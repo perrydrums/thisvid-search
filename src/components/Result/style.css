@@ -1,0 +1,55 @@
+.result {
+  background-color: #333;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.result:hover {
+  background-color: #444;
+  cursor: pointer;
+}
+
+.result .thumbnail {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.result .thumbnail img {
+  width: 100%;
+  height: auto;
+  transition: transform 0.2s ease-in-out;
+}
+
+.result:hover .thumbnail img {
+  transform: scale(1.1);
+}
+
+.result .details {
+  padding: 0.5rem;
+}
+
+.result a {
+  color: #333;
+  text-decoration: none;
+}
+
+.result a:hover {
+  text-decoration: underline;
+}
+
+.result .duration {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.result .private {
+  font-size: 0.8rem;
+  color: #666;
+}
