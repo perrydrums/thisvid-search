@@ -193,6 +193,7 @@ const MyComponent = () => {
 
     for (let i = offset; i <= offset - 1 + amount; i++) {
       promises.push(getVideos(i)
+        // eslint-disable-next-line
         .then((s) => {
           if (s && s.error === 404) {
             // set page limit but only if it hasn't been set yet or if the current page limit is lower than the current page
