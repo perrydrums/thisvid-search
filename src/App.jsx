@@ -225,7 +225,10 @@ const MyComponent = () => {
 
   return (
     <>
-      <h1>ThisVid Advanced Search Site</h1>
+      <div className="header">
+        <h1>ThisVid A.S.S.</h1>
+        <span className="subtitle">ThisVid Advanced Search Site</span>
+      </div>
       <div className="container">
         <div className="form-container">
           <h2>Search</h2>
