@@ -15,7 +15,9 @@ const types = {
     {value: 'private', label: 'Private'},
     {value: 'favourite', label: 'Favourites'},
   ],
-  category: [],
+  category: [
+    {value: 'popular', label: 'Popular'},
+  ],
   tags: [
     {value: 'popular', label: 'Popular'},
     {value: 'latest', label: 'Newest'},
