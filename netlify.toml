@@ -1,19 +1,19 @@
 [[redirects]]
 from = "/members/*"
-to = "https://thisvid.com/:splat"
+to = "https://thisvid.com/members/:splat"
 status = 200
 
 [[redirects]]
 from = "/videos/*"
-to = "https://thisvid.com/:splat"
+to = "https://thisvid.com/videos/:splat"
 status = 200
 
 [[redirects]]
 from = "/categories/*"
-to = "https://thisvid.com/:splat"
+to = "https://thisvid.com/categories/:splat"
 status = 200
 
 [[redirects]]
 from = "/tags/*"
-to = "https://thisvid.com/:splat"
+to = "https://thisvid.com/tags/:splat"
 status = 200
