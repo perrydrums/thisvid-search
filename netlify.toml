@@ -1,0 +1,19 @@
+[[redirects]]
+from = "/members/*"
+to = "https://thisvid.com/:splat"
+status = 200
+
+[[redirects]]
+from = "/videos/*"
+to = "https://thisvid.com/:splat"
+status = 200
+
+[[redirects]]
+from = "/categories/*"
+to = "https://thisvid.com/:splat"
+status = 200
+
+[[redirects]]
+from = "/tags/*"
+to = "https://thisvid.com/:splat"
+status = 200
