@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import cheerio from 'cheerio';
 import './App.css';
 import Result from './components/Result';
@@ -20,7 +20,7 @@ const types = {
     {value: 'popular', label: 'Popular'},
     {value: 'latest', label: 'Newest'},
   ],
-}
+};
 
 const categories = [
   {value: 'gay', label: 'Gay'},
@@ -81,7 +81,7 @@ const MyComponent = () => {
     };
 
     return baseUrl[mode];
-  }
+  };
 
   const getVideos = async (page) => {
     if (pageLimit !== 0 && page > pageLimit) {
@@ -204,12 +204,13 @@ const MyComponent = () => {
           }
           progress++;
           setProgressCount(progress);
-        })
+        }),
       );
     }
 
     try {
       await Promise.all(promises);
+      setVideos((prevVideos) => prevVideos.sort((a, b) => a.page - b.page));
       console.log('All pages done.');
     } catch (error) {
       console.log('Error: ' + error);
@@ -220,119 +221,128 @@ const MyComponent = () => {
   const next = () => {
     run(start + amount);
     setStart(start + amount);
-  }
+  };
 
   return (
-    <div className="container">
-      <div className="form-container">
-        <h1>ThisVid Advanced Search</h1>
-        <form>
-          <div className="form-columns">
-            <p>{`Progress: ${progressCount}/${amount} (${Math.round((progressCount / amount) * 100)}%)`}</p>
-            <p>{`Page Limit: ${pageLimit}`}</p>
-            <label htmlFor="search-mode">Search by:</label>
-            <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+    <>
+      <h1>ThisVid Advanced Search Site</h1>
+      <div className="container">
+        <div className="form-container">
+          <h2>Search</h2>
+          <form>
+            <div className="form-columns">
+              <p>{`Progress: ${progressCount}/${amount} (${Math.round((progressCount / amount) * 100)}%)`}</p>
+              <p>{pageLimit !== 0 && `Page Limit: ${pageLimit}`}</p>
+              <label htmlFor="search-mode">Search by:</label>
+              <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+                {
+                  Object.keys(modes).map((key) => {
+                    return <option key={key} value={key}>{modes[key]}</option>;
+                  })
+                }
+              </select>
               {
-                Object.keys(modes).map((key) => {
-                  return <option key={key} value={key}>{modes[key]}</option>
-                })
-              }
-            </select>
-            {
-              mode === 'user' &&
+                mode === 'user' &&
                 <>
                   <label htmlFor="id">User ID:</label>
-                  <input type="text" id="id" value={id} onChange={(e) => setId(e.target.value)} />
+                  <input type="text" id="id" value={id} onChange={(e) => setId(e.target.value)}/>
                 </>
-            }
-            {
-              mode === 'category' &&
+              }
+              {
+                mode === 'category' &&
                 <>
                   <label htmlFor="category">Category:</label>
                   <select id="category" value={category} onChange={(e) => setCategory(e.target.value)}>
                     {
                       categories.map(({value, label}) => {
-                        return <option key={value} value={value}>{label}</option>
+                        return <option key={value} value={value}>{label}</option>;
                       })
                     }
                   </select>
                 </>
-            }
-            {
-              mode === 'tags' &&
-              <>
-                <label htmlFor="primary-tag">Primary Tag:</label>
-                <input type="text" id="primary-tag" value={primaryTag} onChange={(e) => setPrimaryTag(e.target.value)} />
-              </>
-            }
-            <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
-            <input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)} />
-            <label htmlFor="tags-operator">Operator:</label>
-            <select id="tags-operator" value={termsOperator} onChange={(e) => setTermsOperator(e.target.value)}>
-              <option value="OR">OR</option>
-              <option value="AND">AND</option>
-            </select>
-            <label htmlFor="start">Start Page:</label>
-            <input type="number" id="start" value={start} onChange={(e) => setStart(parseInt(e.target.value))} />
-            <label htmlFor="amount">Number of Pages:</label>
-            <input type="number" id="amount" value={amount} onChange={(e) => setAmount(parseInt(e.target.value))} />
-            <label htmlFor="min-duration">Min Duration (minutes):</label>
-            <input type="number" min="0" id="min-duration" value={minDuration} onChange={(e) => setMinDuration(parseInt(e.target.value || 0))} />
-            <label htmlFor="type">Type:</label>
-            <select value={type} id="type" onChange={(e) => setType(e.target.value)}>
-              <option disabled value=''> - Select - </option>
-              {
-                types[mode].map(({ value, label }) => {
-                  return <option key={value} value={value}>{label}</option>
-                })
               }
-            </select>
-            <div>
-              <label htmlFor="quick">Quick Search:</label>
-              <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)} />
-            </div>
-            <div>
-              {(type === 'favourite' || mode !== 'user') &&
+              {
+                mode === 'tags' &&
                 <>
-                  <label htmlFor="omit-private">Omit Private Videos:</label>
-                  <input type="checkbox" id="omit-private" checked={omitPrivate} onChange={() => setOmitPrivate(!omitPrivate)} />
+                  <label htmlFor="primary-tag">Primary Tag:</label>
+                  <input type="text" id="primary-tag" value={primaryTag}
+                         onChange={(e) => setPrimaryTag(e.target.value)}/>
                 </>
               }
+              <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
+              <input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)}/>
+              <label htmlFor="tags-operator">Operator:</label>
+              <select id="tags-operator" value={termsOperator} onChange={(e) => setTermsOperator(e.target.value)}>
+                <option value="OR">OR</option>
+                <option value="AND">AND</option>
+              </select>
+              <label htmlFor="start">Start Page:</label>
+              <input type="number" id="start" value={start} onChange={(e) => setStart(parseInt(e.target.value))}/>
+              <label htmlFor="amount">Number of Pages:</label>
+              <input type="number" id="amount" value={amount} onChange={(e) => setAmount(parseInt(e.target.value))}/>
+              <label htmlFor="min-duration">Min Duration (minutes):</label>
+              <input type="number" min="0" id="min-duration" value={minDuration}
+                     onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
+              <label htmlFor="type">Type:</label>
+              <select value={type} id="type" onChange={(e) => setType(e.target.value)}>
+                <option disabled value=""> - Select -</option>
+                {
+                  types[mode].map(({value, label}) => {
+                    return <option key={value} value={value}>{label}</option>;
+                  })
+                }
+              </select>
+              <div>
+                <label htmlFor="quick">Quick Search:</label>
+                <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)}/>
+              </div>
+              <div>
+                {(type === 'favourite' || mode !== 'user') &&
+                  <>
+                    <label htmlFor="omit-private">Omit Private Videos:</label>
+                    <input type="checkbox" id="omit-private" checked={omitPrivate}
+                           onChange={() => setOmitPrivate(!omitPrivate)}/>
+                  </>
+                }
+              </div>
+              <div>
+                <label htmlFor="preserve-results">Preserve Results:</label>
+                <input type="checkbox" id="preserve-results" checked={preserveResults}
+                       onChange={() => setPreserveResults(!preserveResults)}/>
+              </div>
+              <div></div>
+              <button type="button" onClick={() => {
+                run(start);
+              }}>Run
+              </button>
+              <button
+                type="button"
+                onClick={next}
+                disabled={start + amount > pageLimit && pageLimit !== 0}
+              >
+                Next
+              </button>
             </div>
-            <div>
-              <label htmlFor="preserve-results">Preserve Results:</label>
-              <input type="checkbox" id="preserve-results" checked={preserveResults} onChange={() => setPreserveResults(!preserveResults)} />
-            </div>
-            <div></div>
-            <button type="button" onClick={() => {run(start)}}>Run</button>
-            <button
-              type="button"
-              onClick={next}
-              disabled={start + amount > pageLimit && pageLimit !== 0}
-            >
-              Next
-            </button>
+          </form>
+        </div>
+        <div className="results-container">
+          <h2>Found {videos.length} videos</h2>
+          <div className="results">
+            {videos.map((video, index) => (
+              <Result
+                key={index}
+                title={video.title}
+                url={video.url}
+                isPrivate={video.isPrivate}
+                duration={video.duration}
+                imageSrc={video.imageSrc}
+                page={video.page}
+              />
+            ))}
           </div>
-        </form>
-      </div>
-      <div className="results-container">
-        <h1>Found {videos.length} videos</h1>
-        <div className="results">
-          {videos.map((video, index) => (
-            <Result
-              key={index}
-              title={video.title}
-              url={video.url}
-              isPrivate={video.isPrivate}
-              duration={video.duration}
-              imageSrc={video.imageSrc}
-              page={video.page}
-            />
-          ))}
         </div>
       </div>
-    </div>
-
+    </>
   );
 };
 
