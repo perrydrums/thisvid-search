@@ -54,7 +54,6 @@ const categories = [
 ];
 
 const MyComponent = () => {
-  // const [id, setId] = useState('3129565');
   const [mode, setMode] = useState('user');
   const [id, setId] = useState('100632');
   const [terms, setTerms] = useState('');
@@ -71,6 +70,7 @@ const MyComponent = () => {
   const [amount, setAmount] = useState(50);
   const [minDuration, setMinDuration] = useState(0);
   const [pageLimit, setPageLimit] = useState(0);
+  const [finished, setFinished] = useState(false);
 
   const getUrl = (page) => {
     // Define the base URLs for each search mode
@@ -211,16 +211,26 @@ const MyComponent = () => {
     try {
       await Promise.all(promises);
       setVideos((prevVideos) => prevVideos.sort((a, b) => a.page - b.page));
+      setFinished(true);
       console.log('All pages done.');
     } catch (error) {
       console.log('Error: ' + error);
     }
   };
 
-  // Run for the next set of pages
+  // Run for the next set of pages.
   const next = () => {
     run(start + amount);
     setStart(start + amount);
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (e.nativeEvent.submitter.name === 'next') {
+      next();
+      return;
+    }
+    run(start);
   };
 
   return (
@@ -232,11 +242,11 @@ const MyComponent = () => {
       <div className="container">
         <div className="form-container">
           <h2>Search</h2>
-          <form>
+          <form onSubmit={submit}>
             <div className="form-columns">
               <p>{`Progress: ${progressCount}/${amount} (${Math.round((progressCount / amount) * 100)}%)`}</p>
               <p>{pageLimit !== 0 && `Page Limit: ${pageLimit}`}</p>
-              <label htmlFor="search-mode">Search by:</label>
+              <label htmlFor="search-mode">Search by</label>
               <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
                 {
                   Object.keys(modes).map((key) => {
@@ -247,15 +257,15 @@ const MyComponent = () => {
               {
                 mode === 'user' &&
                 <>
-                  <label htmlFor="id">User ID:</label>
-                  <input type="text" id="id" value={id} onChange={(e) => setId(e.target.value)}/>
+                  <label htmlFor="id">User ID</label>
+                  <input type="text" id="id" value={id} required onChange={(e) => setId(e.target.value)}/>
                 </>
               }
               {
                 mode === 'category' &&
                 <>
-                  <label htmlFor="category">Category:</label>
-                  <select id="category" value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <label htmlFor="category">Category</label>
+                  <select id="category" value={category} required onChange={(e) => setCategory(e.target.value)}>
                     {
                       categories.map(({value, label}) => {
                         return <option key={value} value={value}>{label}</option>;
@@ -267,27 +277,30 @@ const MyComponent = () => {
               {
                 mode === 'tags' &&
                 <>
-                  <label htmlFor="primary-tag">Primary Tag:</label>
-                  <input type="text" id="primary-tag" value={primaryTag}
+                  <label htmlFor="primary-tag">Primary Tag</label>
+                  <input type="text" id="primary-tag" value={primaryTag} required
                          onChange={(e) => setPrimaryTag(e.target.value)}/>
                 </>
               }
               <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
               <input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)}/>
-              <label htmlFor="tags-operator">Operator:</label>
-              <select id="tags-operator" value={termsOperator} onChange={(e) => setTermsOperator(e.target.value)}>
+              <label htmlFor="tags-operator">Operator</label>
+              <select id="tags-operator" value={termsOperator} required
+                      onChange={(e) => setTermsOperator(e.target.value)}>
                 <option value="OR">OR</option>
                 <option value="AND">AND</option>
               </select>
-              <label htmlFor="start">Start Page:</label>
-              <input type="number" id="start" value={start} onChange={(e) => setStart(parseInt(e.target.value))}/>
-              <label htmlFor="amount">Number of Pages:</label>
-              <input type="number" id="amount" value={amount} onChange={(e) => setAmount(parseInt(e.target.value))}/>
-              <label htmlFor="min-duration">Min Duration (minutes):</label>
-              <input type="number" min="0" id="min-duration" value={minDuration}
+              <label htmlFor="start">Start Page</label>
+              <input type="number" id="start" value={start} required
+                     onChange={(e) => setStart(parseInt(e.target.value))}/>
+              <label htmlFor="amount">Number of Pages</label>
+              <input type="number" id="amount" value={amount} required
+                     onChange={(e) => setAmount(parseInt(e.target.value))}/>
+              <label htmlFor="min-duration">Min Duration (minutes)</label>
+              <input type="number" min="0" id="min-duration" required value={minDuration}
                      onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
-              <label htmlFor="type">Type:</label>
-              <select value={type} id="type" onChange={(e) => setType(e.target.value)}>
+              <label htmlFor="type">Type</label>
+              <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
                 <option disabled value=""> - Select -</option>
                 {
                   types[mode].map(({value, label}) => {
@@ -295,41 +308,36 @@ const MyComponent = () => {
                   })
                 }
               </select>
+            </div>
+            <div className="button-columns-3" style={{margin: "12px 0"}}>
               <div>
-                <label htmlFor="quick">Quick Search:</label>
                 <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)}/>
+                <label htmlFor="quick" className="checkbox-button">Quick Search</label>
               </div>
               <div>
-                {(type === 'favourite' || mode !== 'user') &&
-                  <>
-                    <label htmlFor="omit-private">Omit Private Videos:</label>
-                    <input type="checkbox" id="omit-private" checked={omitPrivate}
-                           onChange={() => setOmitPrivate(!omitPrivate)}/>
-                  </>
-                }
-              </div>
-              <div>
-                <label htmlFor="preserve-results">Preserve Results:</label>
                 <input type="checkbox" id="preserve-results" checked={preserveResults}
                        onChange={() => setPreserveResults(!preserveResults)}/>
+                <label htmlFor="preserve-results" className="checkbox-button">Preserve Results</label>
               </div>
-              <div></div>
-              <button type="button" onClick={() => {
-                run(start);
-              }}>Run
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                disabled={start + amount > pageLimit && pageLimit !== 0}
-              >
+              {(type === 'favourite' || mode !== 'user') &&
+                <div>
+                  <input type="checkbox" id="omit-private" checked={omitPrivate}
+                         onChange={() => setOmitPrivate(!omitPrivate)}/>
+                  <label htmlFor="omit-private" className="checkbox-button">No Private Videos</label>
+                </div>
+              }
+            </div>
+            <div className="button-columns">
+              <button type="submit" name="run">Run</button>
+              <button type="submit" name="next"
+                      disabled={start + amount > pageLimit && pageLimit !== 0}>
                 Next
               </button>
             </div>
           </form>
         </div>
         <div className="results-container">
-          <h2>Found {videos.length} videos</h2>
+          {finished && <h2>Found {videos.length} videos</h2>}
           <div className="results">
             {videos.map((video, index) => (
               <Result
