@@ -13,6 +13,13 @@ const modes = {
 };
 
 const types = {
+  category: [
+    {value: 'popular', label: 'Popular'},
+  ],
+  tags: [
+    {value: 'popular', label: 'Popular'},
+    {value: 'latest', label: 'Newest'},
+  ],
   user: [
     {value: 'public', label: 'Public'},
     {value: 'private', label: 'Private'},
@@ -22,13 +29,6 @@ const types = {
     {value: 'public', label: 'Public'},
     {value: 'private', label: 'Private'},
     {value: 'favourite', label: 'Favourites'},
-  ],
-  category: [
-    {value: 'popular', label: 'Popular'},
-  ],
-  tags: [
-    {value: 'popular', label: 'Popular'},
-    {value: 'latest', label: 'Newest'},
   ],
 };
 
@@ -64,8 +64,8 @@ const categories = [
 ];
 
 const MyComponent = () => {
-  const [mode, setMode] = useState('user');
-  const [id, setId] = useState('3129565');
+  const [mode, setMode] = useState('category');
+  const [id, setId] = useState('');
   const [terms, setTerms] = useState('');
   const [termsOperator, setTermsOperator] = useState('OR');
   const [primaryTag, setPrimaryTag] = useState('');
