@@ -4,6 +4,7 @@ import './App.css';
 import Result from './components/Result';
 import {getFriends} from './helpers/getFriends';
 import FriendResult from './components/Result/friendResult';
+import debug from './helpers/debug';
 
 const modes = {
   user: 'User ID',
@@ -86,9 +87,8 @@ const MyComponent = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-
-  const resultsRef = useRef(null)
-  const executeScroll = () => resultsRef.current.scrollIntoView()
+  const resultsRef = useRef(null);
+  const executeScroll = () => resultsRef.current.scrollIntoView();
 
   const getFriendsById = async () => {
     setFriendsLoading(true);
@@ -135,14 +135,14 @@ const MyComponent = () => {
   const urlExists = async (url) => {
     const response = await fetch(url);
     return response.status !== 404;
-  }
+  };
 
   const checkSourceExists = async () => {
     const url = getSourceUrl();
     const exists = await urlExists(url);
 
     setSourceExists(exists);
-  }
+  };
 
   const getVideos = async (page) => {
     if (pageLimit !== 0 && page > pageLimit) {
@@ -165,15 +165,18 @@ const MyComponent = () => {
       const urls = [];
       $('.tumbpu').each((i, element) => {
         const isPrivate = $('span', element).first().hasClass('private');
-        const duration = $('span span.duration', element).text();
-        const title = $(element).attr('title');
-        const [minutes, seconds] = duration.split(':').map(Number);
-        const time = minutes * 60 + seconds;
-
         if (omitPrivate && isPrivate) {
           return;
         }
 
+        const avatarElement = $('span .lazy-load', element).first();
+        const avatar = isPrivate ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video' : avatarElement.attr('data-original').replace('//', 'https://');
+
+        const duration = $('span span.duration', element).text();
+        const [minutes, seconds] = duration.split(':').map(Number);
+        const time = minutes * 60 + seconds;
+
+        const title = $(element).attr('title');
         if (quick) {
           const hasAllTags = termsOperator === 'AND'
             ? tagsArray.every(tag => title.toLowerCase().includes(tag.toLowerCase()))
@@ -186,6 +189,7 @@ const MyComponent = () => {
                 url: $(element).attr('href'),
                 isPrivate,
                 duration,
+                avatar,
                 page,
               }]);
             }
@@ -197,6 +201,7 @@ const MyComponent = () => {
               url: $(element).attr('href'),
               isPrivate,
               duration,
+              avatar,
             });
           }
         }
@@ -214,9 +219,6 @@ const MyComponent = () => {
               ? tagsArray.every(tag => $(`.description a[title*="${tag}"]`).length > 0)
               : tagsArray.some(tag => $(`.description a[title*="${tag}"]`).length > 0);
 
-            const imageSrc = $('.video-holder img').attr('src').replace('//', 'https://');
-            console.log(imageSrc);
-
             if (hasAllTags) {
               setVideos((prevVideos) => [
                 ...prevVideos,
@@ -225,7 +227,7 @@ const MyComponent = () => {
                   url: video.url,
                   isPrivate: video.isPrivate,
                   duration: video.duration,
-                  imageSrc,
+                  avatar: video.avatar,
                   page,
                 },
               ]);
@@ -459,7 +461,8 @@ const MyComponent = () => {
                 url={video.url}
                 isPrivate={video.isPrivate}
                 duration={video.duration}
-                imageSrc={video.imageSrc}
+                imageSrc={video.avatar}
+                page={debug ? video.page : null}
               />
             ))}
           </div>
