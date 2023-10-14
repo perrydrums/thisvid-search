@@ -206,11 +206,6 @@ input[type="checkbox"]:checked + label.checkbox-button {
   .results {
     grid-template-columns: 1fr 1fr;
   }
-
-  .form-container,
-  .results-container {
-    height: unset;
-  }
 }
 
 @media (max-width: 900px) {
