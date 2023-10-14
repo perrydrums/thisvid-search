@@ -2,15 +2,23 @@ import React, {useState} from 'react';
 import cheerio from 'cheerio';
 import './App.css';
 import Result from './components/Result';
+import {getFriends} from './helpers/getFriends';
+import FriendResult from './components/Result/friendResult';
 
 const modes = {
   user: 'User ID',
+  friend: 'Friend',
   category: 'Category with tags',
   tags: 'Tags',
 };
 
 const types = {
   user: [
+    {value: 'public', label: 'Public'},
+    {value: 'private', label: 'Private'},
+    {value: 'favourite', label: 'Favourites'},
+  ],
+  friend: [
     {value: 'public', label: 'Public'},
     {value: 'private', label: 'Private'},
     {value: 'favourite', label: 'Favourites'},
@@ -57,7 +65,7 @@ const categories = [
 
 const MyComponent = () => {
   const [mode, setMode] = useState('user');
-  const [id, setId] = useState('100632');
+  const [id, setId] = useState('3129565');
   const [terms, setTerms] = useState('');
   const [termsOperator, setTermsOperator] = useState('OR');
   const [primaryTag, setPrimaryTag] = useState('');
@@ -73,11 +81,34 @@ const MyComponent = () => {
   const [minDuration, setMinDuration] = useState(0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [friendId, setFriendId] = useState('');
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const getFriendsById = async () => {
+    setFriendsLoading(true);
+    const f = await getFriends(id);
+
+    if (f === false) {
+      setErrorMessage('User not found');
+      return;
+    }
+
+    if (f.length === 0) {
+      setErrorMessage('No friends found');
+      return;
+    }
+
+    setFriends(f);
+    setFriendsLoading(false);
+  };
 
   const getUrl = (page) => {
     // Define the base URLs for each search mode
     const baseUrl = {
       user: `/members/${id}/${type}_videos/${page}/`,
+      friend: `/members/${friendId}/${type}_videos/${page}/`,
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
       category: `/categories/${category}/most-popular/${page}/`,
     };
@@ -238,12 +269,12 @@ const MyComponent = () => {
   return (
     <>
       <div className="header">
-        <h1>ThisVid A.S.S.</h1>
         <span className="subtitle">ThisVid Advanced Search Site</span>
       </div>
       <div className="container">
         <div className="form-container">
           <h2>Search</h2>
+          <span className="error"> {errorMessage} </span>
           <form onSubmit={submit}>
             <div className="form-columns">
               <p>{`Progress: ${progressCount}/${amount} (${Math.round((progressCount / amount) * 100)}%)`}</p>
@@ -257,10 +288,29 @@ const MyComponent = () => {
                 }
               </select>
               {
-                mode === 'user' &&
+                (mode === 'user' || mode === 'friend') &&
                 <>
-                  <label htmlFor="id">User ID</label>
+                  <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
                   <input type="text" id="id" value={id} required onChange={(e) => setId(e.target.value)}/>
+                </>
+              }
+              {
+                mode === 'friend' &&
+                <>
+                  <label htmlFor="friendId">
+                    Choose Friend
+                    {friendsLoading && <div className="small-loading-spinner"></div>}
+                  </label>
+                  {friends.length === 0
+                    ? <button type="button" onClick={getFriendsById} disabled={id === ''}>Get Friends</button>
+                    : <select id="friendId" value={friendId} required onChange={(e) => setFriendId(e.target.value)}>
+                      {
+                        friends.map(({uid, username, avatar}) => {
+                          return <option key={uid} value={uid}>{username}</option>;
+                        })
+                      }
+                    </select>
+                  }
                 </>
               }
               {
@@ -339,6 +389,24 @@ const MyComponent = () => {
           </form>
         </div>
         <div className="results-container">
+          {mode === 'friend' && friendId === '' &&
+            <>
+              <h2>{friends.length === 0 ? 'Click on Get Friends' : 'Choose a friend'}</h2>
+              <div className="results">
+                {
+                  friends.map(({uid, username, avatar}) => (
+                      <FriendResult
+                        key={uid}
+                        uid={uid}
+                        username={username}
+                        avatar={avatar}
+                        selectFunction={() => setFriendId(uid)}
+                      />
+                    ),
+                  )}
+              </div>
+            </>
+          }
           {finished && <h2>Found {videos.length} videos</h2>}
           <div className="results">
             {videos.map((video, index) => (
@@ -349,7 +417,6 @@ const MyComponent = () => {
                 isPrivate={video.isPrivate}
                 duration={video.duration}
                 imageSrc={video.imageSrc}
-                page={video.page}
               />
             ))}
           </div>

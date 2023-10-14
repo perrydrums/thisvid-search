@@ -1,7 +1,7 @@
 import React from 'react';
 import './style.css';
 
-const Result = ({title, url, duration, page, imageSrc = null, isPrivate = false}) => (
+const Result = ({title, url, duration, imageSrc = null, isPrivate = false}) => (
   <div
     className="result"
     onClick={() => window.open(url, '_blank')}
@@ -12,7 +12,7 @@ const Result = ({title, url, duration, page, imageSrc = null, isPrivate = false}
       </div>
     }
     <div className="details">
-      [{page}] {title}
+      {title}
       <p className="duration">{duration}</p>
       {isPrivate && <span className="private">Private</span>}
     </div>
