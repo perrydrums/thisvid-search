@@ -5,6 +5,7 @@ import Result from './components/Result';
 import {getFriends} from './helpers/getFriends';
 import FriendResult from './components/Result/friendResult';
 import debug from './helpers/debug';
+import InputTags from './components/input/Tags';
 
 const modes = {
   user: 'User ID',
@@ -87,6 +88,12 @@ const MyComponent = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
+
+
+  const [tags, setTags] = useState([]);
+
+
+
   const resultsRef = useRef(null);
   const executeScroll = () => resultsRef.current.scrollIntoView();
 
@@ -148,7 +155,7 @@ const MyComponent = () => {
     if (pageLimit !== 0 && page > pageLimit) {
       return;
     }
-    const tagsArray = terms.split(/[,\s]+/).filter(str => str.trim() !== '');
+    // const tagsArray = terms.split(/[,\s]+/).filter(str => str.trim() !== '');
 
     const url = getUrl(page);
 
@@ -179,10 +186,10 @@ const MyComponent = () => {
         const title = $(element).attr('title');
         if (quick) {
           const hasAllTags = termsOperator === 'AND'
-            ? tagsArray.every(tag => title.toLowerCase().includes(tag.toLowerCase()))
-            : tagsArray.some(tag => title.toLowerCase().includes(tag.toLowerCase()));
+            ? tags.every(tag => title.toLowerCase().includes(tag.toLowerCase()))
+            : tags.some(tag => title.toLowerCase().includes(tag.toLowerCase()));
 
-          if (hasAllTags || tagsArray.length === 0) {
+          if (hasAllTags || tags.length === 0) {
             if (time >= minDuration * 60) {
               setVideos((prevVideos) => [...prevVideos, {
                 title,
@@ -216,8 +223,8 @@ const MyComponent = () => {
             const $ = cheerio.load(body);
 
             const hasAllTags = termsOperator === 'AND'
-              ? tagsArray.every(tag => $(`.description a[title*="${tag}"]`).length > 0)
-              : tagsArray.some(tag => $(`.description a[title*="${tag}"]`).length > 0);
+              ? tags.every(tag => $(`.description a[title*="${tag}"]`).length > 0)
+              : tags.some(tag => $(`.description a[title*="${tag}"]`).length > 0);
 
             if (hasAllTags) {
               setVideos((prevVideos) => [
@@ -379,8 +386,15 @@ const MyComponent = () => {
                   />
                 </>
               }
+              {/*<label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>*/}
+              {/*<input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)}/>*/}
+
               <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
-              <input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)}/>
+              <InputTags
+                tags={tags}
+                setTags={setTags}
+              />
+
               <label htmlFor="tags-operator">Operator</label>
               <select id="tags-operator" value={termsOperator} required
                       onChange={(e) => setTermsOperator(e.target.value)}>
