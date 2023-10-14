@@ -1,5 +1,5 @@
 .result {
-  background-color: #333;
+  background-color: var(--container-background-color);
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -7,7 +7,7 @@
 }
 
 .result:hover {
-  background-color: #444;
+  background-color: var(--input-hover-background-color);
   cursor: pointer;
 }
 

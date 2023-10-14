@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import cheerio from 'cheerio';
 import './App.css';
 import Result from './components/Result';
@@ -85,6 +85,10 @@ const MyComponent = () => {
   const [friendId, setFriendId] = useState('');
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [sourceExists, setSourceExists] = useState(true);
+
+  const resultsRef = useRef(null)
+  const executeScroll = () => resultsRef.current.scrollIntoView()
 
   const getFriendsById = async () => {
     setFriendsLoading(true);
@@ -115,6 +119,30 @@ const MyComponent = () => {
 
     return baseUrl[mode];
   };
+
+  const getSourceUrl = () => {
+    // Define the base URLs for each search mode
+    const baseUrl = {
+      user: `/members/${id}/`,
+      friend: `/members/${friendId}/`,
+      tags: `/tags/${primaryTag}/`,
+      category: `/categories/${category}/`,
+    };
+
+    return baseUrl[mode];
+  };
+
+  const urlExists = async (url) => {
+    const response = await fetch(url);
+    return response.status !== 404;
+  }
+
+  const checkSourceExists = async () => {
+    const url = getSourceUrl();
+    const exists = await urlExists(url);
+
+    setSourceExists(exists);
+  }
 
   const getVideos = async (page) => {
     if (pageLimit !== 0 && page > pageLimit) {
@@ -224,6 +252,15 @@ const MyComponent = () => {
     let tempPageLimit = 0;
     let progress = 0;
 
+    const urlFirstPage = getUrl(offset);
+    const firstPageExists = await urlExists(urlFirstPage);
+
+    if (!firstPageExists) {
+      setFinished(true);
+      setErrorMessage(`Page ${offset} does for ${mode} not exist.`);
+      return;
+    }
+
     for (let i = offset; i <= offset - 1 + amount; i++) {
       promises.push(getVideos(i)
         // eslint-disable-next-line
@@ -245,6 +282,7 @@ const MyComponent = () => {
       await Promise.all(promises);
       setVideos((prevVideos) => prevVideos.sort((a, b) => a.page - b.page));
       setFinished(true);
+      executeScroll();
       console.log('All pages done.');
     } catch (error) {
       console.log('Error: ' + error);
@@ -259,10 +297,13 @@ const MyComponent = () => {
 
   const submit = (e) => {
     e.preventDefault();
+    setErrorMessage('');
+    setFinished(false);
     if (e.nativeEvent.submitter.name === 'next') {
       next();
       return;
     }
+    setPageLimit(0);
     run(start);
   };
 
@@ -329,9 +370,11 @@ const MyComponent = () => {
               {
                 mode === 'tags' &&
                 <>
-                  <label htmlFor="primary-tag">Primary Tag</label>
+                  <label htmlFor="primary-tag">Primary Tag {!sourceExists && 'Tag does not exist'}</label>
                   <input type="text" id="primary-tag" value={primaryTag} required
-                         onChange={(e) => setPrimaryTag(e.target.value)}/>
+                         onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
+                         onBlur={checkSourceExists}
+                  />
                 </>
               }
               <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
@@ -388,7 +431,7 @@ const MyComponent = () => {
             </div>
           </form>
         </div>
-        <div className="results-container">
+        <div className="results-container" ref={resultsRef}>
           {mode === 'friend' && friendId === '' &&
             <>
               <h2>{friends.length === 0 ? 'Click on Get Friends' : 'Choose a friend'}</h2>
