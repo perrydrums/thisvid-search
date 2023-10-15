@@ -65,7 +65,7 @@ const Analyse = () => {
         const username = videoInfo.find('li:nth-child(4) a').first().text();
         const userUrl = videoInfo.find('li:nth-child(4) a').first().attr('href');
         // userID is last part of url
-        const userID = userUrl.split('/').slice(-2)[0];
+        const userID = userUrl ? userUrl.split('/').slice(-2)[0] : '';
         const avatar = await getAvatar(username, userID);
 
         const video = {
@@ -157,6 +157,7 @@ const Analyse = () => {
           <div className="results">
             {Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
               <Result
+                key={user.username}
                 title={user.username}
                 url={user.url}
                 duration={`${user.count} videos`}
