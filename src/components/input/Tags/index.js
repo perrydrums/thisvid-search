@@ -16,7 +16,7 @@ const InputTags = ({tags, setTags}) => {
 
   const inputKeyDown = (e) => {
     const val = e.target.value;
-    if (e.key === 'Enter' && val) {
+    if ((e.key === 'Enter' || e.key === ',') && val) {
       e.preventDefault();
 
       if (tags.find(tag => tag.toLowerCase() === val.toLowerCase())) {
@@ -31,16 +31,19 @@ const InputTags = ({tags, setTags}) => {
 
 
   return (
-    <div className="input-tag">
-      <ul className="input-tag__tags">
-        { tags.map((tag, i) => (
-          <li key={tag} onClick={() => { removeTag(i); }}>
-            {tag}
-          </li>
-        ))}
-        <li className="input-tag__tags__input"><input type="text" onKeyDown={inputKeyDown} ref={c => { tagInput = c; }} /></li>
-      </ul>
-    </div>
+    <ul className="input-tag__tags">
+      { tags.map((tag, i) => (
+        <li key={tag} onClick={() => { removeTag(i); }}>
+          {tag}
+        </li>
+      ))}
+      <li className="input-tag__tags__input">
+        <input type="text"
+               onKeyDown={inputKeyDown}
+               ref={c => { tagInput = c; }}
+        />
+      </li>
+    </ul>
   );
 }
 

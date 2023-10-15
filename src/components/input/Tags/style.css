@@ -1,20 +1,8 @@
-.input-tag {
-  border-radius: 2px;
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.input-tag input {
-  border: none;
-  width: 100%;
-}
-
 .input-tag__tags {
   display: inline-flex;
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
-  width: 100%;
 }
 
 .input-tag__tags li {
@@ -29,6 +17,10 @@
   margin-right: 5px;
   padding: 5px 10px;
   cursor: pointer;
+}
+
+.input-tag__tags li.input-tag__tags__input {
+  margin-right: 0;
 }
 
 .input-tag__tags li:hover {

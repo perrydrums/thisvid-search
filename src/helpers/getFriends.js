@@ -24,6 +24,8 @@ export const getFriends = async (userId) => {
       return $('.tumbpu').map((i, e) => {
         const $e = $(e);
 
+        const url = $e.attr('href');
+
         // get profile ID from the last part of href inside $e. it has trailing slash
         const uid = $e.attr('href').split('/').filter(Boolean).pop();
 
@@ -33,7 +35,7 @@ export const getFriends = async (userId) => {
         // get the username from span class title
         const username = $e.find('.title').text();
 
-        return {uid, username, avatar};
+        return {uid, username, avatar, url};
       }).get();
     }),
   );
