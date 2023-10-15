@@ -11,10 +11,10 @@ const Analyse = () => {
   const [finished, setFinished] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const localUid = localStorage.getItem('uid');
-  if (localUid && !uid) {
-    setUid(localUid);
-  }
+  // const localUid = localStorage.getItem('uid');
+  // if (localUid && !uid) {
+  //   setUid(localUid);
+  // }
 
   const resultsRef = useRef(null);
   const executeScroll = () => resultsRef.current.scrollIntoView();
