@@ -8,7 +8,7 @@ const Analyse = () => {
   const [users, setUsers] = useState({});
   const [progressCount, setProgressCount] = useState(0);
   const [pageLimit, setPageLimit] = useState(0);
-  const [finished, setFinished] = useState(false);
+  const [finished, setFinished] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
   const localUid = localStorage.getItem('uid');
