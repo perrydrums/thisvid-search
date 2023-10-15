@@ -103,8 +103,8 @@ const Analyse = () => {
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    // const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text());
-    const lastPage = 1;
+    const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text());
+    // const lastPage = 1;
     setPageLimit(lastPage);
 
     // Fetch all pages
@@ -153,7 +153,7 @@ const Analyse = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          <h2>Users with most favourited videos</h2>
+          <h2>{finished && 'Users with most favourited videos'}</h2>
           <div className="results">
             {Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
               <Result
