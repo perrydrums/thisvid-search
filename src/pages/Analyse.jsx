@@ -6,7 +6,6 @@ import Result from '../components/Result';
 const Analyse = () => {
   const [uid, setUid] = useState('');
   const [users, setUsers] = useState({});
-  const [preserveResults, setPreserveResults] = useState(false);
   const [progressCount, setProgressCount] = useState(0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -94,10 +93,7 @@ const Analyse = () => {
     );
   };
 
-  const run = async () => {
-    setProgressCount(0);
-    setUsers({});
-
+  const getPageLimit = async () => {
     const response = await fetch(`/members/${uid}/favourite_videos/`);
 
     const body = await response.text();
@@ -106,10 +102,15 @@ const Analyse = () => {
     const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text());
     // const lastPage = 1;
     setPageLimit(lastPage);
+  }
+
+  const run = async () => {
+    setProgressCount(0);
+    setUsers({});
 
     // Fetch all pages
     await Promise.all(
-      [...Array(lastPage + 1).keys()].slice(1).map(async (page) => {
+      [...Array(pageLimit + 1).keys()].slice(1).map(async (page) => {
         await analyseFavourites(page);
         setProgressCount((progressCount) => progressCount + 1);
       }),
@@ -120,10 +121,22 @@ const Analyse = () => {
     executeScroll();
   };
 
+  const next = async () => {
+    await analyseFavourites(progressCount + 1);
+    setProgressCount((progressCount) => progressCount + 1);
+    localStorage.setItem('uid', uid);
+    setFinished(true);
+    executeScroll();
+  };
+
   const submit = (e) => {
     e.preventDefault();
     setErrorMessage('');
     setFinished(false);
+    if (e.nativeEvent.submitter.name === 'next') {
+      next();
+      return;
+    }
     run();
   };
 
@@ -138,22 +151,25 @@ const Analyse = () => {
           <span className="error"> {errorMessage} </span>
           <form onSubmit={submit}>
             <div className="form-columns">
-              <p>{`Progress: ${progressCount}/${pageLimit} (${Math.round((progressCount / pageLimit) * 100)}%)`}</p>
-              <label htmlFor="id">Your User ID</label>
-              <input type="text" id="id" value={uid} required onChange={(e) => setUid(e.target.value)}/>
               <div>
-                <input type="checkbox" id="preserve-results" checked={preserveResults}
-                       onChange={() => setPreserveResults(!preserveResults)}/>
-                <label htmlFor="preserve-results" className="checkbox-button">Preserve Results</label>
+                {`Progress: ${progressCount}/${pageLimit} (${Math.round((progressCount / pageLimit) * 100)}%)`}
+                {!finished && <div className="small-loading-spinner"></div>}
               </div>
+              <p></p>
+              <label htmlFor="id">Your User ID</label>
+              <input type="text" id="id" value={uid} required
+                     onChange={(e) => setUid(e.target.value)}
+                     onBlur={getPageLimit}
+              />
             </div>
             <div className="button-columns">
-              <button type="submit" name="run">Run</button>
+              <button type="submit" name="next" disabled={!pageLimit || !finished}>Analyse page {progressCount + 1}/{pageLimit}</button>
+              <button type="submit" name="run" disabled={!pageLimit || !finished}>Analyse all videos</button>
             </div>
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          <h2>{finished && 'Users with most favourited videos'}</h2>
+          <h2>{'Users with most favourited videos'}</h2>
           <div className="results">
             {Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
               <Result
