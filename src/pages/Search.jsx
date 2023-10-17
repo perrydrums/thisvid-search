@@ -65,7 +65,7 @@ const categories = [
 
 ];
 
-const MyComponent = () => {
+const Search = () => {
   const [mode, setMode] = useState('category');
   const [id, setId] = useState('');
   const [tags, setTags] = useState([]);
@@ -88,6 +88,7 @@ const MyComponent = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
+  const [sort, setSort] = useState('newest');
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -252,6 +253,7 @@ const MyComponent = () => {
 
   const run = async (offset) => {
     setProgressCount(0);
+    setSort('newest');
 
     if (!preserveResults) {
       setVideos([]);
@@ -297,6 +299,34 @@ const MyComponent = () => {
     } catch (error) {
       console.log('Error: ' + error);
     }
+  };
+
+  const sortVideos = (sortMode) => {
+    const sortedVideos = videos;
+    switch (sortMode) {
+      default:
+      case 'newest':
+        sortedVideos.sort((a, b) => a.page - b.page);
+        break;
+      case 'oldest':
+        sortedVideos.sort((a, b) => b.page - a.page);
+        break;
+      case 'longest':
+        sortedVideos.sort((a, b) => {
+          const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
+          const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
+          return bMinutes * 60 + bSeconds - aMinutes * 60 + aSeconds;
+        });
+        break;
+      case 'shortest':
+        sortedVideos.sort((a, b) => {
+          const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
+          const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
+          return aMinutes * 60 + aSeconds - bMinutes * 60 + bSeconds;
+        });
+        break;
+    }
+    setVideos(sortedVideos);
   };
 
   // Run for the next set of pages.
@@ -449,7 +479,7 @@ const MyComponent = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          {mode === 'friend' && friendId === '' &&
+          {mode === 'friend' && friendId === '' ?
             <>
               <h2>{friends.length === 0 ? 'Click on Get Friends' : 'Choose a friend'}</h2>
               <div className="results">
@@ -466,25 +496,42 @@ const MyComponent = () => {
                   )}
               </div>
             </>
+            :
+            <>
+              <div className="results-header">
+                {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
+                <div>
+                  <label htmlFor="sort">Sort by</label>
+                  <select id="sort" value={sort} onChange={(e) => {
+                    setSort(e.target.value);
+                    sortVideos(e.target.value);
+                  }}>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="longest">Longest</option>
+                    <option value="shortest">Shortest</option>
+                  </select>
+                </div>
+              </div>
+              <div className="results">
+                {videos.map((video, index) => (
+                  <Result
+                    key={index}
+                    title={video.title}
+                    url={video.url}
+                    isPrivate={video.isPrivate}
+                    duration={video.duration}
+                    imageSrc={video.avatar}
+                    page={debug ? video.page : null}
+                  />
+                ))}
+              </div>
+            </>
           }
-          {finished && <h2>Found {videos.length} videos</h2>}
-          <div className="results">
-            {videos.map((video, index) => (
-              <Result
-                key={index}
-                title={video.title}
-                url={video.url}
-                isPrivate={video.isPrivate}
-                duration={video.duration}
-                imageSrc={video.avatar}
-                page={debug ? video.page : null}
-              />
-            ))}
-          </div>
         </div>
       </div>
     </>
   );
 };
 
-export default MyComponent;
+export default Search;
