@@ -20,7 +20,7 @@
   overflow: hidden;
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-end;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100%;
