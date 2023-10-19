@@ -88,7 +88,7 @@ const Search = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState('newest');
+  const [sort, setSort] = useState('views');
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -181,6 +181,10 @@ const Search = () => {
         const avatarElement = $('span .lazy-load', element).first();
         const avatar = isPrivate ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video' : avatarElement.attr('data-original').replace('//', 'https://');
 
+        const viewsHtml = $('.view', element).first().text();
+        const views = viewsHtml.match(/\d+/)[0];
+        const date = $('.date', element).first().text();
+
         const duration = $('span span.duration', element).text();
         const [minutes, seconds] = duration.split(':').map(Number);
         const time = minutes * 60 + seconds;
@@ -199,6 +203,8 @@ const Search = () => {
                 isPrivate,
                 duration,
                 avatar,
+                views,
+                date,
                 page,
               }]);
             }
@@ -211,6 +217,8 @@ const Search = () => {
               isPrivate,
               duration,
               avatar,
+              views,
+              date,
             });
           }
         }
@@ -237,6 +245,8 @@ const Search = () => {
                   isPrivate: video.isPrivate,
                   duration: video.duration,
                   avatar: video.avatar,
+                  views: video.views,
+                  date: video.date,
                   page,
                 },
               ]);
@@ -292,7 +302,7 @@ const Search = () => {
 
     try {
       await Promise.all(promises);
-      setVideos((prevVideos) => prevVideos.sort((a, b) => a.page - b.page));
+      setVideos((prevVideos) => prevVideos.sort((a, b) => b.views - a.views));
       setFinished(true);
       executeScroll();
       console.log('All pages done.');
@@ -315,15 +325,18 @@ const Search = () => {
         sortedVideos.sort((a, b) => {
           const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
           const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return bMinutes * 60 + bSeconds - aMinutes * 60 + aSeconds;
+          return (bMinutes * 60 + bSeconds) - (aMinutes * 60 + aSeconds);
         });
         break;
       case 'shortest':
         sortedVideos.sort((a, b) => {
           const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
           const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return aMinutes * 60 + aSeconds - bMinutes * 60 + bSeconds;
+          return (aMinutes * 60 + aSeconds) - (bMinutes * 60 + bSeconds);
         });
+        break;
+      case 'views':
+        sortedVideos.sort((a, b) => b.views - a.views);
         break;
     }
     setVideos(sortedVideos);
@@ -506,6 +519,7 @@ const Search = () => {
                     setSort(e.target.value);
                     sortVideos(e.target.value);
                   }}>
+                    <option value="views">Views</option>
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
                     <option value="longest">Longest</option>
@@ -522,6 +536,8 @@ const Search = () => {
                     isPrivate={video.isPrivate}
                     duration={video.duration}
                     imageSrc={video.avatar}
+                    date={video.date}
+                    views={video.views}
                     page={debug ? video.page : null}
                   />
                 ))}
