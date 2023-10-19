@@ -10,6 +10,7 @@ const Analyse = () => {
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [show, setShow] = useState('users');
 
   // const localUid = localStorage.getItem('uid');
   // if (localUid && !uid) {
@@ -49,7 +50,7 @@ const Analyse = () => {
 
         const title = $('.headline h1').first().text();
         const thumbnailElement = $('.video-holder img').first().attr('src');
-        const thumbnail = thumbnailElement ? thumbnailElement.replace('//', 'https://') : '';
+        const thumbnail = thumbnailElement ? thumbnailElement.replace('//', 'https://') : 'https://placehold.co/100x100/000000/b60707?text=Private+Video';
         const videoInfo = $('.box ul.description').first();
         // videoInfo contains 4 li elements
         // first one contains description text
@@ -75,6 +76,7 @@ const Analyse = () => {
           tags,
           username,
           userUrl,
+          url,
         };
 
         // Add or update the user object
@@ -140,6 +142,36 @@ const Analyse = () => {
     run();
   };
 
+  // returns array of category objects
+  const getCategoriesAndCounts = () => {
+    const categories = {};
+    Object.values(users).forEach((user) => {
+      user.videos.forEach((video) => {
+        if (!categories[video.category]) {
+          categories[video.category] = 0;
+        }
+        categories[video.category]++;
+      });
+    });
+    return Object.entries(categories).sort((a, b) => b[1] - a[1]);
+  }
+
+  // returns array of tag objects
+  const getTagsAndCounts = () => {
+    const tags = {};
+    Object.values(users).forEach((user) => {
+      user.videos.forEach((video) => {
+        video.tags.forEach((tag) => {
+          if (!tags[tag]) {
+            tags[tag] = 0;
+          }
+          tags[tag]++;
+        });
+      });
+    });
+    return Object.entries(tags).sort((a, b) => b[1] - a[1]);
+  }
+
   return (
     <>
       <div className="header">
@@ -169,15 +201,52 @@ const Analyse = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          <h2>{'Users with most favourited videos'}</h2>
+          <h2>Favourite {show}</h2>
+          {Object.keys(users).length > 0 &&
+            <div className="filter-buttons">
+              <button name="show-videos" disabled={show === 'videos'} onClick={() => setShow('videos')}>Videos</button>
+              <button name="show-favourite-users" disabled={show === 'users'} onClick={() => setShow('users')}>Users</button>
+              <button name="show-favourite-categories" disabled={show === 'categories'} onClick={() => setShow('categories')}>Categories</button>
+              <button name="show-favourite-tags" disabled={show === 'tags'} onClick={() => setShow('tags')}>Tags</button>
+            </div>
+          }
           <div className="results">
-            {Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
+            {show === 'users' && Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
               <Result
                 key={user.username}
                 title={user.username}
                 url={user.url}
                 duration={`${user.count} videos`}
                 imageSrc={user.avatar}
+              />
+            ))}
+            {show === 'videos' && Object.values(users).sort((a, b) => b.count - a.count).map((user) => (
+              user.videos.map((video) =>
+                <Result
+                  key={video.title}
+                  title={video.title}
+                  url={video.url}
+                  duration={video.category}
+                  imageSrc={video.thumbnail}
+                />
+              )
+            ))}
+            {show === 'categories' && getCategoriesAndCounts().map(([category, count]) => (
+              <Result
+                key={category}
+                title={category}
+                url={`/categories/${category.replaceAll(' ', '-')}`}
+                duration={`${count} videos`}
+                imageSrc={`https://placehold.co/100x100/000000/b60707?text=${category.replaceAll(' ', '+')}`}
+              />
+            ))}
+            {show === 'tags' && getTagsAndCounts().map(([tag, count]) => (
+              <Result
+                key={tag}
+                title={tag}
+                url={`/categories/${tag.replaceAll(' ', '-')}`}
+                duration={`${count} videos`}
+                imageSrc={`https://placehold.co/100x100/000000/b60707?text=${tag.replaceAll(' ', '+')}`}
               />
             ))}
           </div>

@@ -149,6 +149,27 @@ button:disabled {
   color: var(--button-disabled-text-color);
 }
 
+.filter-buttons {
+  display: flex;
+  justify-content: stretch;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filter-buttons button {
+  height: 28px;
+  font-size: 12px;
+  padding: 4px;
+  border: 1px solid transparent;
+}
+
+.filter-buttons button:disabled {
+  background-color: var(--accent-color);
+  cursor: unset;
+  color: var(--text-color);
+  border: 1px solid var(--text-color);
+}
+
 ul {
   padding: 0;
   list-style: none;
