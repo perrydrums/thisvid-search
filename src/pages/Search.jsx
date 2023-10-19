@@ -263,7 +263,6 @@ const Search = () => {
 
   const run = async (offset) => {
     setProgressCount(0);
-    setSort('newest');
 
     if (!preserveResults) {
       setVideos([]);
@@ -360,6 +359,18 @@ const Search = () => {
     run(start);
   };
 
+  const getPageLimit = async () => {
+    const response = await fetch(`/members/${id}/${type}_videos/`);
+
+    const body = await response.text();
+    const $ = cheerio.load(body);
+
+    const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text());
+    // const lastPage = 1;
+    setPageLimit(lastPage);
+    amount > lastPage && setAmount(lastPage);
+  };
+
   return (
     <>
       <div className="header">
@@ -385,8 +396,10 @@ const Search = () => {
                 (mode === 'user' || mode === 'friend') &&
                 <>
                   <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                  <input type="text" id="id" value={id} required onChange={(e) => setId(e.target.value)}/>
-                </>
+                  <input type="text" id="id" value={id} required
+                         onBlur={getPageLimit}
+                         onChange={(e) => setId(e.target.value)}
+                  /></>
               }
               {
                 mode === 'friend' &&
@@ -455,7 +468,10 @@ const Search = () => {
               <input type="number" min="0" id="min-duration" required value={minDuration}
                      onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
               <label htmlFor="type">Type</label>
-              <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
+              <select value={type} id="type" required
+                      onChange={(e) => setType(e.target.value)}
+                      onBlur={mode === 'user' && getPageLimit}
+              >
                 <option disabled value=""> - Select -</option>
                 {
                   types[mode].map(({value, label}) => {
