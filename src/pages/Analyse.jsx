@@ -12,10 +12,10 @@ const Analyse = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [show, setShow] = useState('users');
 
-  // const localUid = localStorage.getItem('uid');
-  // if (localUid && !uid) {
-  //   setUid(localUid);
-  // }
+  const localUid = localStorage.getItem('uid');
+  if (localUid && !uid) {
+    setUid(localUid);
+  }
 
   const resultsRef = useRef(null);
   const executeScroll = () => resultsRef.current.scrollIntoView();
@@ -118,7 +118,6 @@ const Analyse = () => {
       }),
     );
 
-    localStorage.setItem('uid', uid);
     setFinished(true);
     executeScroll();
   };
@@ -126,20 +125,30 @@ const Analyse = () => {
   const next = async () => {
     await analyseFavourites(progressCount + 1);
     setProgressCount((progressCount) => progressCount + 1);
-    localStorage.setItem('uid', uid);
     setFinished(true);
     executeScroll();
   };
 
   const submit = (e) => {
     e.preventDefault();
+    localStorage.setItem('uid', uid);
     setErrorMessage('');
     setFinished(false);
     if (e.nativeEvent.submitter.name === 'next') {
       next();
       return;
     }
-    run();
+
+    if (pageLimit > 10) {
+      // show warning alert if page limit is greater than 10
+      if (window.confirm(`This will take a while. Are you sure you want to continue?`)) {
+        run();
+      } else {
+        setFinished(true);
+      }
+    } else {
+      run();
+    }
   };
 
   // returns array of category objects

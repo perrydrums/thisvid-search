@@ -351,6 +351,7 @@ const Search = () => {
     e.preventDefault();
     setErrorMessage('');
     setFinished(false);
+    setSort('popular');
     if (e.nativeEvent.submitter.name === 'next') {
       next();
       return;
@@ -453,7 +454,7 @@ const Search = () => {
               <label htmlFor="type">Type</label>
               <select value={type} id="type" required
                       onChange={(e) => setType(e.target.value)}
-                      onBlur={mode === 'user' && getPageLimit}
+                      onBlur={() => mode === 'user' && getPageLimit()}
               >
                 <option disabled value=""> - Select -</option>
                 {
