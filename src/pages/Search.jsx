@@ -356,7 +356,6 @@ const Search = () => {
       next();
       return;
     }
-    setPageLimit(0);
     run(start);
   };
 
@@ -376,7 +375,8 @@ const Search = () => {
 
     const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text()) || 1;
     setPageLimit(lastPage);
-    amount > lastPage && setAmount(lastPage);
+    // (!amount || amount > lastPage) && setAmount(lastPage);
+    setAmount(lastPage);
   };
 
   return (
@@ -479,7 +479,7 @@ const Search = () => {
               <input type="number" id="start" value={start} required
                      onChange={(e) => setStart(parseInt(e.target.value))}/>
               <label htmlFor="amount">Number of Pages</label>
-              <input type="number" id="amount" value={amount} required
+              <input type="number" min="0" max={pageLimit} id="amount" value={amount} required
                      onChange={(e) => setAmount(parseInt(e.target.value))}/>
               <label htmlFor="min-duration">Min Duration (minutes)</label>
               <input type="number" min="0" id="min-duration" required value={minDuration}
