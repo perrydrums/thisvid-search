@@ -360,13 +360,20 @@ const Search = () => {
   };
 
   const getPageLimit = async () => {
+    if (!id || !type) {
+      return;
+    }
     const response = await fetch(`/members/${id}/${type}_videos/`);
+
+    if (response.status === 404) {
+      setErrorMessage(`User ${id} does not exist.`);
+      return;
+    }
 
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text());
-    // const lastPage = 1;
+    const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text()) || 1;
     setPageLimit(lastPage);
     amount > lastPage && setAmount(lastPage);
   };
@@ -443,9 +450,18 @@ const Search = () => {
                   />
                 </>
               }
-              {/*<label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>*/}
-              {/*<input type="text" id="tags" value={terms} onChange={(e) => setTerms(e.target.value)}/>*/}
-
+              <label htmlFor="type">Type</label>
+              <select value={type} id="type" required
+                      onChange={(e) => setType(e.target.value)}
+                      onBlur={mode === 'user' && getPageLimit}
+              >
+                <option disabled value=""> - Select -</option>
+                {
+                  types[mode].map(({value, label}) => {
+                    return <option key={value} value={value}>{label}</option>;
+                  })
+                }
+              </select>
               <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
               <InputTags
                 tags={tags}
@@ -467,18 +483,6 @@ const Search = () => {
               <label htmlFor="min-duration">Min Duration (minutes)</label>
               <input type="number" min="0" id="min-duration" required value={minDuration}
                      onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
-              <label htmlFor="type">Type</label>
-              <select value={type} id="type" required
-                      onChange={(e) => setType(e.target.value)}
-                      onBlur={mode === 'user' && getPageLimit}
-              >
-                <option disabled value=""> - Select -</option>
-                {
-                  types[mode].map(({value, label}) => {
-                    return <option key={value} value={value}>{label}</option>;
-                  })
-                }
-              </select>
             </div>
             <div className="button-columns-3" style={{margin: "12px 0"}}>
               <div>
