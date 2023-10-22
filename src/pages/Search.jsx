@@ -88,7 +88,7 @@ const Search = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState('views');
+  const [sort, setSort] = useState('relevance');
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -195,6 +195,11 @@ const Search = () => {
             ? tags.every(tag => title.toLowerCase().includes(tag.toLowerCase()))
             : tags.some(tag => title.toLowerCase().includes(tag.toLowerCase()));
 
+          const relevance = tags.reduce((score, tag) => {
+            const regex = new RegExp(tag, 'gi');
+            return score + (title.match(regex) || []).length;
+          }, 0);
+
           if (hasAllTags || tags.length === 0) {
             if (time >= minDuration * 60) {
               setVideos((prevVideos) => [...prevVideos, {
@@ -205,6 +210,7 @@ const Search = () => {
                 avatar,
                 views,
                 date,
+                relevance,
                 page,
               }]);
             }
@@ -301,7 +307,7 @@ const Search = () => {
 
     try {
       await Promise.all(promises);
-      setVideos((prevVideos) => prevVideos.sort((a, b) => b.views - a.views));
+      setVideos((prevVideos) => prevVideos.sort((a, b) => b.relevance - a.relevance));
       setFinished(true);
       executeScroll();
       console.log('All pages done.');
@@ -336,6 +342,9 @@ const Search = () => {
         break;
       case 'views':
         sortedVideos.sort((a, b) => b.views - a.views);
+        break;
+      case 'relevance':
+        sortedVideos.sort((a, b) => b.relevance - a.relevance);
         break;
     }
     setVideos(sortedVideos);
@@ -540,6 +549,7 @@ const Search = () => {
                     setSort(e.target.value);
                     sortVideos(e.target.value);
                   }}>
+                    <option value="relevance">Relevance</option>
                     <option value="views">Views</option>
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
