@@ -428,7 +428,9 @@ const Search = () => {
                 <>
                   <div>
                     <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                    {username && <a href={`https://thisvid.com/members/${id}/`} target="_blank"
+                    {username && <a href={`https://thisvid.com/members/${id}/`}
+                                    target="_blank"
+                                    rel="noreferrer"
                                     className="username">{username}</a>}
                   </div>
                   <input type="text" id="id" value={id} required
