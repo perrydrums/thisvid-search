@@ -88,7 +88,7 @@ const Search = () => {
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState('relevance');
+  const [sort, setSort] = useState('views');
   const [username, setUsername] = useState('');
 
   const localUid = localStorage.getItem('uid');
@@ -308,7 +308,7 @@ const Search = () => {
 
     try {
       await Promise.all(promises);
-      setVideos((prevVideos) => prevVideos.sort((a, b) => b.relevance - a.relevance));
+      setVideos((prevVideos) => prevVideos.sort((a, b) => b.views - a.views));
       setFinished(true);
       executeScroll();
       console.log('All pages done.');
@@ -569,8 +569,8 @@ const Search = () => {
                     setSort(e.target.value);
                     sortVideos(e.target.value);
                   }}>
-                    <option value="relevance">Relevance</option>
                     <option value="views">Views</option>
+                    <option value="relevance">Relevance</option>
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
                     <option value="longest">Longest</option>
