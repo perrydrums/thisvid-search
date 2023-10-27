@@ -100,6 +100,18 @@ label {
   margin-bottom: 8px;
 }
 
+a.username {
+  font-weight: bold;
+  color: var(--text-color);
+  float: right;
+  text-decoration: var(--accent-color) underline 2px;
+  transition: text-decoration-color 0.2s ease-in-out;
+}
+
+a.username:hover {
+  text-decoration-color: var(--text-color);
+}
+
 input,
 select,
 button {

@@ -1,7 +1,7 @@
 :root {
   --background-color: #f5f5f5;
   --text-color: #333;
-  --accent-color: #b60707;
+  --accent-color: #ff0036;
   --container-background-color: #fff;
   --input-background-color: #f6f6f6;
   --input-hover-background-color: #eee;
@@ -14,7 +14,6 @@
   :root {
     --background-color: #f5f5f5;
     --text-color: #333;
-    --accent-color: #b60707;
     --container-background-color: #fff;
     --input-background-color: #f6f6f6;
     --input-hover-background-color: #eee;
@@ -28,7 +27,6 @@
   :root {
     --background-color: #1a1a1a;
     --text-color: white;
-    --accent-color: #b60707;
     --container-background-color: #2d2d2d;
     --input-background-color: #333;
     --input-hover-background-color: #444;

@@ -89,6 +89,7 @@ const Search = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
   const [sort, setSort] = useState('relevance');
+  const [username, setUsername] = useState('');
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -372,10 +373,23 @@ const Search = () => {
     if (!id || !type) {
       return;
     }
+    const userResponse = await fetch(`/members/${id}/`);
+
+    if (userResponse.status === 404) {
+      setErrorMessage(`User ${id} does not exist.`);
+      return;
+    }
+
+    const userBody = await userResponse.text();
+    const $user = cheerio.load(userBody);
+
+    const username = $user('.profile-menu .headline h2').text() || 'username not found';
+    setUsername(username);
+
     const response = await fetch(`/members/${id}/${type}_videos/`);
 
     if (response.status === 404) {
-      setErrorMessage(`User ${id} does not exist.`);
+      setErrorMessage(`User ${id} does not have any ${type} videos.`);
       return;
     }
 
@@ -412,7 +426,11 @@ const Search = () => {
               {
                 (mode === 'user' || mode === 'friend') &&
                 <>
-                  <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
+                  <div>
+                    <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
+                    {username && <a href={`https://thisvid.com/members/${id}/`} target="_blank"
+                                    className="username">{username}</a>}
+                  </div>
                   <input type="text" id="id" value={id} required
                          onBlur={getPageLimit}
                          onChange={(e) => setId(e.target.value)}
