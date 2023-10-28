@@ -1,13 +1,17 @@
 import React from 'react';
+import friendsIcon from '../../images/friends.png';
 import './style.css';
 
-const Result = ({title, url, duration, views, date, imageSrc = null, page = null, isPrivate = false}) => (
+const Result = ({title, url, duration, views, date, isFriend = false, imageSrc = null, page = null, isPrivate = false}) => (
   <div
     className="result"
     onClick={() => window.open(url, '_blank')}
   >
     {imageSrc &&
       <div className="thumbnail" style={{backgroundImage: `url(${imageSrc})`}}>
+        {isFriend && <div className="friends">
+          <img src={friendsIcon} alt="Friends" />
+        </div>}
         <span className="info">
         {views &&
           <>

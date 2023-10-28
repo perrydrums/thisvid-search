@@ -179,6 +179,8 @@ const Search = () => {
           return;
         }
 
+        // const isFriend = friends.some(friend => friend.uid == 249732);
+        const isFriend = false;
         const avatarElement = $('span .lazy-load', element).first();
         const avatar = isPrivate ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video' : avatarElement.attr('data-original').replace('//', 'https://');
 
@@ -212,6 +214,7 @@ const Search = () => {
                 views,
                 date,
                 relevance,
+                isFriend,
                 page,
               }]);
             }
@@ -226,6 +229,7 @@ const Search = () => {
               avatar,
               views,
               date,
+              isFriend,
             });
           }
         }
@@ -254,6 +258,7 @@ const Search = () => {
                   avatar: video.avatar,
                   views: video.views,
                   date: video.date,
+                  isFriend: video.isFriend,
                   page,
                 },
               ]);
@@ -508,7 +513,7 @@ const Search = () => {
               <input type="number" id="start" value={start} required
                      onChange={(e) => setStart(parseInt(e.target.value))}/>
               <label htmlFor="amount">Number of Pages</label>
-              <input type="number" min="0" max={pageLimit} id="amount" value={amount} required
+              <input type="number" min="0" max={pageLimit || 100} id="amount" value={amount} required
                      onChange={(e) => setAmount(parseInt(e.target.value))}/>
               <label htmlFor="min-duration">Min Duration (minutes)</label>
               <input type="number" min="0" id="min-duration" required value={minDuration}
@@ -589,6 +594,7 @@ const Search = () => {
                     imageSrc={video.avatar}
                     date={video.date}
                     views={video.views}
+                    isFriend={video.isFriend}
                     page={debug ? video.page : null}
                   />
                 ))}

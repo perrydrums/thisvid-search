@@ -25,6 +25,7 @@
   background-repeat: no-repeat;
   background-size: 100%;
   transition: background-size 0.2s ease-in-out;
+  position: relative;
 }
 
 .result:hover .thumbnail {
@@ -66,4 +67,26 @@
 .result .date {
   font-size: 0.8rem;
   color: #666;
+}
+
+/* at the top of the thumbnail */
+.result .friends {
+  position: absolute;
+  top: 0;
+  margin: .5rem;
+}
+
+.result .friends img {
+  width: 1.2rem;
+  height: 1.2rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  opacity: .8;
+  padding: 2px;
+  border-radius: 50%;
+  transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.result:hover .friends img {
+  background-color: white;
+  opacity: 1;
 }
