@@ -71,7 +71,7 @@ const Search = () => {
   const [tags, setTags] = useState([]);
   const [termsOperator, setTermsOperator] = useState('OR');
   const [primaryTag, setPrimaryTag] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('gay');
   const [start, setStart] = useState(1);
   const [type, setType] = useState('');
   const [quick, setQuick] = useState(true);
