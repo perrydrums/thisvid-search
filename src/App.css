@@ -2,7 +2,6 @@ body {
   padding: 0 16px 16px 16px;
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: 'Arial', sans-serif;
 }
 
 .header {
@@ -213,6 +212,7 @@ label.checkbox-button {
   text-align: center;
   text-transform: uppercase;
   font-size: 14px;
+  vertical-align: center;
   transition: background-color 0.2s, color 0.2s;
 }
 

@@ -1,3 +1,7 @@
+* {
+  font-family: 'Open Sans', sans-serif;
+}
+
 :root {
   --background-color: #f5f5f5;
   --text-color: #333;
@@ -25,14 +29,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-color: #1a1a1a;
+    --background-color: #151515;
     --text-color: white;
-    --container-background-color: #2d2d2d;
-    --input-background-color: #333;
-    --input-hover-background-color: #444;
-    --input-focus-background-color: #555;
-    --button-disabled-background-color: #ccc;
-    --button-disabled-text-color: #666;
+    --container-background-color: #222425;
+    --input-background-color: #2f3133;
+    --input-hover-background-color: #3a3c3f;
+    --input-focus-background-color: #3a3c3f;
+    --button-disabled-background-color: #6e7278;
+    --button-disabled-text-color: #3a3c3f;
   }
 }
 
