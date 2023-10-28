@@ -1,6 +1,5 @@
 import cheerio from 'cheerio';
 
-
 export const getFriends = async (userId) => {
   const response = await fetch(`/members/${userId}/friends/`);
 

@@ -29,6 +29,7 @@ const Result = ({title, url, duration, views, date, isFriend = false, imageSrc =
       </div>
     }
     <div className="details">
+      {/*<a onClick={() => downloadVideo(url)}>DOWNLOAD</a>*/}
       {page && `[${page}] `}{title}
       {date && <p className="date">{date}</p>}
       {isPrivate && <span className="private">Private</span>}
