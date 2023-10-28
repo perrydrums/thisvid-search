@@ -6,18 +6,24 @@ const adBlocker = AdBlockerPlugin({
 });
 puppeteer.use(adBlocker);
 
+const headers = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'public, max-age=31536000',
+  'Netlify-Vary': 'query',
+};
+
 exports.handler = async function (event, context) {
   const url = event.queryStringParameters.url;
 
-  if (!url) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        status: 'Bad Request',
-        message: 'Missing url query parameter',
-      }),
-    };
-  }
+  // if (!url) {
+  //   return {
+  //     statusCode: 400,
+  //     body: JSON.stringify({
+  //       status: 'Bad Request',
+  //       message: 'Missing url query parameter',
+  //     }),
+  //   };
+  // }
 
   const browser = await puppeteer.launch({
     args: chromium.args,
@@ -42,29 +48,15 @@ exports.handler = async function (event, context) {
 
   await browser.close();
 
-  if (!videoUrl) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        status: 'Internal Server Error',
-        message: 'Could not find video URL',
-      }),
-    };
-  }
+  // if (!videoUrl) {
+  //   return {
+  //     statusCode: 500,
+  //     body: JSON.stringify({
+  //       status: 'Internal Server Error',
+  //       message: 'Could not find video URL',
+  //     }),
+  //   };
+  // }
 
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=31536000, must-revalidate',
-      'Netlify-CDN-Cache-Control': 'public, max-age=31536000, must-revalidate',
-      'Netlify-Vary': 'query=url',
-    },
-    body: JSON.stringify({
-      status: 'Ok',
-      page: {
-        videoUrl,
-      },
-    }),
-  };
+  return new Response(JSON.stringify({videoUrl}), {headers, status: 200});
 };
