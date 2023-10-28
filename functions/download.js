@@ -48,15 +48,19 @@ exports.handler = async function (event, context) {
 
   await browser.close();
 
-  // if (!videoUrl) {
-  //   return {
-  //     statusCode: 500,
-  //     body: JSON.stringify({
-  //       status: 'Internal Server Error',
-  //       message: 'Could not find video URL',
-  //     }),
-  //   };
-  // }
+  if (!videoUrl) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        status: 'Internal Server Error',
+        message: 'Could not find video URL',
+      }),
+    };
+  }
 
-  return new Response(JSON.stringify({videoUrl}), {headers, status: 200});
+  return {
+    statusCode: 200,
+    body: JSON.stringify({videoUrl}),
+    headers,
+  };
 };
