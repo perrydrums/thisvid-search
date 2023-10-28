@@ -54,6 +54,12 @@ exports.handler = async function (event, context) {
 
   return {
     statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      "Cdn-Cache-Control": "public, s-maxage=31536000, must-revalidate",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Netlify-Vary": "query=url",
+    },
     body: JSON.stringify({
       status: 'Ok',
       page: {
