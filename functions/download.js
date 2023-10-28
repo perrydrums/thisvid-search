@@ -1,4 +1,4 @@
-const chromium = require('chrome-aws-lambda');
+const chromium = require('@sparticuz/chromium-min');
 const puppeteer = require('puppeteer-extra');
 const AdBlockerPlugin = require('puppeteer-extra-plugin-adblocker');
 const adBlocker = AdBlockerPlugin({
