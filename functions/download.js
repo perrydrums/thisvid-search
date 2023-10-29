@@ -15,15 +15,15 @@ const headers = {
 exports.handler = async function (event, context) {
   const url = event.queryStringParameters.url;
 
-  // if (!url) {
-  //   return {
-  //     statusCode: 400,
-  //     body: JSON.stringify({
-  //       status: 'Bad Request',
-  //       message: 'Missing url query parameter',
-  //     }),
-  //   };
-  // }
+  if (!url) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Missing url query parameter',
+      }),
+    };
+  }
 
   const browser = await puppeteer.launch({
     args: chromium.args,
