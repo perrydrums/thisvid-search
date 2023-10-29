@@ -34,9 +34,7 @@ const InputTags = ({tags, setTags}) => {
   return (
     <ul className="input-tag__tags">
       {tags.map((tag, i) => (
-        <li key={tag} onClick={() => {
-          removeTag(i);
-        }}>
+        <li className="input-tag__tags__item" key={tag} onClick={() => {removeTag(i)}}>
           {tag}
         </li>
       ))}

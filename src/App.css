@@ -26,6 +26,16 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: var(--container-background-color);
   border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 90%;
 }
 
 .results-container {
@@ -49,13 +59,14 @@ h1 {
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 1.4rem;
+  margin: 0;
 }
 
 .form-columns {
   display: grid;
   align-items: center;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
@@ -75,6 +86,7 @@ h2 {
   display: flex;
   justify-content: stretch;
   gap: 12px;
+  margin-bottom: 12px;
 }
 
 .button-columns-3 > div {
@@ -86,7 +98,7 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .results-header select {
@@ -98,10 +110,6 @@ h2 {
 .results-header input {
   width: 180px;
   margin-left: 12px;
-}
-
-label {
-  margin-bottom: 8px;
 }
 
 a.username {
@@ -143,7 +151,8 @@ button:focus {
   outline: none;
 }
 
-input[type='checkbox'] {
+input[type='checkbox'],
+input[type='radio'] {
   width: auto;
 }
 
@@ -200,7 +209,8 @@ strong {
 }
 
 /* Reset default styles for checkbox */
-input[type="checkbox"] {
+input[type="checkbox"],
+input[type="radio"] {
   display: none; /* Hide the default checkbox */
 }
 
@@ -226,7 +236,8 @@ label.checkbox-button:hover {
   color: #fff;
 }
 
-input[type="checkbox"]:checked + label.checkbox-button {
+input[type="checkbox"]:checked + label.checkbox-button,
+input[type="radio"]:checked + label.checkbox-button {
   background-color: var(--accent-color);
   border: 1px solid white;
   color: #fff;

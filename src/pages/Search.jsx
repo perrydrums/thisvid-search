@@ -92,6 +92,7 @@ const Search = () => {
   const [sourceExists, setSourceExists] = useState(true);
   const [sort, setSort] = useState('views');
   const [username, setUsername] = useState('');
+  const [advanced, setAdvanced] = useState(false);
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -416,141 +417,158 @@ const Search = () => {
       </div>
       <div className="container">
         <div className="form-container">
-          <h2>Search</h2>
+          <div className="button-columns-3">
+            <input type="radio" id="basic" name="mode" value="basic" checked={!advanced}
+                   onChange={() => setAdvanced(false)}/>
+            <label className="checkbox-button" htmlFor="basic">Basic search</label>
+            <input type="radio" id="advanced" name="mode" value="advanced" checked={advanced}
+                   onChange={() => setAdvanced(true)}/>
+            <label className="checkbox-button" htmlFor="advanced">Advanced search</label>
+          </div>
           <span className="error"> {errorMessage} </span>
           <form onSubmit={submit}>
-            <div className="form-columns">
-              <p>{`Progress: ${progressCount}/${amount} (${Math.round((progressCount / amount) * 100)}%)`}</p>
-              <p>{pageLimit !== 0 && `Page Limit: ${pageLimit}`}</p>
-              <label htmlFor="search-mode">Search by</label>
-              <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-                {
-                  Object.keys(modes).map((key) => {
-                    return <option key={key} value={key}>{modes[key]}</option>;
-                  })
-                }
-              </select>
-              {
-                (mode === 'user' || mode === 'friend') &&
-                <>
-                  <div>
-                    <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                    {username && <a href={`https://thisvid.com/members/${id}/`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="username">{username}</a>}
-                  </div>
-                  <input type="text" id="id" value={id} required
-                         onBlur={getPageLimit}
-                         onChange={(e) => setId(e.target.value)}
-                  /></>
-              }
-              {
-                mode === 'friend' &&
-                <>
-                  <label htmlFor="friendId">
-                    Choose Friend
-                    {friendsLoading && <div className="small-loading-spinner"></div>}
-                  </label>
-                  {friends.length === 0
-                    ? <button type="button" onClick={getFriendsById} disabled={id === ''}>Get Friends</button>
-                    :
-                    <input
-                      type="text"
-                      readOnly={true}
-                      required={true}
-                      id="friendId"
-                      placeholder="Choose friend"
-                      value={friendIdFieldHover ? 'Change friend' : (friends.find((friend) => friend.uid === friendId)?.username || '')}
-                      onClick={() => setFriendId(null)}
-                      onMouseEnter={() => setFriendIdFieldHover(true)}
-                      onMouseLeave={() => setFriendIdFieldHover(false)}
-                      style={{cursor: 'pointer'}}
-                    />
+            <div>
+              <div className="form-columns">
+                {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
+                <label htmlFor="search-mode">Search by</label>
+                <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+                  {
+                    Object.keys(modes).map((key) => {
+                      return <option key={key} value={key}>{modes[key]}</option>;
+                    })
                   }
-                </>
-              }
-              {
-                mode === 'category' &&
-                <>
-                  <label htmlFor="category">Category</label>
-                  <select id="category" value={category} required onChange={(e) => setCategory(e.target.value)}>
-                    {
-                      categories.map(({value, label}) => {
-                        return <option key={value} value={value}>{label}</option>;
-                      })
-                    }
-                  </select>
-                </>
-              }
-              {
-                mode === 'tags' &&
-                <>
-                  <label htmlFor="primary-tag">Primary Tag {!sourceExists && 'Tag does not exist'}</label>
-                  <input type="text" id="primary-tag" value={primaryTag} required
-                         onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
-                         onBlur={checkSourceExists}
-                  />
-                </>
-              }
-              <label htmlFor="type">Type</label>
-              <select value={type} id="type" required
-                      onChange={(e) => setType(e.target.value)}
-                      onBlur={() => mode === 'user' && getPageLimit()}
-              >
-                <option disabled value=""> - Select -</option>
+                </select>
                 {
-                  types[mode].map(({value, label}) => {
-                    return <option key={value} value={value}>{label}</option>;
-                  })
+                  (mode === 'user' || mode === 'friend') &&
+                  <>
+                    <div>
+                      <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
+                      {username && <a href={`https://thisvid.com/members/${id}/`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="username">{username}</a>}
+                    </div>
+                    <input type="text" id="id" value={id} required
+                           onBlur={getPageLimit}
+                           onChange={(e) => setId(e.target.value)}
+                    /></>
                 }
-              </select>
-              <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
-              <InputTags
-                tags={tags}
-                setTags={setTags}
-              />
-
-              <label htmlFor="tags-operator">Operator</label>
-              <select id="tags-operator" value={termsOperator} required
-                      onChange={(e) => setTermsOperator(e.target.value)}>
-                <option value="OR">OR</option>
-                <option value="AND">AND</option>
-              </select>
-              <label htmlFor="start">Start Page</label>
-              <input type="number" id="start" value={start} required
-                     onChange={(e) => setStart(parseInt(e.target.value))}/>
-              <label htmlFor="amount">Number of Pages</label>
-              <input type="number" min="0" max={pageLimit || 100} id="amount" value={amount} required
-                     onChange={(e) => setAmount(parseInt(e.target.value))}/>
-              <label htmlFor="min-duration">Min Duration (minutes)</label>
-              <input type="number" min="0" id="min-duration" required value={minDuration}
-                     onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
+                {
+                  mode === 'friend' &&
+                  <>
+                    <label htmlFor="friendId">
+                      Choose Friend
+                      {friendsLoading && <div className="small-loading-spinner"></div>}
+                    </label>
+                    {friends.length === 0
+                      ? <button type="button" onClick={getFriendsById} disabled={id === ''}>Get Friends</button>
+                      :
+                      <input
+                        type="text"
+                        readOnly={true}
+                        required={true}
+                        id="friendId"
+                        placeholder="Choose friend"
+                        value={friendIdFieldHover ? 'Change friend' : (friends.find((friend) => friend.uid === friendId)?.username || '')}
+                        onClick={() => setFriendId(null)}
+                        onMouseEnter={() => setFriendIdFieldHover(true)}
+                        onMouseLeave={() => setFriendIdFieldHover(false)}
+                        style={{cursor: 'pointer'}}
+                      />
+                    }
+                  </>
+                }
+                {
+                  mode === 'category' &&
+                  <>
+                    <label htmlFor="category">Category</label>
+                    <select id="category" value={category} required onChange={(e) => setCategory(e.target.value)}>
+                      {
+                        categories.map(({value, label}) => {
+                          return <option key={value} value={value}>{label}</option>;
+                        })
+                      }
+                    </select>
+                  </>
+                }
+                {
+                  mode === 'tags' &&
+                  <>
+                    <label htmlFor="primary-tag">Primary Tag {!sourceExists && 'Tag does not exist'}</label>
+                    <input type="text" id="primary-tag" value={primaryTag} required
+                           onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
+                           onBlur={checkSourceExists}
+                    />
+                  </>
+                }
+                <label htmlFor="type">Type</label>
+                <select value={type} id="type" required
+                        onChange={(e) => setType(e.target.value)}
+                        onBlur={() => mode === 'user' && getPageLimit()}
+                >
+                  <option disabled value=""> - Select -</option>
+                  {
+                    types[mode].map(({value, label}) => {
+                      return <option key={value} value={value}>{label}</option>;
+                    })
+                  }
+                </select>
+                <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
+                <InputTags
+                  tags={tags}
+                  setTags={setTags}
+                />
+                {advanced &&
+                  <>
+                    <label htmlFor="tags-operator">Operator</label>
+                    <select id="tags-operator" value={termsOperator} required
+                            onChange={(e) => setTermsOperator(e.target.value)}>
+                      <option value="OR">OR</option>
+                      <option value="AND">AND</option>
+                    </select>
+                  </>
+                }
+                {advanced &&
+                  <>
+                    <label htmlFor="start">Start Page</label>
+                    <input type="number" id="start" value={start} required
+                           onChange={(e) => setStart(parseInt(e.target.value))}/>
+                  </>
+                }
+                <label htmlFor="min-duration">Min Duration (minutes)</label>
+                <input type="number" min="0" id="min-duration" required value={minDuration}
+                       onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
+                <label htmlFor="amount">Number of Pages</label>
+                <input type="number" min="0" max={pageLimit || 100} id="amount" value={amount} required
+                       onChange={(e) => setAmount(parseInt(e.target.value))}/>
+              </div>
             </div>
-            <div className="button-columns-3" style={{margin: "12px 0"}}>
-              <div>
-                <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)}/>
-                <label htmlFor="quick" className="checkbox-button">Quick Search</label>
-              </div>
-              <div>
-                <input type="checkbox" id="preserve-results" checked={preserveResults}
-                       onChange={() => setPreserveResults(!preserveResults)}/>
-                <label htmlFor="preserve-results" className="checkbox-button">Preserve Results</label>
-              </div>
-              {(type === 'favourite' || mode !== 'user') &&
+            <div>
+              <div className="button-columns-3" style={{margin: "12px 0"}}>
                 <div>
-                  <input type="checkbox" id="omit-private" checked={omitPrivate}
-                         onChange={() => setOmitPrivate(!omitPrivate)}/>
-                  <label htmlFor="omit-private" className="checkbox-button">No Private Videos</label>
+                  <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)}/>
+                  <label htmlFor="quick" className="checkbox-button">Quick Search</label>
                 </div>
-              }
-            </div>
-            <div className="button-columns">
-              <button type="submit" name="run">Run</button>
-              <button type="submit" name="next"
-                      disabled={start + amount > pageLimit && pageLimit !== 0}>
-                Next
-              </button>
+                <div>
+                  <input type="checkbox" id="preserve-results" checked={preserveResults}
+                         onChange={() => setPreserveResults(!preserveResults)}/>
+                  <label htmlFor="preserve-results" className="checkbox-button">Preserve Results</label>
+                </div>
+                {(type === 'favourite' || mode !== 'user') &&
+                  <div>
+                    <input type="checkbox" id="omit-private" checked={omitPrivate}
+                           onChange={() => setOmitPrivate(!omitPrivate)}/>
+                    <label htmlFor="omit-private" className="checkbox-button">No Private Videos</label>
+                  </div>
+                }
+              </div>
+              <div className="button-columns">
+                <button type="submit" name="run">Run</button>
+                <button type="submit" name="next"
+                        disabled={start + amount > pageLimit && pageLimit !== 0}>
+                  Next
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -566,6 +584,7 @@ const Search = () => {
                     value={friendSearch}
                     placeholder="Username"
                     onChange={(e) => setFriendSearch(e.target.value)}
+                    disabled={friends.length === 0}
                   />
                 </div>
               </div>
@@ -588,6 +607,7 @@ const Search = () => {
             <>
               <div className="results-header">
                 {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
+                <span>{`Progress: ${Math.round((progressCount / amount) * 100)}%`}</span>
                 <div>
                   <label htmlFor="sort">Sort by</label>
                   <select id="sort" value={sort} onChange={(e) => {

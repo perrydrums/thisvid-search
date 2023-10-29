@@ -5,15 +5,15 @@ const FriendResult = ({uid, username, avatar, selectFunction}) => (
   <div
     className="result"
     onClick={() => selectFunction(uid)}
+    style={{cursor: 'pointer'}}
   >
-    {avatar &&
-      <div className="thumbnail">
-        <img src={avatar} alt={username}/>
+    <div>
+      {avatar && <div className="thumbnail" style={{backgroundImage: `url(${avatar})`}}/>}
+      <div className="details">
+        {username}
       </div>
-    }
-    <div className="details">
-      {username}
     </div>
+
   </div>
 );
 
