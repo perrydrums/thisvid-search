@@ -13,7 +13,7 @@
     "dotenv": "^16.3.1",
     "http-proxy-middleware": "^2.0.6",
     "node-fetch": "^3.3.2",
-    "puppeteer": "^21.4.1",
+    "puppeteer-core": "^21.4.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6",
     "react": "^18.2.0",
@@ -45,5 +45,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "npm": ">=8.0.0 <9.0.0",
+    "node": ">=16.0.0 <17.0.0"
   }
 }
