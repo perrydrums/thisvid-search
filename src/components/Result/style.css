@@ -4,11 +4,13 @@
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .result:hover {
   background-color: var(--input-hover-background-color);
-  cursor: pointer;
 }
 
 .result .thumbnail {
@@ -26,6 +28,7 @@
   background-size: 100%;
   transition: background-size 0.2s ease-in-out;
   position: relative;
+  cursor: pointer;
 }
 
 .result:hover .thumbnail {
@@ -46,8 +49,21 @@
   margin-right: 0.2rem;
 }
 
+.result .title {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.result .title:hover {
+  text-decoration: underline;
+}
+
 .result .details {
   padding: 0.5rem;
+}
+
+.result .details span {
+  cursor: pointer;
 }
 
 .result a {
@@ -89,4 +105,38 @@
 .result:hover .friends img {
   background-color: white;
   opacity: 1;
+}
+
+.result .download {
+  display: inline-block;
+  float: right;
+}
+
+.result .download svg {
+  width: 1.5em;
+  height: 1.5em;
+  cursor: pointer;
+  stroke: white;
+}
+
+.result .download svg:hover {
+  stroke: var(--accent-color);
+}
+
+.result .loading svg {
+  stroke: var(--accent-color);
+  animation: loading .5s alternate infinite;
+}
+
+.result .done svg {
+  stroke: greenyellow;
+}
+
+@keyframes loading {
+  0% {
+    stroke: var(--accent-color);
+  }
+  100% {
+    stroke: white;
+  }
 }
