@@ -86,6 +86,7 @@ const Search = () => {
   const [friends, setFriends] = useState([]);
   const [friendId, setFriendId] = useState('');
   const [friendsLoading, setFriendsLoading] = useState(false);
+  const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
   const [sort, setSort] = useState('views');
@@ -549,19 +550,31 @@ const Search = () => {
         <div className="results-container" ref={resultsRef}>
           {mode === 'friend' && friendId === '' ?
             <>
-              <h2>{friends.length === 0 ? 'Click on Get Friends' : 'Choose a friend'}</h2>
+              <div className="results-header">
+                {friends.length === 0 ? <h2>Search for friends</h2> : <h2>Found {friends.length} friends</h2>}
+                <div>
+                  <input
+                    type="text"
+                    id="friend-search"
+                    value={friendSearch}
+                    placeholder="Username"
+                    onChange={(e) => setFriendSearch(e.target.value)}
+                  />
+                </div>
+              </div>
               <div className="results">
-                {
-                  friends.map(({uid, username, avatar}) => (
-                      <FriendResult
-                        key={uid}
-                        uid={uid}
-                        username={username}
-                        avatar={avatar}
-                        selectFunction={() => setFriendId(uid)}
-                      />
-                    ),
-                  )}
+                {/* show list of friends filtered on friendSearch username */}
+                {friends.filter(({username}) => username.toLowerCase().includes(friendSearch.toLowerCase()))
+                  .map(({uid, username, avatar}) =>
+                    <FriendResult
+                      key={uid}
+                      uid={uid}
+                      username={username}
+                      avatar={avatar}
+                      selectFunction={() => setFriendId(uid)}
+                    />,
+                  )
+                }
               </div>
             </>
             :
