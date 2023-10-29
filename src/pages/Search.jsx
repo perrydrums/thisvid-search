@@ -84,8 +84,9 @@ const Search = () => {
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
   const [friends, setFriends] = useState([]);
-  const [friendId, setFriendId] = useState('');
+  const [friendId, setFriendId] = useState(null);
   const [friendsLoading, setFriendsLoading] = useState(false);
+  const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
@@ -453,13 +454,19 @@ const Search = () => {
                   </label>
                   {friends.length === 0
                     ? <button type="button" onClick={getFriendsById} disabled={id === ''}>Get Friends</button>
-                    : <select id="friendId" value={friendId} required onChange={(e) => setFriendId(e.target.value)}>
-                      {
-                        friends.map(({uid, username, avatar}) => {
-                          return <option key={uid} value={uid}>{username}</option>;
-                        })
-                      }
-                    </select>
+                    :
+                    <input
+                      type="text"
+                      readOnly={true}
+                      required={true}
+                      id="friendId"
+                      placeholder="Choose friend"
+                      value={friendIdFieldHover ? 'Change friend' : (friends.find((friend) => friend.uid === friendId)?.username || '')}
+                      onClick={() => setFriendId(null)}
+                      onMouseEnter={() => setFriendIdFieldHover(true)}
+                      onMouseLeave={() => setFriendIdFieldHover(false)}
+                      style={{cursor: 'pointer'}}
+                    />
                   }
                 </>
               }
@@ -548,7 +555,7 @@ const Search = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          {mode === 'friend' && friendId === '' ?
+          {mode === 'friend' && !friendId ?
             <>
               <div className="results-header">
                 {friends.length === 0 ? <h2>Search for friends</h2> : <h2>Found {friends.length} friends</h2>}

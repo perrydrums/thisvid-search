@@ -39,5 +39,5 @@ export const getFriends = async (userId) => {
     }),
   );
 
-  return friends.flat().sort((a, b) => a.username.localeCompare(b.username));
+  return friends.flat();
 };
