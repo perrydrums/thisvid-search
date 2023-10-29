@@ -25,10 +25,15 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const browser = await puppeteer.launch({
-    // args: chromium.args,
+  const options = {
     executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath(),
-  });
+  }
+
+  if (!process.env.CHROME_EXECUTABLE_PATH) {
+    options.args = chromium.args;
+  }
+
+  const browser = await puppeteer.launch(options);
 
   const page = await browser.newPage();
   await page.goto(url);
