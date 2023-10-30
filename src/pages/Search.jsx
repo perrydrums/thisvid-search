@@ -7,6 +7,7 @@ import FriendResult from '../components/Result/friendResult';
 import debug from '../helpers/debug';
 import InputTags from '../components/input/Tags';
 import LoadingBar from 'react-top-loading-bar';
+import { log } from '../helpers/supabase/log';
 
 const modes = {
   user: 'User ID',
@@ -280,6 +281,23 @@ const Search = () => {
     }
   };
 
+  const logSearch = async () => {
+    await log({
+      mode,
+      type,
+      advanced,
+      tags,
+      pageAmount: amount,
+      quick,
+      minDuration,
+      primaryTag,
+      category,
+      userId: id,
+      friendId,
+      resultCount: 0,
+    });
+  };
+
   const run = async (offset) => {
     setProgressCount(0);
 
@@ -325,6 +343,7 @@ const Search = () => {
       setFinished(true);
       executeScroll();
       console.log('All pages done.');
+      logSearch();
     } catch (error) {
       console.log('Error: ' + error);
     }
