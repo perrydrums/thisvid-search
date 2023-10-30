@@ -217,7 +217,6 @@ input[type='radio'] {
 /* Style the label to look like a button */
 label.checkbox-button {
   display: inline-block;
-  vertical-align: center;
   width: 100%;
   padding: 8px;
   background-color: var(--input-background-color);

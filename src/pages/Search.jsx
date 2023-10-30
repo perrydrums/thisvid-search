@@ -6,6 +6,7 @@ import { getFriends } from '../helpers/getFriends';
 import FriendResult from '../components/Result/friendResult';
 import debug from '../helpers/debug';
 import InputTags from '../components/input/Tags';
+import LoadingBar from 'react-top-loading-bar';
 
 const modes = {
   user: 'User ID',
@@ -382,13 +383,16 @@ const Search = () => {
   };
 
   const getPageLimit = async () => {
-    if (!id || !type) {
+    if (!id || (mode === 'friend' && !friendId) || !type) {
       return;
     }
-    const userResponse = await fetch(`/members/${id}/`);
+
+    const userId = mode === 'friend' ? friendId : id;
+
+    const userResponse = await fetch(`/members/${userId}/`);
 
     if (userResponse.status === 404) {
-      setErrorMessage(`User ${id} does not exist.`);
+      setErrorMessage(`User ${userId} does not exist.`);
       return;
     }
 
@@ -398,10 +402,10 @@ const Search = () => {
     const username = $user('.profile-menu .headline h2').text() || 'username not found';
     setUsername(username);
 
-    const response = await fetch(`/members/${id}/${type}_videos/`);
+    const response = await fetch(`/members/${userId}/${type}_videos/`);
 
     if (response.status === 404) {
-      setErrorMessage(`User ${id} does not have any ${type} videos.`);
+      setErrorMessage(`User ${userId} does not have any ${type} videos.`);
       return;
     }
 
@@ -419,6 +423,12 @@ const Search = () => {
 
   return (
     <>
+      <LoadingBar
+        progress={progressCount ? Math.round((progressCount / amount) * 100) : 0}
+        color="#ff0036"
+        height={10}
+        onLoaderFinished={() => setProgressCount(0)}
+      />
       <div className="header">
         <span className="subtitle">ThisVid Advanced Search Site</span>
       </div>
@@ -558,7 +568,7 @@ const Search = () => {
                   id="type"
                   required
                   onChange={(e) => setType(e.target.value)}
-                  onBlur={() => mode === 'user' && getPageLimit()}
+                  onBlur={() => mode === 'user' || (mode === 'friend' && getPageLimit())}
                 >
                   <option disabled value="">
                     {' '}
@@ -715,7 +725,6 @@ const Search = () => {
             <>
               <div className="results-header">
                 {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
-                <span>{`Progress: ${Math.round((progressCount / amount) * 100)}%`}</span>
                 <div>
                   <label htmlFor="sort">Sort by</label>
                   <select
