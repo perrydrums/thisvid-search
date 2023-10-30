@@ -66,7 +66,7 @@ const categories = [
 
 const Search = () => {
   const [mode, setMode] = useState('category');
-  const [id, setId] = useState('');
+  const [id, setId] = useState(null);
   const [tags, setTags] = useState([]);
   const [termsOperator, setTermsOperator] = useState('OR');
   const [primaryTag, setPrimaryTag] = useState('');
