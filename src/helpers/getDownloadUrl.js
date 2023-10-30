@@ -6,6 +6,6 @@ const getDownloadUrl = async (videoUrl) => {
 
   const body = await response.json();
   return body.videoUrl || false;
-}
+};
 
 export default getDownloadUrl;

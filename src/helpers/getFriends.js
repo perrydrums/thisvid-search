@@ -20,22 +20,24 @@ export const getFriends = async (userId) => {
       const body = await response.text();
       const $ = cheerio.load(body);
 
-      return $('.tumbpu').map((i, e) => {
-        const $e = $(e);
+      return $('.tumbpu')
+        .map((i, e) => {
+          const $e = $(e);
 
-        const url = $e.attr('href');
+          const url = $e.attr('href');
 
-        // get profile ID from the last part of href inside $e. it has trailing slash
-        const uid = $e.attr('href').split('/').filter(Boolean).pop();
+          // get profile ID from the last part of href inside $e. it has trailing slash
+          const uid = $e.attr('href').split('/').filter(Boolean).pop();
 
-        // get img src inside div class thumb
-        const avatar = $e.find('.thumb img').attr('src');
+          // get img src inside div class thumb
+          const avatar = $e.find('.thumb img').attr('src');
 
-        // get the username from span class title
-        const username = $e.find('.title').text();
+          // get the username from span class title
+          const username = $e.find('.title').text();
 
-        return {uid, username, avatar, url};
-      }).get();
+          return { uid, username, avatar, url };
+        })
+        .get();
     }),
   );
 

@@ -21,14 +21,14 @@ body {
 }
 
 .form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 85vh;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: var(--container-background-color);
   border-radius: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
 .form-container form {
@@ -59,8 +59,8 @@ h1 {
 }
 
 h2 {
-  font-size: 1.4rem;
   margin: 0;
+  font-size: 1.4rem;
 }
 
 .form-columns {
@@ -85,8 +85,8 @@ h2 {
 .button-columns-3 {
   display: flex;
   justify-content: stretch;
-  gap: 12px;
   margin-bottom: 12px;
+  gap: 12px;
 }
 
 .button-columns-3 > div {
@@ -113,10 +113,10 @@ h2 {
 }
 
 a.username {
-  font-weight: bold;
-  color: var(--text-color);
   float: right;
+  color: var(--text-color);
   text-decoration: var(--accent-color) underline 2px;
+  font-weight: bold;
   transition: text-decoration-color 0.2s ease-in-out;
 }
 
@@ -177,22 +177,22 @@ button:disabled {
 .filter-buttons {
   display: flex;
   justify-content: stretch;
-  gap: 8px;
   margin-bottom: 8px;
+  gap: 8px;
 }
 
 .filter-buttons button {
   height: 28px;
-  font-size: 12px;
   padding: 4px;
   border: 1px solid transparent;
+  font-size: 12px;
 }
 
 .filter-buttons button:disabled {
   background-color: var(--accent-color);
+  border: 1px solid var(--text-color);
   cursor: unset;
   color: var(--text-color);
-  border: 1px solid var(--text-color);
 }
 
 ul {
@@ -209,26 +209,29 @@ strong {
 }
 
 /* Reset default styles for checkbox */
-input[type="checkbox"],
-input[type="radio"] {
+input[type='checkbox'],
+input[type='radio'] {
   display: none; /* Hide the default checkbox */
 }
 
 /* Style the label to look like a button */
 label.checkbox-button {
   display: inline-block;
+  vertical-align: center;
   width: 100%;
   padding: 8px;
   background-color: var(--input-background-color);
   border: 1px solid var(--input-focus-background-color);
   border-radius: 5px;
   cursor: pointer;
+  user-select: none;
   color: var(--text-color);
   text-align: center;
   text-transform: uppercase;
   font-size: 14px;
-  vertical-align: center;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 label.checkbox-button:hover {
@@ -236,8 +239,8 @@ label.checkbox-button:hover {
   color: #fff;
 }
 
-input[type="checkbox"]:checked + label.checkbox-button,
-input[type="radio"]:checked + label.checkbox-button {
+input[type='checkbox']:checked + label.checkbox-button,
+input[type='radio']:checked + label.checkbox-button {
   background-color: var(--accent-color);
   border: 1px solid white;
   color: #fff;
@@ -283,5 +286,3 @@ input[type="radio"]:checked + label.checkbox-button {
     transform: rotate(360deg);
   }
 }
-
-

@@ -26,8 +26,8 @@ exports.handler = async function (event, context) {
   }
 
   const options = {
-    executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath(),
-  }
+    executablePath: process.env.CHROME_EXECUTABLE_PATH || (await chromium.executablePath()),
+  };
 
   if (!process.env.CHROME_EXECUTABLE_PATH) {
     options.args = chromium.args;
@@ -63,7 +63,7 @@ exports.handler = async function (event, context) {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({videoUrl}),
+    body: JSON.stringify({ videoUrl }),
     headers,
   };
 };

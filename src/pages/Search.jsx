@@ -1,8 +1,8 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import cheerio from 'cheerio';
 import '../App.css';
 import Result from '../components/Result';
-import {getFriends} from '../helpers/getFriends';
+import { getFriends } from '../helpers/getFriends';
 import FriendResult from '../components/Result/friendResult';
 import debug from '../helpers/debug';
 import InputTags from '../components/input/Tags';
@@ -15,54 +15,51 @@ const modes = {
 };
 
 const types = {
-  category: [
-    {value: 'popular', label: 'Popular'},
-  ],
+  category: [{ value: 'popular', label: 'Popular' }],
   tags: [
-    {value: 'popular', label: 'Popular'},
-    {value: 'latest', label: 'Newest'},
+    { value: 'popular', label: 'Popular' },
+    { value: 'latest', label: 'Newest' },
   ],
   user: [
-    {value: 'public', label: 'Public'},
-    {value: 'private', label: 'Private'},
-    {value: 'favourite', label: 'Favourites'},
+    { value: 'public', label: 'Public' },
+    { value: 'private', label: 'Private' },
+    { value: 'favourite', label: 'Favourites' },
   ],
   friend: [
-    {value: 'public', label: 'Public'},
-    {value: 'private', label: 'Private'},
-    {value: 'favourite', label: 'Favourites'},
+    { value: 'public', label: 'Public' },
+    { value: 'private', label: 'Private' },
+    { value: 'favourite', label: 'Favourites' },
   ],
 };
 
 const categories = [
-  {value: 'gay', label: 'Gay'},
-  {value: '3d-gay', label: 'Gay 3D'},
-  {value: 'gay-asian', label: 'Gay Asian'},
-  {value: 'gay-bareback', label: 'Gay Bareback'},
-  {value: 'gay-bdsm', label: 'Gay BDSM'},
-  {value: 'gay-bear', label: 'Gay Bear'},
-  {value: 'gay-big-cock', label: 'Gay Big Cock'},
-  {value: 'gay-bizarre', label: 'Gay Bizarre'},
-  {value: 'gay-black-men', label: 'Gay Black Men'},
-  {value: 'gay-blowjob', label: 'Gay Blowjob'},
-  {value: 'gay-feet', label: 'Gay Feet'},
-  {value: 'gay-fetish', label: 'Gay Fetish'},
-  {value: 'gay-fisting', label: 'Gay Fisting'},
-  {value: 'gay-glory-hole', label: 'Gay Glory Hole'},
-  {value: 'gay-handjob', label: 'Gay Handjob'},
-  {value: 'gay-interracial', label: 'Gay Interracial'},
-  {value: 'gay-massage', label: 'Gay Massage'},
-  {value: 'gay-muscle-men', label: 'Gay Muscle Men'},
-  {value: 'gay-orgy', label: 'Gay Orgy'},
-  {value: 'male-pissing', label: 'Gay Pissing'},
-  {value: 'male-scat', label: 'Gay Scat'},
-  {value: 'gay-smoking', label: 'Gay Smoking'},
-  {value: 'gay-twinks', label: 'Gay Twinks'},
-  {value: 'male-farting', label: 'Gay Farting'},
-  {value: 'male-voyeur', label: 'Gay Voyeur'},
-  {value: 'men-flashing', label: 'Gay Flashing'},
-  {value: 'str8-guys', label: 'Straight Guys'},
-
+  { value: 'gay', label: 'Gay' },
+  { value: '3d-gay', label: 'Gay 3D' },
+  { value: 'gay-asian', label: 'Gay Asian' },
+  { value: 'gay-bareback', label: 'Gay Bareback' },
+  { value: 'gay-bdsm', label: 'Gay BDSM' },
+  { value: 'gay-bear', label: 'Gay Bear' },
+  { value: 'gay-big-cock', label: 'Gay Big Cock' },
+  { value: 'gay-bizarre', label: 'Gay Bizarre' },
+  { value: 'gay-black-men', label: 'Gay Black Men' },
+  { value: 'gay-blowjob', label: 'Gay Blowjob' },
+  { value: 'gay-feet', label: 'Gay Feet' },
+  { value: 'gay-fetish', label: 'Gay Fetish' },
+  { value: 'gay-fisting', label: 'Gay Fisting' },
+  { value: 'gay-glory-hole', label: 'Gay Glory Hole' },
+  { value: 'gay-handjob', label: 'Gay Handjob' },
+  { value: 'gay-interracial', label: 'Gay Interracial' },
+  { value: 'gay-massage', label: 'Gay Massage' },
+  { value: 'gay-muscle-men', label: 'Gay Muscle Men' },
+  { value: 'gay-orgy', label: 'Gay Orgy' },
+  { value: 'male-pissing', label: 'Gay Pissing' },
+  { value: 'male-scat', label: 'Gay Scat' },
+  { value: 'gay-smoking', label: 'Gay Smoking' },
+  { value: 'gay-twinks', label: 'Gay Twinks' },
+  { value: 'male-farting', label: 'Gay Farting' },
+  { value: 'male-voyeur', label: 'Gay Voyeur' },
+  { value: 'men-flashing', label: 'Gay Flashing' },
+  { value: 'str8-guys', label: 'Straight Guys' },
 ];
 
 const Search = () => {
@@ -161,7 +158,6 @@ const Search = () => {
     if (pageLimit !== 0 && page > pageLimit) {
       return;
     }
-    // const tagsArray = terms.split(/[,\s]+/).filter(str => str.trim() !== '');
 
     const url = getUrl(page);
 
@@ -169,7 +165,7 @@ const Search = () => {
       const response = await fetch(url);
 
       if (response.status === 404) {
-        return {error: 404};
+        return { error: 404 };
       }
 
       const body = await response.text();
@@ -185,7 +181,9 @@ const Search = () => {
         // const isFriend = friends.some(friend => friend.uid == 249732);
         const isFriend = false;
         const avatarElement = $('span .lazy-load', element).first();
-        const avatar = isPrivate ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video' : avatarElement.attr('data-original').replace('//', 'https://');
+        const avatar = isPrivate
+          ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video'
+          : avatarElement.attr('data-original').replace('//', 'https://');
 
         const viewsHtml = $('.view', element).first().text();
         const views = viewsHtml.match(/\d+/)[0];
@@ -197,9 +195,10 @@ const Search = () => {
 
         const title = $(element).attr('title');
         if (quick) {
-          const hasAllTags = termsOperator === 'AND'
-            ? tags.every(tag => title.toLowerCase().includes(tag.toLowerCase()))
-            : tags.some(tag => title.toLowerCase().includes(tag.toLowerCase()));
+          const hasAllTags =
+            termsOperator === 'AND'
+              ? tags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
+              : tags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
 
           const relevance = tags.reduce((score, tag) => {
             const regex = new RegExp(tag, 'gi');
@@ -208,18 +207,21 @@ const Search = () => {
 
           if (hasAllTags || tags.length === 0) {
             if (time >= minDuration * 60) {
-              setVideos((prevVideos) => [...prevVideos, {
-                title,
-                url: $(element).attr('href'),
-                isPrivate,
-                duration,
-                avatar,
-                views,
-                date,
-                relevance,
-                isFriend,
-                page,
-              }]);
+              setVideos((prevVideos) => [
+                ...prevVideos,
+                {
+                  title,
+                  url: $(element).attr('href'),
+                  isPrivate,
+                  duration,
+                  avatar,
+                  views,
+                  date,
+                  relevance,
+                  isFriend,
+                  page,
+                },
+              ]);
             }
           }
         } else {
@@ -246,9 +248,10 @@ const Search = () => {
             const body = await response.text();
             const $ = cheerio.load(body);
 
-            const hasAllTags = termsOperator === 'AND'
-              ? tags.every(tag => $(`.description a[title*="${tag}"]`).length > 0)
-              : tags.some(tag => $(`.description a[title*="${tag}"]`).length > 0);
+            const hasAllTags =
+              termsOperator === 'AND'
+                ? tags.every((tag) => $(`.description a[title*="${tag}"]`).length > 0)
+                : tags.some((tag) => $(`.description a[title*="${tag}"]`).length > 0);
 
             if (hasAllTags) {
               setVideos((prevVideos) => [
@@ -298,19 +301,20 @@ const Search = () => {
     }
 
     for (let i = offset; i <= offset - 1 + amount; i++) {
-      promises.push(getVideos(i)
-        // eslint-disable-next-line
-        .then((s) => {
-          if (s && s.error === 404) {
-            // set page limit but only if it hasn't been set yet or if the current page limit is lower than the current page
-            if (tempPageLimit === 0 || tempPageLimit > i) {
-              tempPageLimit = i - 1;
-              setPageLimit(tempPageLimit);
+      promises.push(
+        getVideos(i)
+          // eslint-disable-next-line
+          .then((s) => {
+            if (s && s.error === 404) {
+              // set page limit but only if it hasn't been set yet or if the current page limit is lower than the current page
+              if (tempPageLimit === 0 || tempPageLimit > i) {
+                tempPageLimit = i - 1;
+                setPageLimit(tempPageLimit);
+              }
             }
-          }
-          progress++;
-          setProgressCount(progress);
-        }),
+            progress++;
+            setProgressCount(progress);
+          }),
       );
     }
 
@@ -339,14 +343,14 @@ const Search = () => {
         sortedVideos.sort((a, b) => {
           const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
           const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return (bMinutes * 60 + bSeconds) - (aMinutes * 60 + aSeconds);
+          return bMinutes * 60 + bSeconds - (aMinutes * 60 + aSeconds);
         });
         break;
       case 'shortest':
         sortedVideos.sort((a, b) => {
           const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
           const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return (aMinutes * 60 + aSeconds) - (bMinutes * 60 + bSeconds);
+          return aMinutes * 60 + aSeconds - (bMinutes * 60 + bSeconds);
         });
         break;
       case 'views':
@@ -404,7 +408,10 @@ const Search = () => {
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    const lastPage = parseInt($('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text()) || 1;
+    const lastPage =
+      parseInt(
+        $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+      ) || 1;
     setPageLimit(lastPage);
     // (!amount || amount > lastPage) && setAmount(lastPage);
     setAmount(lastPage);
@@ -418,12 +425,28 @@ const Search = () => {
       <div className="container">
         <div className="form-container">
           <div className="button-columns-3">
-            <input type="radio" id="basic" name="mode" value="basic" checked={!advanced}
-                   onChange={() => setAdvanced(false)}/>
-            <label className="checkbox-button" htmlFor="basic">Basic search</label>
-            <input type="radio" id="advanced" name="mode" value="advanced" checked={advanced}
-                   onChange={() => setAdvanced(true)}/>
-            <label className="checkbox-button" htmlFor="advanced">Advanced search</label>
+            <input
+              type="radio"
+              id="basic"
+              name="mode"
+              value="basic"
+              checked={!advanced}
+              onChange={() => setAdvanced(false)}
+            />
+            <label className="checkbox-button" htmlFor="basic">
+              Basic search
+            </label>
+            <input
+              type="radio"
+              id="advanced"
+              name="mode"
+              value="advanced"
+              checked={advanced}
+              onChange={() => setAdvanced(true)}
+            />
+            <label className="checkbox-button" htmlFor="advanced">
+              Advanced search
+            </label>
           </div>
           <span className="error"> {errorMessage} </span>
           <form onSubmit={submit}>
@@ -432,140 +455,219 @@ const Search = () => {
                 {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
                 <label htmlFor="search-mode">Search by</label>
                 <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-                  {
-                    Object.keys(modes).map((key) => {
-                      return <option key={key} value={key}>{modes[key]}</option>;
-                    })
-                  }
+                  {Object.keys(modes).map((key) => {
+                    return (
+                      <option key={key} value={key}>
+                        {modes[key]}
+                      </option>
+                    );
+                  })}
                 </select>
-                {
-                  (mode === 'user' || mode === 'friend') &&
+                {(mode === 'user' || mode === 'friend') && (
                   <>
                     <div>
                       <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                      {username && <a href={`https://thisvid.com/members/${id}/`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="username">{username}</a>}
+                      {username && (
+                        <a
+                          href={`https://thisvid.com/members/${id}/`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="username"
+                        >
+                          {username}
+                        </a>
+                      )}
                     </div>
-                    <input type="text" id="id" value={id} required
-                           onBlur={getPageLimit}
-                           onChange={(e) => setId(e.target.value)}
-                    /></>
-                }
-                {
-                  mode === 'friend' &&
+                    <input
+                      type="text"
+                      id="id"
+                      value={id}
+                      required
+                      onBlur={getPageLimit}
+                      onChange={(e) => setId(e.target.value)}
+                    />
+                  </>
+                )}
+                {mode === 'friend' && (
                   <>
                     <label htmlFor="friendId">
                       Choose Friend
                       {friendsLoading && <div className="small-loading-spinner"></div>}
                     </label>
-                    {friends.length === 0
-                      ? <button type="button" onClick={getFriendsById} disabled={id === ''}>Get Friends</button>
-                      :
+                    {friends.length === 0 ? (
+                      <button type="button" onClick={getFriendsById} disabled={id === ''}>
+                        Get Friends
+                      </button>
+                    ) : (
                       <input
                         type="text"
                         readOnly={true}
                         required={true}
                         id="friendId"
                         placeholder="Choose friend"
-                        value={friendIdFieldHover ? 'Change friend' : (friends.find((friend) => friend.uid === friendId)?.username || '')}
+                        value={
+                          friendIdFieldHover
+                            ? 'Change friend'
+                            : friends.find((friend) => friend.uid === friendId)?.username || ''
+                        }
                         onClick={() => setFriendId(null)}
                         onMouseEnter={() => setFriendIdFieldHover(true)}
                         onMouseLeave={() => setFriendIdFieldHover(false)}
-                        style={{cursor: 'pointer'}}
+                        style={{ cursor: 'pointer' }}
                       />
-                    }
+                    )}
                   </>
-                }
-                {
-                  mode === 'category' &&
+                )}
+                {mode === 'category' && (
                   <>
                     <label htmlFor="category">Category</label>
-                    <select id="category" value={category} required onChange={(e) => setCategory(e.target.value)}>
-                      {
-                        categories.map(({value, label}) => {
-                          return <option key={value} value={value}>{label}</option>;
-                        })
-                      }
+                    <select
+                      id="category"
+                      value={category}
+                      required
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      {categories.map(({ value, label }) => {
+                        return (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        );
+                      })}
                     </select>
                   </>
-                }
-                {
-                  mode === 'tags' &&
+                )}
+                {mode === 'tags' && (
                   <>
-                    <label htmlFor="primary-tag">Primary Tag {!sourceExists && 'Tag does not exist'}</label>
-                    <input type="text" id="primary-tag" value={primaryTag} required
-                           onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
-                           onBlur={checkSourceExists}
+                    <label htmlFor="primary-tag">
+                      Primary Tag {!sourceExists && 'Tag does not exist'}
+                    </label>
+                    <input
+                      type="text"
+                      id="primary-tag"
+                      value={primaryTag}
+                      required
+                      onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
+                      onBlur={checkSourceExists}
                     />
                   </>
-                }
+                )}
                 <label htmlFor="type">Type</label>
-                <select value={type} id="type" required
-                        onChange={(e) => setType(e.target.value)}
-                        onBlur={() => mode === 'user' && getPageLimit()}
+                <select
+                  value={type}
+                  id="type"
+                  required
+                  onChange={(e) => setType(e.target.value)}
+                  onBlur={() => mode === 'user' && getPageLimit()}
                 >
-                  <option disabled value=""> - Select -</option>
-                  {
-                    types[mode].map(({value, label}) => {
-                      return <option key={value} value={value}>{label}</option>;
-                    })
-                  }
+                  <option disabled value="">
+                    {' '}
+                    - Select -
+                  </option>
+                  {types[mode].map(({ value, label }) => {
+                    return (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    );
+                  })}
                 </select>
                 <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
-                <InputTags
-                  tags={tags}
-                  setTags={setTags}
-                />
-                {advanced &&
+                <InputTags tags={tags} setTags={setTags} />
+                {advanced && (
                   <>
                     <label htmlFor="tags-operator">Operator</label>
-                    <select id="tags-operator" value={termsOperator} required
-                            onChange={(e) => setTermsOperator(e.target.value)}>
+                    <select
+                      id="tags-operator"
+                      value={termsOperator}
+                      required
+                      onChange={(e) => setTermsOperator(e.target.value)}
+                    >
                       <option value="OR">OR</option>
                       <option value="AND">AND</option>
                     </select>
                   </>
-                }
-                {advanced &&
+                )}
+                {advanced && (
                   <>
                     <label htmlFor="start">Start Page</label>
-                    <input type="number" id="start" value={start} required
-                           onChange={(e) => setStart(parseInt(e.target.value))}/>
+                    <input
+                      type="number"
+                      id="start"
+                      value={start}
+                      required
+                      onChange={(e) => setStart(parseInt(e.target.value))}
+                    />
                   </>
-                }
+                )}
                 <label htmlFor="min-duration">Min Duration (minutes)</label>
-                <input type="number" min="0" id="min-duration" required value={minDuration}
-                       onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}/>
+                <input
+                  type="number"
+                  min="0"
+                  id="min-duration"
+                  required
+                  value={minDuration}
+                  onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}
+                />
                 <label htmlFor="amount">Number of Pages</label>
-                <input type="number" min="0" max={pageLimit || 100} id="amount" value={amount} required
-                       onChange={(e) => setAmount(parseInt(e.target.value))}/>
+                <input
+                  type="number"
+                  min="0"
+                  max={pageLimit || 100}
+                  id="amount"
+                  value={amount}
+                  required
+                  onChange={(e) => setAmount(parseInt(e.target.value))}
+                />
               </div>
             </div>
             <div>
-              <div className="button-columns-3" style={{margin: "12px 0"}}>
+              <div className="button-columns-3" style={{ margin: '12px 0' }}>
                 <div>
-                  <input type="checkbox" id="quick" checked={quick} onChange={() => setQuick(!quick)}/>
-                  <label htmlFor="quick" className="checkbox-button">Quick Search</label>
+                  <input
+                    type="checkbox"
+                    id="quick"
+                    checked={quick}
+                    onChange={() => setQuick(!quick)}
+                  />
+                  <label htmlFor="quick" className="checkbox-button">
+                    Quick Search
+                  </label>
                 </div>
                 <div>
-                  <input type="checkbox" id="preserve-results" checked={preserveResults}
-                         onChange={() => setPreserveResults(!preserveResults)}/>
-                  <label htmlFor="preserve-results" className="checkbox-button">Preserve Results</label>
+                  <input
+                    type="checkbox"
+                    id="preserve-results"
+                    checked={preserveResults}
+                    onChange={() => setPreserveResults(!preserveResults)}
+                  />
+                  <label htmlFor="preserve-results" className="checkbox-button">
+                    Preserve Results
+                  </label>
                 </div>
-                {(type === 'favourite' || mode !== 'user') &&
+                {(type === 'favourite' || mode !== 'user') && (
                   <div>
-                    <input type="checkbox" id="omit-private" checked={omitPrivate}
-                           onChange={() => setOmitPrivate(!omitPrivate)}/>
-                    <label htmlFor="omit-private" className="checkbox-button">No Private Videos</label>
+                    <input
+                      type="checkbox"
+                      id="omit-private"
+                      checked={omitPrivate}
+                      onChange={() => setOmitPrivate(!omitPrivate)}
+                    />
+                    <label htmlFor="omit-private" className="checkbox-button">
+                      No Private Videos
+                    </label>
                   </div>
-                }
+                )}
               </div>
               <div className="button-columns">
-                <button type="submit" name="run">Run</button>
-                <button type="submit" name="next"
-                        disabled={start + amount > pageLimit && pageLimit !== 0}>
+                <button type="submit" name="run">
+                  Run
+                </button>
+                <button
+                  type="submit"
+                  name="next"
+                  disabled={start + amount > pageLimit && pageLimit !== 0}
+                >
                   Next
                 </button>
               </div>
@@ -573,10 +675,14 @@ const Search = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          {mode === 'friend' && !friendId ?
+          {mode === 'friend' && !friendId ? (
             <>
               <div className="results-header">
-                {friends.length === 0 ? <h2>Search for friends</h2> : <h2>Found {friends.length} friends</h2>}
+                {friends.length === 0 ? (
+                  <h2>Search for friends</h2>
+                ) : (
+                  <h2>Found {friends.length} friends</h2>
+                )}
                 <div>
                   <input
                     type="text"
@@ -590,30 +696,36 @@ const Search = () => {
               </div>
               <div className="results">
                 {/* show list of friends filtered on friendSearch username */}
-                {friends.filter(({username}) => username.toLowerCase().includes(friendSearch.toLowerCase()))
-                  .map(({uid, username, avatar}) =>
+                {friends
+                  .filter(({ username }) =>
+                    username.toLowerCase().includes(friendSearch.toLowerCase()),
+                  )
+                  .map(({ uid, username, avatar }) => (
                     <FriendResult
                       key={uid}
                       uid={uid}
                       username={username}
                       avatar={avatar}
                       selectFunction={() => setFriendId(uid)}
-                    />,
-                  )
-                }
+                    />
+                  ))}
               </div>
             </>
-            :
+          ) : (
             <>
               <div className="results-header">
                 {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
                 <span>{`Progress: ${Math.round((progressCount / amount) * 100)}%`}</span>
                 <div>
                   <label htmlFor="sort">Sort by</label>
-                  <select id="sort" value={sort} onChange={(e) => {
-                    setSort(e.target.value);
-                    sortVideos(e.target.value);
-                  }}>
+                  <select
+                    id="sort"
+                    value={sort}
+                    onChange={(e) => {
+                      setSort(e.target.value);
+                      sortVideos(e.target.value);
+                    }}
+                  >
                     <option value="views">Views</option>
                     <option value="relevance">Relevance</option>
                     <option value="newest">Newest</option>
@@ -640,7 +752,7 @@ const Search = () => {
                 ))}
               </div>
             </>
-          }
+          )}
         </div>
       </div>
     </>

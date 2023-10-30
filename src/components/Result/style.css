@@ -1,12 +1,12 @@
 .result {
-  background-color: var(--container-background-color);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: var(--container-background-color);
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+  overflow: hidden;
 }
 
 .result:hover {
@@ -14,21 +14,21 @@
 }
 
 .result .thumbnail {
-  width: 100%;
-  height: 100px;
-  margin-bottom: .5rem;
-  padding: .5rem;
-  box-sizing: border-box;
-  overflow: hidden;
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  width: 100%;
+  height: 100px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-sizing: border-box;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100%;
-  transition: background-size 0.2s ease-in-out;
-  position: relative;
   cursor: pointer;
+  transition: background-size 0.2s ease-in-out;
+  overflow: hidden;
 }
 
 .result:hover .thumbnail {
@@ -36,10 +36,10 @@
 }
 
 .result .thumbnail .info {
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
   padding: 0.2rem 0.5rem;
+  background-color: rgba(0, 0, 0, 0.5);
   border-radius: 0.5rem;
+  color: white;
   font-size: 0.8rem;
 }
 
@@ -76,30 +76,32 @@
 }
 
 .result .private {
-  font-size: 0.8rem;
   color: #666;
+  font-size: 0.8rem;
 }
 
 .result .date {
-  font-size: 0.8rem;
   color: #666;
+  font-size: 0.8rem;
 }
 
 /* at the top of the thumbnail */
 .result .friends {
   position: absolute;
   top: 0;
-  margin: .5rem;
+  margin: 0.5rem;
 }
 
 .result .friends img {
   width: 1.2rem;
   height: 1.2rem;
-  background-color: rgba(255, 255, 255, 0.8);
-  opacity: .8;
   padding: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  opacity: 0.8;
+  transition:
+    opacity 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
 }
 
 .result:hover .friends img {
@@ -125,7 +127,7 @@
 
 .result .loading svg {
   stroke: var(--accent-color);
-  animation: loading .5s alternate infinite;
+  animation: loading 0.5s alternate infinite;
 }
 
 .result .done svg {

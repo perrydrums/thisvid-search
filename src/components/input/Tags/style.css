@@ -1,23 +1,23 @@
 .input-tag__tags {
   display: inline-flex;
   flex-wrap: wrap;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
 .input-tag__tags li {
+  position: relative;
+  display: flex;
   align-items: center;
+  padding: 5px 10px;
+  margin-right: 5px;
+  margin-bottom: 12px;
   background: var(--accent-color);
   border-radius: 0.5rem;
+  cursor: pointer;
   color: white;
-  display: flex;
   font-weight: 300;
   list-style: none;
-  margin-bottom: 12px;
-  margin-right: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-  position: relative;
 }
 
 .input-tag__tags li.input-tag__tags__input {
@@ -34,39 +34,39 @@
 
 .input-tag__tags li.input-tag__tags__item:hover:after {
   position: absolute;
-  content: "";
-  left: 0;
   top: 45%;
   right: 0;
+  left: 0;
   width: 80%;
   margin: 0 auto;
   border-top: 4px solid var(--accent-color);
-  -ms-transform: rotate(-30deg);
-  transform: rotate(-30deg);
   color: white;
+  transform: rotate(-30deg);
   animation: fade-in 0.2s ease-in-out;
+  content: '';
+  -ms-transform: rotate(-30deg);
 }
 
 .input-tag__tags li.input-tag__tags__input {
-  background: none;
   flex-grow: 1;
   padding: 0;
   margin-bottom: 0;
+  background: none;
 }
 
 /* hovering tooltip */
 .input-tag__tooltip {
+  position: absolute;
+  display: inline-block;
+  z-index: 100;
+  padding: 5px 10px;
   background: var(--accent-color);
   border-radius: 0.5rem;
   color: white;
-  display: inline-block;
   font-size: 12px;
-  padding: 5px 10px;
-  pointer-events: none;
-  position: absolute;
-  transition: opacity .3s;
-  z-index: 100;
   transform: translate(0, 100%);
+  transition: opacity 0.3s;
+  pointer-events: none;
 }
 
 @keyframes fade-in {
