@@ -180,12 +180,17 @@ const Search = () => {
           return;
         }
 
+        // TODO: Check if friend. Can only be done when loading video page.
         // const isFriend = friends.some(friend => friend.uid == 249732);
         const isFriend = false;
-        const avatarElement = $('span .lazy-load', element).first();
+
         const avatar = isPrivate
-          ? 'https://placehold.co/100x100/000000/b60707?text=Private+Video'
-          : avatarElement.attr('data-original').replace('//', 'https://');
+          ? $('span', element)
+              .first()
+              .attr('style')
+              .match(/url\((.*?)\)/)[1]
+              .replace('//', 'https://')
+          : $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
 
         const viewsHtml = $('.view', element).first().text();
         const views = viewsHtml.match(/\d+/)[0];
