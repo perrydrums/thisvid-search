@@ -1,4 +1,5 @@
 import { supabase } from './client';
+import { getIp } from './getIp';
 
 export const log = async ({
   mode,
@@ -14,6 +15,7 @@ export const log = async ({
   friendId,
   resultCount,
 }) => {
+  const ipAddress = await getIp();
   const { data, error } = await supabase.from('searches').insert([
     {
       mode,
@@ -28,6 +30,7 @@ export const log = async ({
       userId,
       friendId,
       resultCount,
+      ipAddress,
     },
   ]);
   if (error) {
