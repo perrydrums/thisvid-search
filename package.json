@@ -25,6 +25,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prestart": "source $HOME/.nvm/nvm.sh; nvm use",
     "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

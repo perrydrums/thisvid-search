@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import cheerio from 'cheerio';
 import '../App.css';
 import Result from '../components/Result';
@@ -92,6 +92,47 @@ const Search = () => {
   const [sort, setSort] = useState('views');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
+
+  useEffect(() => {
+    const getPageLimit = async () => {
+      if (!id || (mode === 'friend' && !friendId) || !type) {
+        return;
+      }
+
+      const userId = mode === 'friend' ? friendId : id;
+
+      const userResponse = await fetch(`/members/${userId}/`);
+
+      if (userResponse.status === 404) {
+        setErrorMessage(`User ${userId} does not exist.`);
+        return;
+      }
+
+      const userBody = await userResponse.text();
+      const $user = cheerio.load(userBody);
+
+      const username = $user('.profile-menu .headline h2').text() || 'username not found';
+      setUsername(username);
+
+      const response = await fetch(`/members/${userId}/${type}_videos/`);
+
+      if (response.status === 404) {
+        setErrorMessage(`User ${userId} does not have any ${type} videos.`);
+        return;
+      }
+
+      const body = await response.text();
+      const $ = cheerio.load(body);
+
+      const lastPage =
+        parseInt(
+          $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+        ) || 1;
+      setPageLimit(lastPage);
+      setAmount(lastPage);
+    };
+    getPageLimit();
+  }, [mode, id, type, friendId]);
 
   const localUid = localStorage.getItem('uid');
   if (mode === 'friend' && localUid && !id) {
@@ -406,45 +447,6 @@ const Search = () => {
     run(start);
   };
 
-  const getPageLimit = async () => {
-    if (!id || (mode === 'friend' && !friendId) || !type) {
-      return;
-    }
-
-    const userId = mode === 'friend' ? friendId : id;
-
-    const userResponse = await fetch(`/members/${userId}/`);
-
-    if (userResponse.status === 404) {
-      setErrorMessage(`User ${userId} does not exist.`);
-      return;
-    }
-
-    const userBody = await userResponse.text();
-    const $user = cheerio.load(userBody);
-
-    const username = $user('.profile-menu .headline h2').text() || 'username not found';
-    setUsername(username);
-
-    const response = await fetch(`/members/${userId}/${type}_videos/`);
-
-    if (response.status === 404) {
-      setErrorMessage(`User ${userId} does not have any ${type} videos.`);
-      return;
-    }
-
-    const body = await response.text();
-    const $ = cheerio.load(body);
-
-    const lastPage =
-      parseInt(
-        $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-      ) || 1;
-    setPageLimit(lastPage);
-    // (!amount || amount > lastPage) && setAmount(lastPage);
-    setAmount(lastPage);
-  };
-
   return (
     <>
       <LoadingBar
@@ -517,7 +519,6 @@ const Search = () => {
                       id="id"
                       value={id}
                       required
-                      onBlur={getPageLimit}
                       onChange={(e) => setId(e.target.value)}
                     />
                   </>
@@ -587,13 +588,7 @@ const Search = () => {
                   </>
                 )}
                 <label htmlFor="type">Type</label>
-                <select
-                  value={type}
-                  id="type"
-                  required
-                  onChange={(e) => setType(e.target.value)}
-                  onBlur={() => mode === 'user' || (mode === 'friend' && getPageLimit())}
-                >
+                <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
                   <option disabled value="">
                     {' '}
                     - Select -
