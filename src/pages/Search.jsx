@@ -12,6 +12,8 @@ import LoadingBar from 'react-top-loading-bar';
 import { log } from '../helpers/supabase/log';
 import Feedback from '../components/Feedback';
 import { getCategories } from '../helpers/getCategories';
+import CategoryResult from '../components/Result/categoryResult';
+import Share from '../components/Share';
 
 const modes = {
   user: 'User ID',
@@ -39,7 +41,7 @@ const types = {
 };
 
 const Search = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const params = {};
 
   searchParams.forEach((value, key) => {
@@ -51,7 +53,7 @@ const Search = () => {
   const [tags, setTags] = useState(params.tags ? params.tags.split(',') : []);
   const [termsOperator, setTermsOperator] = useState(params.termsOperator || 'OR');
   const [primaryTag, setPrimaryTag] = useState(params.primaryTag || '');
-  const [category, setCategory] = useState(params.category || 'gay');
+  const [category, setCategory] = useState(`${params.category}` || '');
   const [start, setStart] = useState(params.start || 1);
   const [type, setType] = useState(params.type || '');
   const [quick, setQuick] = useState(true);
@@ -59,7 +61,7 @@ const Search = () => {
   const [preserveResults, setPreserveResults] = useState(false);
   const [videos, setVideos] = useState([]);
   const [progressCount, setProgressCount] = useState(0);
-  const [amount, setAmount] = useState(params.amount || 50);
+  const [amount, setAmount] = useState(params.amount || 30);
   const [minDuration, setMinDuration] = useState(params.minDuration || 0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
@@ -80,6 +82,13 @@ const Search = () => {
     getCategories().then((categories) => {
       setCategories(categories);
     });
+  }, []);
+
+  useEffect(() => {
+    if (params.run) {
+      run(Number(params.start) || 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -432,6 +441,14 @@ const Search = () => {
     setSearchObject(null);
     setSort('popular');
 
+    if (e.nativeEvent.submitter.name === 'next') {
+      next();
+      return;
+    }
+    run(start);
+  };
+
+  const getShareUrl = () => {
     const params = new URLSearchParams({
       mode,
       type,
@@ -445,15 +462,9 @@ const Search = () => {
       termsOperator,
       orderBy: sort,
       start,
+      run: true,
     });
-
-    setSearchParams(params);
-
-    if (e.nativeEvent.submitter.name === 'next') {
-      next();
-      return;
-    }
-    run(start);
+    return `${window.location.origin}/?${params.toString()}`;
   };
 
   return (
@@ -582,20 +593,22 @@ const Search = () => {
                 {mode === 'category' && (
                   <>
                     <label htmlFor="category">Category</label>
-                    <select
+                    <input
+                      type="text"
+                      readOnly={true}
+                      required={true}
                       id="category"
-                      value={category}
-                      required
-                      onChange={(e) => setCategory(e.target.value)}
-                    >
-                      {categories.map(({ name, image, slug }) => {
-                        return (
-                          <option key={slug} value={slug}>
-                            {name}
-                          </option>
-                        );
-                      })}
-                    </select>
+                      placeholder="Choose category"
+                      value={
+                        friendIdFieldHover
+                          ? 'Change category'
+                          : categories.find((c) => c.slug === category)?.name || ''
+                      }
+                      onClick={() => setCategory(null)}
+                      onMouseEnter={() => setFriendIdFieldHover(true)}
+                      onMouseLeave={() => setFriendIdFieldHover(false)}
+                      style={{ cursor: 'pointer' }}
+                    />
                   </>
                 )}
                 {mode === 'tags' && (
@@ -730,6 +743,26 @@ const Search = () => {
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
+          {mode === 'category' && !category && (
+            <>
+              <div className="results-header">
+                <h2>Select a category</h2>
+              </div>
+              <div className="results">
+                {categories.map(({ name, image, slug }) => {
+                  return (
+                    <CategoryResult
+                      key={slug}
+                      name={name}
+                      image={image}
+                      slug={slug}
+                      selectFunction={setCategory}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
           {mode === 'friend' && !friendId ? (
             <>
               <div className="results-header">
@@ -750,7 +783,6 @@ const Search = () => {
                 </div>
               </div>
               <div className="results">
-                {/* show list of friends filtered on friendSearch username */}
                 {friends
                   .filter(({ username }) =>
                     username.toLowerCase().includes(friendSearch.toLowerCase()),
@@ -770,7 +802,12 @@ const Search = () => {
             <>
               <div className="results-header">
                 {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
-                {searchObject && <Feedback search={searchObject} resultCount={videos.length} />}
+                {searchObject && (
+                  <>
+                    <Feedback search={searchObject} resultCount={videos.length} />
+                    <Share url={getShareUrl()} />
+                  </>
+                )}
                 <div>
                   <label htmlFor="sort">Sort by</label>
                   <select

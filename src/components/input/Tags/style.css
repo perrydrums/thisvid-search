@@ -11,7 +11,7 @@
   align-items: center;
   padding: 5px 10px;
   margin-right: 5px;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
   background: var(--accent-color);
   border-radius: 0.5rem;
   cursor: pointer;
@@ -22,6 +22,7 @@
 
 .input-tag__tags li.input-tag__tags__input {
   margin-right: 0;
+  margin-top: 7px;
 }
 
 .input-tag__tags li.input-tag__tags__item {

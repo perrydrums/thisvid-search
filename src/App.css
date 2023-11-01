@@ -70,14 +70,6 @@ h2 {
   gap: 12px;
 }
 
-@media (max-width: 768px) {
-
-
-  .form-columns {
-    grid-template-columns: 1fr;
-  }
-}
-
 .form-columns > div {
   display: flex;
   justify-content: space-between;

@@ -1,0 +1,40 @@
+.share-cta {
+  cursor: pointer;
+  transition: color .2s;
+}
+
+.share-cta:hover {
+  color: var(--accent-color);
+}
+
+.feedback-confirmation {
+  animation: fade-out .2s ease-in-out forwards 3s;
+}
+
+.star-rating {
+  display: inline-block;
+  font-size: 0;
+}
+
+.star {
+  display: inline-block;
+  padding-right: 4px;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--button-disabled-background-color);
+  transition: color .2s;
+}
+
+.star.selected {
+  color: var(--accent-color);
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
