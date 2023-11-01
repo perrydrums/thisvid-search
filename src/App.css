@@ -70,6 +70,14 @@ h2 {
   gap: 12px;
 }
 
+@media (max-width: 768px) {
+
+
+  .form-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 .form-columns > div {
   display: flex;
   justify-content: space-between;
@@ -110,6 +118,16 @@ h2 {
 .results-header input {
   width: 180px;
   margin-left: 12px;
+}
+
+div.label-tooltip {
+  background-color: var(--accent-color);
+  opacity: 1;
+  font-size: .8em;
+  max-width: 150px;
+  padding: 8px 12px;
+  border-radius: 0.5rem;
+  animation: fade-in 0.2s;
 }
 
 a.username {
@@ -228,9 +246,8 @@ label.checkbox-button {
   text-align: center;
   text-transform: uppercase;
   font-size: 14px;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
+  transition: background-color 0.2s,
+  color 0.2s;
 }
 
 label.checkbox-button:hover {
@@ -268,7 +285,7 @@ input[type='radio']:checked + label.checkbox-button {
 
 @media (max-width: 900px) {
   .results {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   label {
@@ -278,10 +295,23 @@ input[type='radio']:checked + label.checkbox-button {
   label.checkbox-button {
     font-size: 10px;
   }
+
+  .form-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

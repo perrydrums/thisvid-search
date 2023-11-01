@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import cheerio from 'cheerio';
+import { Tooltip } from 'react-tooltip';
 import '../App.css';
 import Result from '../components/Result';
 import { getFriends } from '../helpers/getFriends';
@@ -10,11 +11,12 @@ import InputTags from '../components/input/Tags';
 import LoadingBar from 'react-top-loading-bar';
 import { log } from '../helpers/supabase/log';
 import Feedback from '../components/Feedback';
+import { getCategories } from '../helpers/getCategories';
 
 const modes = {
   user: 'User ID',
   friend: 'Friend',
-  category: 'Category with tags',
+  category: 'Category',
   tags: 'Tags',
 };
 
@@ -36,36 +38,6 @@ const types = {
   ],
 };
 
-const categories = [
-  { value: 'gay', label: 'Gay' },
-  { value: '3d-gay', label: 'Gay 3D' },
-  { value: 'gay-asian', label: 'Gay Asian' },
-  { value: 'gay-bareback', label: 'Gay Bareback' },
-  { value: 'gay-bdsm', label: 'Gay BDSM' },
-  { value: 'gay-bear', label: 'Gay Bear' },
-  { value: 'gay-big-cock', label: 'Gay Big Cock' },
-  { value: 'gay-bizarre', label: 'Gay Bizarre' },
-  { value: 'gay-black-men', label: 'Gay Black Men' },
-  { value: 'gay-blowjob', label: 'Gay Blowjob' },
-  { value: 'gay-feet', label: 'Gay Feet' },
-  { value: 'gay-fetish', label: 'Gay Fetish' },
-  { value: 'gay-fisting', label: 'Gay Fisting' },
-  { value: 'gay-glory-hole', label: 'Gay Glory Hole' },
-  { value: 'gay-handjob', label: 'Gay Handjob' },
-  { value: 'gay-interracial', label: 'Gay Interracial' },
-  { value: 'gay-massage', label: 'Gay Massage' },
-  { value: 'gay-muscle-men', label: 'Gay Muscle Men' },
-  { value: 'gay-orgy', label: 'Gay Orgy' },
-  { value: 'male-pissing', label: 'Gay Pissing' },
-  { value: 'male-scat', label: 'Gay Scat' },
-  { value: 'gay-smoking', label: 'Gay Smoking' },
-  { value: 'gay-twinks', label: 'Gay Twinks' },
-  { value: 'male-farting', label: 'Gay Farting' },
-  { value: 'male-voyeur', label: 'Gay Voyeur' },
-  { value: 'men-flashing', label: 'Gay Flashing' },
-  { value: 'str8-guys', label: 'Straight Guys' },
-];
-
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const params = {};
@@ -76,7 +48,7 @@ const Search = () => {
 
   const [mode, setMode] = useState(params.mode || 'category');
   const [id, setId] = useState(params.id || '');
-  const [tags, setTags] = useState(params.tags?.split(',') || []);
+  const [tags, setTags] = useState(params.tags ? params.tags.split(',') : []);
   const [termsOperator, setTermsOperator] = useState(params.termsOperator || 'OR');
   const [primaryTag, setPrimaryTag] = useState(params.primaryTag || '');
   const [category, setCategory] = useState(params.category || 'gay');
@@ -102,6 +74,13 @@ const Search = () => {
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
   const [searchObject, setSearchObject] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    getCategories().then((categories) => {
+      setCategories(categories);
+    });
+  }, []);
 
   useEffect(() => {
     const getPageLimit = async () => {
@@ -550,7 +529,12 @@ const Search = () => {
                       value={id}
                       required
                       onChange={(e) => setId(e.target.value)}
+                      data-tooltip-id="id"
                     />
+                    <Tooltip id="id" className="label-tooltip" place="left-start">
+                      The ID of the ThisVid user profile. You can find this in the URL of the
+                      profile page on ThisVid.
+                    </Tooltip>
                   </>
                 )}
                 {mode === 'friend' && (
@@ -604,10 +588,10 @@ const Search = () => {
                       required
                       onChange={(e) => setCategory(e.target.value)}
                     >
-                      {categories.map(({ value, label }) => {
+                      {categories.map(({ name, image, slug }) => {
                         return (
-                          <option key={value} value={value}>
-                            {label}
+                          <option key={slug} value={slug}>
+                            {name}
                           </option>
                         );
                       })}
