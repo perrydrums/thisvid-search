@@ -117,7 +117,7 @@
   width: 1.5em;
   height: 1.5em;
   cursor: pointer;
-  stroke: white;
+  stroke: var(--text-color);
 }
 
 .result .download svg:hover {
@@ -130,7 +130,7 @@
 }
 
 .result .done svg {
-  stroke: greenyellow;
+  stroke: var(--green);
 }
 
 @keyframes loading {
@@ -138,6 +138,6 @@
     stroke: var(--accent-color);
   }
   100% {
-    stroke: white;
+    stroke: var(--container-background-color);
   }
 }
