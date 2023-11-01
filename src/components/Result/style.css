@@ -76,7 +76,7 @@
 }
 
 .result .private {
-  color: #666;
+  color: var(--accent-color);
   font-size: 0.8rem;
 }
 
