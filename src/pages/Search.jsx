@@ -83,7 +83,7 @@ const Search = () => {
   const [start, setStart] = useState(params.start || 1);
   const [type, setType] = useState(params.type || '');
   const [quick, setQuick] = useState(true);
-  const [omitPrivate, setOmitPrivate] = useState(params.omitPrivate || false);
+  const [omitPrivate, setOmitPrivate] = useState(false);
   const [preserveResults, setPreserveResults] = useState(false);
   const [videos, setVideos] = useState([]);
   const [progressCount, setProgressCount] = useState(0);
@@ -466,7 +466,6 @@ const Search = () => {
       termsOperator,
       orderBy: sort,
       start,
-      omitPrivate,
     });
 
     setSearchParams(params);
