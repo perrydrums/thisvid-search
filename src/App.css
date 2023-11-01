@@ -47,6 +47,11 @@ body {
   overflow: scroll;
 }
 
+.results-container.inactive {
+  pointer-events: none;
+  animation: loading-results .5s ease-in-out alternate infinite;
+}
+
 .results {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -305,5 +310,14 @@ input[type='radio']:checked + label.checkbox-button {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes loading-results {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: .5;
   }
 }

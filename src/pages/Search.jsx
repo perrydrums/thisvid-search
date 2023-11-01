@@ -471,7 +471,7 @@ const Search = () => {
     <>
       <LoadingBar
         progress={progressCount ? Math.round((progressCount / amount) * 100) : 0}
-        color="#ff0036"
+        color="var(--accent-color)"
         height={10}
         onLoaderFinished={() => setProgressCount(0)}
       />
@@ -742,7 +742,11 @@ const Search = () => {
             </div>
           </form>
         </div>
-        <div className="results-container" ref={resultsRef}>
+        <div
+          // className={`results-container ${!(finished || !friendsLoading) ? 'inactive' : ''}`}
+          className={`results-container`}
+          ref={resultsRef}
+        >
           {mode === 'category' && !category && (
             <>
               <div className="results-header">
