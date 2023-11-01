@@ -16,25 +16,28 @@ export const log = async ({
   resultCount,
 }) => {
   const ipAddress = await getIp();
-  const { data, error } = await supabase.from('searches').insert([
-    {
-      mode,
-      advanced,
-      type,
-      tags,
-      pageAmount,
-      quick,
-      duration,
-      primaryTag,
-      category,
-      userId,
-      friendId,
-      resultCount,
-      ipAddress,
-    },
-  ]);
+  const { data, error } = await supabase
+    .from('searches')
+    .insert([
+      {
+        mode,
+        advanced,
+        type,
+        tags,
+        pageAmount,
+        quick,
+        duration,
+        primaryTag,
+        category,
+        userId,
+        friendId,
+        resultCount,
+        ipAddress,
+      },
+    ])
+    .select();
   if (error) {
     console.error(error);
   }
-  return data;
+  return data ? data[0] : null;
 };

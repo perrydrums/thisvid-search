@@ -8,6 +8,7 @@ import debug from '../helpers/debug';
 import InputTags from '../components/input/Tags';
 import LoadingBar from 'react-top-loading-bar';
 import { log } from '../helpers/supabase/log';
+import Feedback from '../components/Feedback';
 
 const modes = {
   user: 'User ID',
@@ -92,6 +93,7 @@ const Search = () => {
   const [sort, setSort] = useState('views');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
+  const [searchObject, setSearchObject] = useState(null);
 
   useEffect(() => {
     const getPageLimit = async () => {
@@ -328,7 +330,7 @@ const Search = () => {
   };
 
   const logSearch = async () => {
-    await log({
+    const s = await log({
       mode,
       type,
       advanced,
@@ -342,6 +344,7 @@ const Search = () => {
       friendId,
       resultCount: 0,
     });
+    setSearchObject(s);
   };
 
   const run = async (offset) => {
@@ -439,6 +442,7 @@ const Search = () => {
     e.preventDefault();
     setErrorMessage('');
     setFinished(false);
+    setSearchObject(null);
     setSort('popular');
     if (e.nativeEvent.submitter.name === 'next') {
       next();
@@ -503,7 +507,7 @@ const Search = () => {
                   <>
                     <div>
                       <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                      {username && (
+                      {mode === 'user' && username && (
                         <a
                           href={`https://thisvid.com/members/${id}/`}
                           target="_blank"
@@ -525,10 +529,22 @@ const Search = () => {
                 )}
                 {mode === 'friend' && (
                   <>
-                    <label htmlFor="friendId">
-                      Choose Friend
-                      {friendsLoading && <div className="small-loading-spinner"></div>}
-                    </label>
+                    <div>
+                      <label htmlFor="friendId">
+                        Choose Friend
+                        {friendsLoading && <div className="small-loading-spinner"></div>}
+                      </label>
+                      {friendId && (
+                        <a
+                          href={`https://thisvid.com/members/${friendId}/`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="username"
+                        >
+                          {friends.find((friend) => friend.uid === friendId)?.username}
+                        </a>
+                      )}
+                    </div>
                     {friends.length === 0 ? (
                       <button type="button" onClick={getFriendsById} disabled={id === ''}>
                         Get Friends
@@ -744,6 +760,7 @@ const Search = () => {
             <>
               <div className="results-header">
                 {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
+                {searchObject && <Feedback search={searchObject} resultCount={videos.length} />}
                 <div>
                   <label htmlFor="sort">Sort by</label>
                   <select

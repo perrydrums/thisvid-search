@@ -15,17 +15,21 @@ const InputTags = ({ tags, setTags }) => {
     setTags(newTags);
   };
 
+  const addTag = (val) => {
+    if (tags.find((tag) => tag.toLowerCase() === val.toLowerCase())) {
+      return;
+    }
+    setTags([...tags, val]);
+    tagInput.value = null;
+    setInput('');
+  };
+
   const inputKeyDown = (e) => {
     const val = e.target.value;
     if ((e.key === 'Enter' || e.key === ',') && val) {
       e.preventDefault();
 
-      if (tags.find((tag) => tag.toLowerCase() === val.toLowerCase())) {
-        return;
-      }
-      setTags([...tags, val]);
-      tagInput.value = null;
-      setInput('');
+      addTag(val);
     } else if (e.key === 'Backspace' && !val) {
       removeTag(tags.length - 1);
     }
@@ -55,7 +59,13 @@ const InputTags = ({ tags, setTags }) => {
           }}
         />
         {input && (
-          <div className="input-tag__tooltip">
+          <div
+            className="input-tag__tooltip"
+            onClick={(e) => {
+              console.log('aaa');
+              addTag(input);
+            }}
+          >
             Add <b>{input}</b> ⏎
           </div>
         )}
