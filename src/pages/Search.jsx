@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import cheerio from 'cheerio';
 import '../App.css';
 import Result from '../components/Result';
@@ -66,31 +67,38 @@ const categories = [
 ];
 
 const Search = () => {
-  const [mode, setMode] = useState('category');
-  const [id, setId] = useState(null);
-  const [tags, setTags] = useState([]);
-  const [termsOperator, setTermsOperator] = useState('OR');
-  const [primaryTag, setPrimaryTag] = useState('');
-  const [category, setCategory] = useState('gay');
-  const [start, setStart] = useState(1);
-  const [type, setType] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const params = {};
+
+  searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
+
+  const [mode, setMode] = useState(params.mode || 'category');
+  const [id, setId] = useState(params.id || '');
+  const [tags, setTags] = useState(params.tags?.split(',') || []);
+  const [termsOperator, setTermsOperator] = useState(params.termsOperator || 'OR');
+  const [primaryTag, setPrimaryTag] = useState(params.primaryTag || '');
+  const [category, setCategory] = useState(params.category || 'gay');
+  const [start, setStart] = useState(params.start || 1);
+  const [type, setType] = useState(params.type || '');
   const [quick, setQuick] = useState(true);
-  const [omitPrivate, setOmitPrivate] = useState(false);
+  const [omitPrivate, setOmitPrivate] = useState(params.omitPrivate || false);
   const [preserveResults, setPreserveResults] = useState(false);
   const [videos, setVideos] = useState([]);
   const [progressCount, setProgressCount] = useState(0);
-  const [amount, setAmount] = useState(50);
-  const [minDuration, setMinDuration] = useState(0);
+  const [amount, setAmount] = useState(params.amount || 50);
+  const [minDuration, setMinDuration] = useState(params.minDuration || 0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
   const [friends, setFriends] = useState([]);
-  const [friendId, setFriendId] = useState(null);
+  const [friendId, setFriendId] = useState(params.friendId || '');
   const [friendsLoading, setFriendsLoading] = useState(false);
   const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState('views');
+  const [sort, setSort] = useState(params.orderBy || 'views');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
   const [searchObject, setSearchObject] = useState(null);
@@ -444,6 +452,25 @@ const Search = () => {
     setFinished(false);
     setSearchObject(null);
     setSort('popular');
+
+    const params = new URLSearchParams({
+      mode,
+      type,
+      tags: tags.join(','),
+      amount,
+      minDuration,
+      primaryTag,
+      category,
+      id,
+      friendId,
+      termsOperator,
+      orderBy: sort,
+      start,
+      omitPrivate,
+    });
+
+    setSearchParams(params);
+
     if (e.nativeEvent.submitter.name === 'next') {
       next();
       return;
