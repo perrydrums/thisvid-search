@@ -1,19 +1,21 @@
+import cheerio from 'cheerio';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import cheerio from 'cheerio';
 import { Tooltip } from 'react-tooltip';
-import '../App.css';
-import Result from '../components/Result';
-import { getFriends } from '../helpers/getFriends';
-import FriendResult from '../components/Result/friendResult';
-import debug from '../helpers/debug';
-import InputTags from '../components/input/Tags';
 import LoadingBar from 'react-top-loading-bar';
-import { log } from '../helpers/supabase/log';
+
+import '../App.css';
 import Feedback from '../components/Feedback';
-import { getCategories } from '../helpers/getCategories';
+import Result from '../components/Result';
 import CategoryResult from '../components/Result/categoryResult';
+import FriendResult from '../components/Result/friendResult';
 import Share from '../components/Share';
+import InputTags from '../components/input/Tags';
+import debug from '../helpers/debug';
+import { getCategories } from '../helpers/getCategories';
+import { getFriends } from '../helpers/getFriends';
+import { log } from '../helpers/supabase/log';
+import { getVideos, sortVideos } from '../helpers/videos';
 
 const modes = {
   user: 'User ID',
@@ -67,7 +69,7 @@ const Search = () => {
   const [finished, setFinished] = useState(false);
   const [friends, setFriends] = useState([]);
   const [friendId, setFriendId] = useState(params.friendId || '');
-  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -141,8 +143,8 @@ const Search = () => {
   const executeScroll = () => resultsRef.current.scrollIntoView();
 
   const getFriendsById = async () => {
-    setFriendsLoading(true);
-    const f = await getFriends(id);
+    setLoading(true);
+    const f = await getFriends(id, setAmount, setProgressCount);
 
     if (f === false) {
       setErrorMessage('User not found');
@@ -155,7 +157,7 @@ const Search = () => {
     }
 
     setFriends(f);
-    setFriendsLoading(false);
+    setLoading(false);
     localStorage.setItem('uid', id);
   };
 
@@ -195,136 +197,6 @@ const Search = () => {
     setSourceExists(exists);
   };
 
-  const getVideos = async (page) => {
-    if (pageLimit !== 0 && page > pageLimit) {
-      return;
-    }
-
-    const url = getUrl(page);
-
-    try {
-      const response = await fetch(url);
-
-      if (response.status === 404) {
-        return { error: 404 };
-      }
-
-      const body = await response.text();
-      const $ = cheerio.load(body);
-
-      const urls = [];
-      $('.tumbpu').each((i, element) => {
-        const isPrivate = $('span', element).first().hasClass('private');
-        if (omitPrivate && isPrivate) {
-          return;
-        }
-
-        // TODO: Check if friend. Can only be done when loading video page.
-        // const isFriend = friends.some(friend => friend.uid == 249732);
-        const isFriend = false;
-
-        const avatar = isPrivate
-          ? $('span', element)
-              .first()
-              .attr('style')
-              .match(/url\((.*?)\)/)[1]
-              .replace('//', 'https://')
-          : $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
-
-        const viewsHtml = $('.view', element).first().text();
-        const views = viewsHtml.match(/\d+/)[0];
-        const date = $('.date', element).first().text();
-
-        const duration = $('span span.duration', element).text();
-        const [minutes, seconds] = duration.split(':').map(Number);
-        const time = minutes * 60 + seconds;
-
-        const title = $(element).attr('title');
-        if (quick) {
-          const hasAllTags =
-            termsOperator === 'AND'
-              ? tags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
-              : tags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
-
-          const relevance = tags.reduce((score, tag) => {
-            const regex = new RegExp(tag, 'gi');
-            return score + (title.match(regex) || []).length;
-          }, 0);
-
-          if (hasAllTags || tags.length === 0) {
-            if (time >= minDuration * 60) {
-              setVideos((prevVideos) => [
-                ...prevVideos,
-                {
-                  title,
-                  url: $(element).attr('href'),
-                  isPrivate,
-                  duration,
-                  avatar,
-                  views,
-                  date,
-                  relevance,
-                  isFriend,
-                  page,
-                },
-              ]);
-            }
-          }
-        } else {
-          if (time >= minDuration * 60) {
-            urls.push({
-              title,
-              url: $(element).attr('href'),
-              isPrivate,
-              duration,
-              avatar,
-              views,
-              date,
-              isFriend,
-            });
-          }
-        }
-      });
-
-      if (!quick) {
-        for (const video of urls) {
-          try {
-            const videoUrl = video.url.split('/').slice(3).join('/');
-            const response = await fetch(videoUrl);
-            const body = await response.text();
-            const $ = cheerio.load(body);
-
-            const hasAllTags =
-              termsOperator === 'AND'
-                ? tags.every((tag) => $(`.description a[title*="${tag}"]`).length > 0)
-                : tags.some((tag) => $(`.description a[title*="${tag}"]`).length > 0);
-
-            if (hasAllTags) {
-              setVideos((prevVideos) => [
-                ...prevVideos,
-                {
-                  title: video.title,
-                  url: video.url,
-                  isPrivate: video.isPrivate,
-                  duration: video.duration,
-                  avatar: video.avatar,
-                  views: video.views,
-                  date: video.date,
-                  isFriend: video.isFriend,
-                  page,
-                },
-              ]);
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const logSearch = async () => {
     const s = await log({
       mode,
@@ -344,6 +216,7 @@ const Search = () => {
   };
 
   const run = async (offset) => {
+    setLoading(true);
     setProgressCount(0);
 
     if (!preserveResults) {
@@ -365,67 +238,46 @@ const Search = () => {
     }
 
     for (let i = offset; i <= offset - 1 + amount; i++) {
+      const url = getUrl(i);
       promises.push(
-        getVideos(i)
+        getVideos({
+          url,
+          tags,
+          termsOperator,
+          minDuration,
+          quick,
+          page: i,
+          omitPrivate,
           // eslint-disable-next-line
-          .then((s) => {
-            if (s && s.error === 404) {
-              // set page limit but only if it hasn't been set yet or if the current page limit is lower than the current page
-              if (tempPageLimit === 0 || tempPageLimit > i) {
-                tempPageLimit = i - 1;
-                setPageLimit(tempPageLimit);
-              }
+        }).then((s) => {
+          if (s && s.error === 404) {
+            // Set page limit but only if it hasn't been set yet or
+            // if the current page limit is lower than the current page.
+            if (tempPageLimit === 0 || tempPageLimit > i) {
+              tempPageLimit = i - 1;
+              setPageLimit(tempPageLimit);
             }
-            progress++;
-            setProgressCount(progress);
-          }),
+          }
+          progress++;
+          setProgressCount(progress);
+          return s;
+        }),
       );
     }
 
     try {
-      await Promise.all(promises);
-      setVideos((prevVideos) => prevVideos.sort((a, b) => b.views - a.views));
+      const videos = (await Promise.all(promises)).flat();
+      preserveResults
+        ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos], sort))
+        : setVideos(sortVideos(videos, sort));
       setFinished(true);
       executeScroll();
-      console.log('All pages done.');
       logSearch();
     } catch (error) {
       console.log('Error: ' + error);
     }
-  };
 
-  const sortVideos = (sortMode) => {
-    const sortedVideos = videos;
-    switch (sortMode) {
-      default:
-      case 'newest':
-        sortedVideos.sort((a, b) => a.page - b.page);
-        break;
-      case 'oldest':
-        sortedVideos.sort((a, b) => b.page - a.page);
-        break;
-      case 'longest':
-        sortedVideos.sort((a, b) => {
-          const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
-          const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return bMinutes * 60 + bSeconds - (aMinutes * 60 + aSeconds);
-        });
-        break;
-      case 'shortest':
-        sortedVideos.sort((a, b) => {
-          const [aMinutes, aSeconds] = a.duration.split(':').map(Number);
-          const [bMinutes, bSeconds] = b.duration.split(':').map(Number);
-          return aMinutes * 60 + aSeconds - (bMinutes * 60 + bSeconds);
-        });
-        break;
-      case 'views':
-        sortedVideos.sort((a, b) => b.views - a.views);
-        break;
-      case 'relevance':
-        sortedVideos.sort((a, b) => b.relevance - a.relevance);
-        break;
-    }
-    setVideos(sortedVideos);
+    setLoading(false);
   };
 
   // Run for the next set of pages.
@@ -439,7 +291,6 @@ const Search = () => {
     setErrorMessage('');
     setFinished(false);
     setSearchObject(null);
-    setSort('popular');
 
     if (e.nativeEvent.submitter.name === 'next') {
       next();
@@ -552,9 +403,9 @@ const Search = () => {
                   <>
                     <div>
                       <label htmlFor="friendId">
-                        Choose Friend
-                        {friendsLoading && <div className="small-loading-spinner"></div>}
+                        <span>Choose Friend</span>
                       </label>
+                      {loading && <div className="small-loading-spinner"></div>}
                       {friendId && (
                         <a
                           href={`https://thisvid.com/members/${friendId}/`}
@@ -742,11 +593,7 @@ const Search = () => {
             </div>
           </form>
         </div>
-        <div
-          // className={`results-container ${!(finished || !friendsLoading) ? 'inactive' : ''}`}
-          className={`results-container`}
-          ref={resultsRef}
-        >
+        <div className={`results-container ${loading ? 'inactive' : ''}`} ref={resultsRef}>
           {mode === 'category' && !category && (
             <>
               <div className="results-header">
@@ -770,10 +617,12 @@ const Search = () => {
           {mode === 'friend' && !friendId ? (
             <>
               <div className="results-header">
-                {friends.length === 0 ? (
-                  <h2>Search for friends</h2>
+                {loading ? (
+                  <span>Collecting friends...</span>
+                ) : finished ? (
+                  `Found ${friends.length} friends`
                 ) : (
-                  <h2>Found {friends.length} friends</h2>
+                  <span></span>
                 )}
                 <div>
                   <input
@@ -805,7 +654,13 @@ const Search = () => {
           ) : (
             <>
               <div className="results-header">
-                {finished ? <h2>Found {videos.length} videos</h2> : <h2>Search for videos</h2>}
+                <h2>
+                  {loading
+                    ? 'Searching...'
+                    : finished
+                    ? `Found ${videos.length} videos`
+                    : 'Search for videos'}
+                </h2>
                 {searchObject && (
                   <>
                     <Feedback search={searchObject} resultCount={videos.length} />
@@ -819,13 +674,17 @@ const Search = () => {
                     value={sort}
                     onChange={(e) => {
                       setSort(e.target.value);
-                      sortVideos(e.target.value);
+                      setVideos(sortVideos(videos, e.target.value));
                     }}
                   >
                     <option value="views">Views</option>
-                    <option value="relevance">Relevance</option>
-                    <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
+                    {tags.length && <option value="relevance">Relevance</option>}
+                    <option value="newest">
+                      Page {start} → {amount}
+                    </option>
+                    <option value="oldest">
+                      Page {start} ← {amount}
+                    </option>
                     <option value="longest">Longest</option>
                     <option value="shortest">Shortest</option>
                   </select>
@@ -842,7 +701,7 @@ const Search = () => {
                     imageSrc={video.avatar}
                     date={video.date}
                     views={video.views}
-                    isFriend={video.isFriend}
+                    isFriend={mode === 'friend'}
                     page={debug ? video.page : null}
                   />
                 ))}

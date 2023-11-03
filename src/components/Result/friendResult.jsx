@@ -1,4 +1,5 @@
 import React from 'react';
+
 import './style.css';
 
 const FriendResult = ({ uid, username, avatar, selectFunction }) => (

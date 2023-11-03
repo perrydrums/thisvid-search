@@ -1,6 +1,6 @@
 import cheerio from 'cheerio';
 
-export const getFriends = async (userId) => {
+export const getFriends = async (userId, setTotalPages, updateProgress) => {
   const response = await fetch(`/members/${userId}/friends/`);
 
   if (response.status === 404) {
@@ -13,6 +13,10 @@ export const getFriends = async (userId) => {
   // Get the text inside "a" inside li class="pagination-last".
   const lastPage = parseInt($('li.pagination-last a').text());
 
+  // Set the total pages.
+  setTotalPages(lastPage);
+
+  let progress = 1;
   // Fetch every page (except the first one) and get the friends.
   const friends = await Promise.all(
     [...Array(lastPage).keys()].slice(1).map(async (page) => {
@@ -20,19 +24,15 @@ export const getFriends = async (userId) => {
       const body = await response.text();
       const $ = cheerio.load(body);
 
+      progress++;
+      updateProgress(progress);
+
       return $('.tumbpu')
         .map((i, e) => {
           const $e = $(e);
-
           const url = $e.attr('href');
-
-          // get profile ID from the last part of href inside $e. it has trailing slash
           const uid = $e.attr('href').split('/').filter(Boolean).pop();
-
-          // get img src inside div class thumb
           const avatar = $e.find('.thumb img').attr('src');
-
-          // get the username from span class title
           const username = $e.find('.title').text();
 
           return { uid, username, avatar, url };

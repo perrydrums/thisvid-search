@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
 import cheerio from 'cheerio';
+import React, { useRef, useState } from 'react';
+
 import '../App.css';
 import Result from '../components/Result';
 

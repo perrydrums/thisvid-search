@@ -1,7 +1,8 @@
 import React from 'react';
+
+import getDownloadUrl from '../../helpers/getDownloadUrl';
 import friendsIcon from '../../images/friends.png';
 import './style.css';
-import getDownloadUrl from '../../helpers/getDownloadUrl';
 
 const Result = ({
   title,
@@ -33,11 +34,6 @@ const Result = ({
             style={{ backgroundImage: `url(${imageSrc})` }}
             onClick={() => window.open(url, '_blank')}
           >
-            {isFriend && (
-              <div className="friends">
-                <img src={friendsIcon} alt="Friends" />
-              </div>
-            )}
             <span className="info">
               {views && (
                 <>
@@ -108,7 +104,13 @@ const Result = ({
           </div>
         ) : (
           <div className="download">
-            <span className="private">Private</span>
+            {isFriend ? (
+              <div className="friends">
+                <img src={friendsIcon} alt="Friends" />
+              </div>
+            ) : (
+              <span className="private">Private</span>
+            )}
           </div>
         )}
       </div>

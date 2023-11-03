@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import './style.css';
+
 import { logFeedback } from '../../helpers/supabase/feedback';
+import './style.css';
 
 const Feedback = ({ search: { id }, resultCount }) => {
   const [showStars, setShowStars] = useState(false);

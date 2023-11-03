@@ -49,7 +49,7 @@ body {
 
 .results-container.inactive {
   pointer-events: none;
-  animation: loading-results .5s ease-in-out alternate infinite;
+  animation: loading-results 0.5s ease-in-out alternate infinite;
 }
 
 .results {
@@ -120,7 +120,7 @@ h2 {
 div.label-tooltip {
   background-color: var(--accent-color);
   opacity: 1;
-  font-size: .8em;
+  font-size: 0.8em;
   max-width: 150px;
   padding: 8px 12px;
   border-radius: 0.5rem;
@@ -243,8 +243,9 @@ label.checkbox-button {
   text-align: center;
   text-transform: uppercase;
   font-size: 14px;
-  transition: background-color 0.2s,
-  color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 label.checkbox-button:hover {
@@ -260,7 +261,6 @@ input[type='radio']:checked + label.checkbox-button {
 }
 
 .small-loading-spinner {
-  display: inline-block;
   float: right;
   width: 1em;
   height: 1em;
@@ -318,6 +318,6 @@ input[type='radio']:checked + label.checkbox-button {
     opacity: 1;
   }
   to {
-    opacity: .5;
+    opacity: 0.5;
   }
 }

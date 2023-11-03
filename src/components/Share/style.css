@@ -1,6 +1,6 @@
 .share-cta {
   cursor: pointer;
-  transition: color .2s;
+  transition: color 0.2s;
 }
 
 .share-cta:hover {
@@ -8,7 +8,7 @@
 }
 
 .feedback-confirmation {
-  animation: fade-out .2s ease-in-out forwards 3s;
+  animation: fade-out 0.2s ease-in-out forwards 3s;
 }
 
 .star-rating {
@@ -22,7 +22,7 @@
   font-size: 24px;
   cursor: pointer;
   color: var(--button-disabled-background-color);
-  transition: color .2s;
+  transition: color 0.2s;
 }
 
 .star.selected {
