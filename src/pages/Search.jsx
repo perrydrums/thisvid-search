@@ -6,12 +6,11 @@ import LoadingBar from 'react-top-loading-bar';
 
 import '../App.css';
 import Feedback from '../components/Feedback';
-import Result from '../components/Result';
-import CategoryResult from '../components/Result/categoryResult';
-import FriendResult from '../components/Result/friendResult';
+import ResultsContainer from '../components/ResultsContainer';
+import CategoriesContainer from '../components/ResultsContainer/CategoriesContainer';
+import FriendsContainer from '../components/ResultsContainer/FriendsContainer';
 import Share from '../components/Share';
 import InputTags from '../components/input/Tags';
-import debug from '../helpers/debug';
 import { getCategories } from '../helpers/getCategories';
 import { getFriends } from '../helpers/getFriends';
 import { log } from '../helpers/supabase/log';
@@ -53,8 +52,10 @@ const Search = () => {
   const [mode, setMode] = useState(params.mode || 'category');
   const [id, setId] = useState(params.id || '');
   const [tags, setTags] = useState(params.tags ? params.tags.split(',') : []);
-  const [termsOperator, setTermsOperator] = useState(params.termsOperator || 'OR');
-  const [primaryTag, setPrimaryTag] = useState(params.primaryTag || '');
+  const [termsOperator, setTermsOperator] = useState(
+    params.termsOperator ? params.termsOperator : 'OR',
+  );
+  const [primaryTag, setPrimaryTag] = useState(params.primaryTag ? params.primaryTag : '');
   const [category, setCategory] = useState(`${params.category}` || '');
   const [start, setStart] = useState(params.start || 1);
   const [type, setType] = useState(params.type || '');
@@ -63,8 +64,8 @@ const Search = () => {
   const [preserveResults, setPreserveResults] = useState(false);
   const [videos, setVideos] = useState([]);
   const [progressCount, setProgressCount] = useState(0);
-  const [amount, setAmount] = useState(params.amount || 30);
-  const [minDuration, setMinDuration] = useState(params.minDuration || 0);
+  const [amount, setAmount] = useState(params.amount ? params.amount : 30);
+  const [minDuration, setMinDuration] = useState(params.minDuration ? params.minDuration : 0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
   const [friends, setFriends] = useState([]);
@@ -74,7 +75,7 @@ const Search = () => {
   const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState(params.orderBy || 'views');
+  const [sort, setSort] = useState(params.orderBy ? params.orderBy : 'views');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
   const [searchObject, setSearchObject] = useState(null);
@@ -405,7 +406,6 @@ const Search = () => {
                       <label htmlFor="friendId">
                         <span>Choose Friend</span>
                       </label>
-                      {loading && <div className="small-loading-spinner"></div>}
                       {friendId && (
                         <a
                           href={`https://thisvid.com/members/${friendId}/`}
@@ -599,19 +599,7 @@ const Search = () => {
               <div className="results-header">
                 <h2>Select a category</h2>
               </div>
-              <div className="results">
-                {categories.map(({ name, image, slug }) => {
-                  return (
-                    <CategoryResult
-                      key={slug}
-                      name={name}
-                      image={image}
-                      slug={slug}
-                      selectFunction={setCategory}
-                    />
-                  );
-                })}
-              </div>
+              <CategoriesContainer categories={categories} setCategory={setCategory} />
             </>
           )}
           {mode === 'friend' && !friendId ? (
@@ -635,21 +623,11 @@ const Search = () => {
                   />
                 </div>
               </div>
-              <div className="results">
-                {friends
-                  .filter(({ username }) =>
-                    username.toLowerCase().includes(friendSearch.toLowerCase()),
-                  )
-                  .map(({ uid, username, avatar }) => (
-                    <FriendResult
-                      key={uid}
-                      uid={uid}
-                      username={username}
-                      avatar={avatar}
-                      selectFunction={() => setFriendId(uid)}
-                    />
-                  ))}
-              </div>
+              <FriendsContainer
+                friends={friends}
+                setFriendId={setFriendId}
+                filterUsername={friendSearch}
+              />
             </>
           ) : (
             <>
@@ -690,22 +668,7 @@ const Search = () => {
                   </select>
                 </div>
               </div>
-              <div className="results">
-                {videos.map((video, index) => (
-                  <Result
-                    key={index}
-                    title={video.title}
-                    url={video.url}
-                    isPrivate={video.isPrivate}
-                    duration={video.duration}
-                    imageSrc={video.avatar}
-                    date={video.date}
-                    views={video.views}
-                    isFriend={mode === 'friend'}
-                    page={debug ? video.page : null}
-                  />
-                ))}
-              </div>
+              <ResultsContainer videos={videos} />
             </>
           )}
         </div>

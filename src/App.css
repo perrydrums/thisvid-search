@@ -44,12 +44,17 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   background-color: var(--container-background-color);
   border-radius: 0.5rem;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .results-container.inactive {
   pointer-events: none;
   animation: loading-results 0.5s ease-in-out alternate infinite;
+}
+
+.results-scroll-container {
+  height: 100%;
+  overflow-y: scroll;
 }
 
 .results {
