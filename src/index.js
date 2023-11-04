@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import './index.css';
 import Analyse from './pages/Analyse';
+import Preferences from './pages/Preferences';
 import Search from './pages/Search';
 import reportWebVitals from './reportWebVitals';
 
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     path: '/analyse',
     element: <Analyse />,
+  },
+  {
+    path: '/preferences',
+    element: <Preferences />,
   },
 ]);
 

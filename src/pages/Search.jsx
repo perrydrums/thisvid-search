@@ -85,6 +85,13 @@ const Search = () => {
     getCategories().then((categories) => {
       setCategories(categories);
     });
+
+    const preferences = ((p) => (p ? JSON.parse(p) : {}))(
+      localStorage.getItem('tvass-preferences'),
+    );
+
+    preferences.tags && setTags(preferences.tags);
+    preferences.minDuration && setMinDuration(preferences.minDuration);
   }, []);
 
   useEffect(() => {
