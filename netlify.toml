@@ -7,6 +7,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/preferences"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/members/*"
 to = "https://thisvid.com/members/:splat"
 status = 200
