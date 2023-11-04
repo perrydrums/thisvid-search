@@ -9,9 +9,8 @@ const ResultsContainer = ({ videos = [] }) => {
     <div className="results-scroll-container">
       <div className="results">
         {videos.map((video, index) => (
-          <LazyLoadComponent height={150}>
+          <LazyLoadComponent height={150} key={index}>
             <Result
-              key={index}
               title={video.title}
               url={video.url}
               isPrivate={video.isPrivate}

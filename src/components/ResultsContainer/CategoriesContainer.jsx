@@ -9,14 +9,8 @@ const CategoriesContainer = ({ categories = [], setCategory }) => {
       <div className="results">
         {categories.map(({ name, image, slug }) => {
           return (
-            <LazyLoadComponent height={100}>
-              <CategoryResult
-                key={slug}
-                name={name}
-                image={image}
-                slug={slug}
-                selectFunction={setCategory}
-              />
+            <LazyLoadComponent height={100} key={slug}>
+              <CategoryResult name={name} image={image} slug={slug} selectFunction={setCategory} />
             </LazyLoadComponent>
           );
         })}
