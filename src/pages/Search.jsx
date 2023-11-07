@@ -24,7 +24,10 @@ const modes = {
 };
 
 const types = {
-  category: [{ value: 'popular', label: 'Popular' }],
+  category: [
+    { value: 'most-popular', label: 'Popular' },
+    { value: 'latest', label: 'Newest' },
+  ],
   tags: [
     { value: 'popular', label: 'Popular' },
     { value: 'latest', label: 'Newest' },
@@ -184,8 +187,12 @@ const Search = () => {
       user: `/members/${id}/${type}_videos/${page}/`,
       friend: `/members/${friendId}/${type}_videos/${page}/`,
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
-      category: `/categories/${category}/most-popular/${page}/`,
+      category: `/categories/${category}/${type}/${page}/`,
     };
+
+    if (mode === 'category' && type === 'latest') {
+      return `/categories/${category}/${page}/`;
+    }
 
     return baseUrl[mode];
   };
@@ -512,11 +519,13 @@ const Search = () => {
                 </select>
               </div>
               <div className="form-columns form-columns-group">
-                <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}</label>
+                <label htmlFor="tags">Title</label>
                 <InputTags
                   tags={includeTags}
                   setTags={setIncludeTags}
-                  tooltip="Videos with these tags will be included in the search results."
+                  tooltip={`Find videos with ${
+                    termsOperator === 'AND' ? 'all' : 'any'
+                  } of these words in the title.`}
                 />
                 {advanced && (
                   <>

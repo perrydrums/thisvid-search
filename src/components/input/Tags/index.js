@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import './style.css';
 
 const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
   const [input, setInput] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+
+  useEffect(() => {
+    if (tags.length > 0) {
+      setOpen(true);
+    }
+  }, [tags]);
 
   /**
    * @type {HTMLInputElement|null}
@@ -37,7 +44,7 @@ const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
     }
   };
 
-  return (
+  return open ? (
     <ul className="input-tag__tags">
       {tags.map((tag, i) => (
         <li
@@ -78,6 +85,10 @@ const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
         )}
       </li>
     </ul>
+  ) : (
+    <button className="input-tag__button" onClick={() => setOpen(true)}>
+      Add tags
+    </button>
   );
 };
 

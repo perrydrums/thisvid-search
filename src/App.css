@@ -96,9 +96,9 @@ h2 {
 
 .form-columns-group {
   margin: 12px 0;
-  background-color: var(--overlay-darker);
-  padding: 12px;
-  border-radius: 0.5rem;
+  /*background-color: var(--overlay-darker);*/
+  /*padding: 12px;*/
+  /*border-radius: 0.5rem;*/
 }
 
 .form-columns-group > ul {
