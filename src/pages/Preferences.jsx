@@ -4,7 +4,12 @@ import '../App.css';
 import InputTags from '../components/input/Tags';
 
 const Preferences = () => {
-  const [{ tags, minDuration }, setPreferences] = useState({ tags: [], minDuration: 0 });
+  const [{ id, tags, boosterTags, minDuration }, setPreferences] = useState({
+    id: '',
+    tags: [],
+    boosterTags: [],
+    minDuration: 0,
+  });
 
   useEffect(() => {
     const preferences = ((p) => (p ? JSON.parse(p) : null))(
@@ -16,7 +21,10 @@ const Preferences = () => {
 
   const savePreferences = (e) => {
     e.preventDefault();
-    localStorage.setItem('tvass-preferences', JSON.stringify({ tags, minDuration }));
+    localStorage.setItem(
+      'tvass-preferences',
+      JSON.stringify({ id, tags, boosterTags, minDuration }),
+    );
   };
 
   return (
@@ -29,8 +37,26 @@ const Preferences = () => {
           <h2>Preferences</h2>
           <form onSubmit={savePreferences}>
             <div className="form-columns">
+              <label htmlFor="id">Your User ID</label>
+              <input
+                type="text"
+                id="id"
+                value={id}
+                onChange={(e) =>
+                  setPreferences({ tags, boosterTags, minDuration, id: e.target.value })
+                }
+              />
               <label htmlFor="tags">Default tags</label>
-              <InputTags tags={tags} setTags={(tags) => setPreferences({ tags, minDuration })} />
+              <InputTags
+                tags={tags}
+                setTags={(tags) => setPreferences({ id, tags, boosterTags, minDuration })}
+              />
+              <label htmlFor="booster-tags">Default booster tags</label>
+              <InputTags
+                htmlId="booster-tags"
+                tags={boosterTags}
+                setTags={(boosterTags) => setPreferences({ id, tags, boosterTags, minDuration })}
+              />
               <label htmlFor="min-duration">Min Duration (minutes)</label>
               <input
                 type="number"
@@ -39,7 +65,12 @@ const Preferences = () => {
                 required
                 value={minDuration}
                 onChange={(e) =>
-                  setPreferences({ tags, minDuration: parseInt(e.target.value || 0) })
+                  setPreferences({
+                    id,
+                    tags,
+                    boosterTags,
+                    minDuration: parseInt(e.target.value || 0),
+                  })
                 }
               />
             </div>

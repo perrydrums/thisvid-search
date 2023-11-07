@@ -62,8 +62,8 @@ const Result = ({
         )}
         <div className="title">
           <span onClick={() => window.open(url, '_blank')}>
-            {page && `[${page}] `}
-            {relevance && `(${relevance}) `}
+            {page !== null && `[${page}] `}
+            {relevance !== null && `(${relevance}) `}
             {title}
           </span>
         </div>

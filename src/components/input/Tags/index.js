@@ -1,8 +1,9 @@
 import React from 'react';
+import { Tooltip } from 'react-tooltip';
 
 import './style.css';
 
-const InputTags = ({ tags, setTags, htmlId = 'tags' }) => {
+const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
   const [input, setInput] = React.useState('');
 
   /**
@@ -56,10 +57,15 @@ const InputTags = ({ tags, setTags, htmlId = 'tags' }) => {
           onKeyDown={inputKeyDown}
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          placeholder="Add tag..."
           ref={(c) => {
             tagInput = c;
           }}
+          data-tooltip-id={`${htmlId}-tooltip`}
         />
+        <Tooltip id={`${htmlId}-tooltip`} className="label-tooltip" place="left-start">
+          {tooltip}
+        </Tooltip>
         {input && (
           <div
             className="input-tag__tooltip"

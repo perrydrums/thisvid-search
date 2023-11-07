@@ -3,9 +3,11 @@ import cheerio from 'cheerio';
 export const getVideos = async ({
   url,
   page,
-  tags = [],
+  includeTags = [],
+  excludeTags = [],
   termsOperator = 'AND',
   boosterTags = [],
+  diminishingTags = [],
   omitPrivate = false,
   minDuration = 0,
   quick = true,
@@ -47,12 +49,17 @@ export const getVideos = async ({
 
       const title = $(element).attr('title');
       if (quick) {
+        // Skip if video title contains any of the exclude tags.
+        if (excludeTags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()))) {
+          return;
+        }
+
         const hasAllTags =
           termsOperator === 'AND'
-            ? tags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
-            : tags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
+            ? includeTags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
+            : includeTags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
 
-        const tagsRelevance = tags.reduce((score, tag) => {
+        const tagsRelevance = includeTags.reduce((score, tag) => {
           const regex = new RegExp(tag, 'gi');
           // For each tag present in title, add 1 to the relevance score.
           return score + (title.match(regex) || []).length;
@@ -64,9 +71,15 @@ export const getVideos = async ({
           return score + ((title.match(regex) || []).length > 0 ? 2 : 0);
         }, 0);
 
-        const relevance = tagsRelevance + boosterRelevance;
+        const diminishingRelevance = diminishingTags.reduce((score, tag) => {
+          const regex = new RegExp(tag, 'gi');
+          // For each unique diminishing tag present in title, subtract 2 from the relevance score.
+          return score - ((title.match(regex) || []).length > 0 ? 2 : 0);
+        }, 0);
 
-        if (hasAllTags || tags.length === 0) {
+        const relevance = tagsRelevance + boosterRelevance + diminishingRelevance;
+
+        if (hasAllTags || includeTags.length === 0) {
           if (time >= minDuration * 60) {
             videos.push({
               title,
@@ -106,8 +119,8 @@ export const getVideos = async ({
 
           const hasAllTags =
             termsOperator === 'AND'
-              ? tags.every((tag) => $(`.description a[title*="${tag}"]`).length > 0)
-              : tags.some((tag) => $(`.description a[title*="${tag}"]`).length > 0);
+              ? includeTags.every((tag) => $(`.description a[title*="${tag}"]`).length > 0)
+              : includeTags.some((tag) => $(`.description a[title*="${tag}"]`).length > 0);
 
           if (hasAllTags) {
             videos.push({
@@ -161,7 +174,7 @@ export const sortVideos = (videos = [], sortMode) => {
       sortedVideos.sort((a, b) => b.views - a.views);
       break;
     case 'relevance':
-      sortedVideos.sort((a, b) => b.relevance - a.relevance);
+      sortedVideos.sort((a, b) => b.relevance - a.relevance || b.views - a.views);
       break;
   }
   return sortedVideos;

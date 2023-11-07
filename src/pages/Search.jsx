@@ -51,9 +51,15 @@ const Search = () => {
 
   const [mode, setMode] = useState(params.mode || 'category');
   const [id, setId] = useState(params.id || '');
-  const [tags, setTags] = useState(params.tags ? params.tags.split(',') : []);
+  const [includeTags, setIncludeTags] = useState(params.tags ? params.tags.split(',') : []);
+  const [excludeTags, setExcludeTags] = useState(
+    params.excludeTags ? params.excludeTags.split(',') : [],
+  );
   const [boosterTags, setBoosterTags] = useState(
     params.boosterTags ? params.boosterTags.split(',') : [],
+  );
+  const [diminishingTags, setDiminishingTags] = useState(
+    params.diminishingTags ? params.diminishingTags.split(',') : [],
   );
   const [termsOperator, setTermsOperator] = useState(
     params.termsOperator ? params.termsOperator : 'OR',
@@ -93,9 +99,14 @@ const Search = () => {
       localStorage.getItem('tvass-preferences'),
     );
 
-    preferences.tags && setTags(preferences.tags);
+    if (mode === 'friend') {
+      preferences.id && setId(preferences.id);
+    }
+
+    preferences.tags && setIncludeTags(preferences.tags);
+    preferences.boosterTags && setBoosterTags(preferences.boosterTags);
     preferences.minDuration && setMinDuration(preferences.minDuration);
-  }, []);
+  }, [mode]);
 
   useEffect(() => {
     if (params.run) {
@@ -144,11 +155,6 @@ const Search = () => {
     };
     getPageLimit();
   }, [mode, id, type, friendId]);
-
-  const localUid = localStorage.getItem('uid');
-  if (mode === 'friend' && localUid && !id) {
-    setId(localUid);
-  }
 
   const resultsRef = useRef(null);
   const executeScroll = () => resultsRef.current.scrollIntoView();
@@ -213,7 +219,7 @@ const Search = () => {
       mode,
       type,
       advanced,
-      tags,
+      tags: includeTags,
       pageAmount: amount,
       quick,
       minDuration,
@@ -253,9 +259,11 @@ const Search = () => {
       promises.push(
         getVideos({
           url,
-          tags,
+          includeTags,
+          excludeTags,
           termsOperator,
           boosterTags,
+          diminishingTags,
           minDuration,
           quick,
           page: i,
@@ -315,7 +323,7 @@ const Search = () => {
     const params = new URLSearchParams({
       mode,
       type,
-      tags: tags.join(','),
+      tags: includeTags.join(','),
       amount,
       minDuration,
       primaryTag,
@@ -502,24 +510,63 @@ const Search = () => {
                     );
                   })}
                 </select>
+              </div>
+              <div className="form-columns form-columns-group">
                 <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}</label>
-                <InputTags tags={tags} setTags={setTags} />
+                <InputTags
+                  tags={includeTags}
+                  setTags={setIncludeTags}
+                  tooltip="Videos with these tags will be included in the search results."
+                />
                 {advanced && (
                   <>
                     <label htmlFor="tags-operator">Operator</label>
-                    <select
-                      id="tags-operator"
-                      value={termsOperator}
-                      required
-                      onChange={(e) => setTermsOperator(e.target.value)}
-                    >
-                      <option value="OR">OR</option>
-                      <option value="AND">AND</option>
-                    </select>
+                    <div>
+                      <select
+                        id="tags-operator"
+                        value={termsOperator}
+                        required
+                        onChange={(e) => setTermsOperator(e.target.value)}
+                        data-tooltip-id="tags-operator-tooltip"
+                      >
+                        <option value="OR">OR</option>
+                        <option value="AND">AND</option>
+                      </select>
+                      <Tooltip
+                        id="tags-operator-tooltip"
+                        className="label-tooltip"
+                        place="left-start"
+                      >
+                        OR will return videos that contain <b>any</b> of the tags. AND will return
+                        videos that contain <b>all</b> of the tags.
+                      </Tooltip>
+                    </div>
+
+                    <label htmlFor="exclude-tags">Title does not contain</label>
+                    <InputTags
+                      htmlId="exclude-tags"
+                      tags={excludeTags}
+                      setTags={setExcludeTags}
+                      tooltip="Videos with these tags will be excluded from the search results."
+                    />
                     <label htmlFor="booster-tags">Booster tags</label>
-                    <InputTags htmlId="booster-tags" tags={boosterTags} setTags={setBoosterTags} />
+                    <InputTags
+                      htmlId="booster-tags"
+                      tags={boosterTags}
+                      setTags={setBoosterTags}
+                      tooltip="Videos with these tags will be boosted to the top of the search results, when sorting by relevance."
+                    />
+                    <label htmlFor="diminishing-tags">Diminishing tags</label>
+                    <InputTags
+                      htmlId="diminishing-tags"
+                      tags={diminishingTags}
+                      setTags={setDiminishingTags}
+                      tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
+                    />
                   </>
                 )}
+              </div>
+              <div className="form-columns">
                 {advanced && (
                   <>
                     <label htmlFor="start">Start Page</label>
@@ -561,6 +608,7 @@ const Search = () => {
                     id="quick"
                     checked={quick}
                     onChange={() => setQuick(!quick)}
+                    disabled={true}
                   />
                   <label htmlFor="quick" className="checkbox-button">
                     Quick Search
