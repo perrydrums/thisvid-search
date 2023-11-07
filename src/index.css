@@ -15,6 +15,8 @@
   --input-focus-background-color: #ddd;
   --button-disabled-background-color: #ccc;
   --button-disabled-text-color: #666;
+  --overlay-darker: rgba(0, 0, 0, 0.1);
+  --overlay-lighter: white;
 }
 
 @media (prefers-color-scheme: light) {
@@ -28,6 +30,8 @@
     --input-focus-background-color: #ddd;
     --button-disabled-background-color: #ccc;
     --button-disabled-text-color: #666;
+    --overlay-darker: rgba(0, 0, 0, 0.1);
+    --overlay-lighter: white;
   }
 }
 
@@ -42,6 +46,8 @@
     --input-focus-background-color: #3a3c3f;
     --button-disabled-background-color: #6e7278;
     --button-disabled-text-color: #3a3c3f;
+    --overlay-darker: rgba(0, 0, 0, 0.1);
+    --overlay-lighter: rgba(255, 255, 255, 0.1);
   }
 }
 
