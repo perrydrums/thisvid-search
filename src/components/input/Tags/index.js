@@ -2,7 +2,7 @@ import React from 'react';
 
 import './style.css';
 
-const InputTags = ({ tags, setTags }) => {
+const InputTags = ({ tags, setTags, htmlId = 'tags' }) => {
   const [input, setInput] = React.useState('');
 
   /**
@@ -52,6 +52,7 @@ const InputTags = ({ tags, setTags }) => {
       <li className="input-tag__tags__input">
         <input
           type="text"
+          id={htmlId}
           onKeyDown={inputKeyDown}
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -63,7 +64,6 @@ const InputTags = ({ tags, setTags }) => {
           <div
             className="input-tag__tooltip"
             onClick={(e) => {
-              console.log('aaa');
               addTag(input);
             }}
           >

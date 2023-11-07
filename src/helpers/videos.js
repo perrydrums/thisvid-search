@@ -5,6 +5,7 @@ export const getVideos = async ({
   page,
   tags = [],
   termsOperator = 'AND',
+  boosterTags = [],
   omitPrivate = false,
   minDuration = 0,
   quick = true,
@@ -51,10 +52,19 @@ export const getVideos = async ({
             ? tags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
             : tags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
 
-        const relevance = tags.reduce((score, tag) => {
+        const tagsRelevance = tags.reduce((score, tag) => {
           const regex = new RegExp(tag, 'gi');
+          // For each tag present in title, add 1 to the relevance score.
           return score + (title.match(regex) || []).length;
         }, 0);
+
+        const boosterRelevance = boosterTags.reduce((score, tag) => {
+          const regex = new RegExp(tag, 'gi');
+          // For each unique booster tag present in title, add 2 to the relevance score.
+          return score + ((title.match(regex) || []).length > 0 ? 2 : 0);
+        }, 0);
+
+        const relevance = tagsRelevance + boosterRelevance;
 
         if (hasAllTags || tags.length === 0) {
           if (time >= minDuration * 60) {

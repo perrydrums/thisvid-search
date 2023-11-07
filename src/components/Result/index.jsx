@@ -14,6 +14,7 @@ const Result = ({
   imageSrc = null,
   page = null,
   isPrivate = false,
+  relevance = null,
 }) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -62,6 +63,7 @@ const Result = ({
         <div className="title">
           <span onClick={() => window.open(url, '_blank')}>
             {page && `[${page}] `}
+            {relevance && `(${relevance}) `}
             {title}
           </span>
         </div>

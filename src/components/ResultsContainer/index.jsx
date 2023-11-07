@@ -20,6 +20,7 @@ const ResultsContainer = ({ videos = [] }) => {
               views={video.views}
               // isFriend={mode === 'friend'}
               page={debug ? video.page : null}
+              relevance={debug ? video.relevance : null}
             />
           </LazyLoadComponent>
         ))}

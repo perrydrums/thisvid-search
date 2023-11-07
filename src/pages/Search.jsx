@@ -52,6 +52,9 @@ const Search = () => {
   const [mode, setMode] = useState(params.mode || 'category');
   const [id, setId] = useState(params.id || '');
   const [tags, setTags] = useState(params.tags ? params.tags.split(',') : []);
+  const [boosterTags, setBoosterTags] = useState(
+    params.boosterTags ? params.boosterTags.split(',') : [],
+  );
   const [termsOperator, setTermsOperator] = useState(
     params.termsOperator ? params.termsOperator : 'OR',
   );
@@ -75,7 +78,7 @@ const Search = () => {
   const [friendSearch, setFriendSearch] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sourceExists, setSourceExists] = useState(true);
-  const [sort, setSort] = useState(params.orderBy ? params.orderBy : 'views');
+  const [sort, setSort] = useState(params.orderBy ? params.orderBy : 'relevance');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
   const [searchObject, setSearchObject] = useState(null);
@@ -252,6 +255,7 @@ const Search = () => {
           url,
           tags,
           termsOperator,
+          boosterTags,
           minDuration,
           quick,
           page: i,
@@ -498,7 +502,7 @@ const Search = () => {
                     );
                   })}
                 </select>
-                <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}:</label>
+                <label htmlFor="tags">{mode === 'user' ? 'Title contains' : 'Tags'}</label>
                 <InputTags tags={tags} setTags={setTags} />
                 {advanced && (
                   <>
@@ -512,6 +516,8 @@ const Search = () => {
                       <option value="OR">OR</option>
                       <option value="AND">AND</option>
                     </select>
+                    <label htmlFor="booster-tags">Booster tags</label>
+                    <InputTags htmlId="booster-tags" tags={boosterTags} setTags={setBoosterTags} />
                   </>
                 )}
                 {advanced && (
@@ -662,8 +668,8 @@ const Search = () => {
                       setVideos(sortVideos(videos, e.target.value));
                     }}
                   >
+                    <option value="relevance">Relevance</option>
                     <option value="views">Views</option>
-                    {tags.length && <option value="relevance">Relevance</option>}
                     <option value="newest">
                       Page {start} → {amount}
                     </option>
