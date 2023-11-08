@@ -4,27 +4,32 @@ import '../App.css';
 import InputTags from '../components/input/Tags';
 
 const Preferences = () => {
-  const [{ id, tags, boosterTags, minDuration }, setPreferences] = useState({
+  const [preferences, setPreferences] = useState({
     id: '',
     tags: [],
+    excludeTags: [],
     boosterTags: [],
+    diminishingTags: [],
     minDuration: 0,
   });
 
   useEffect(() => {
-    const preferences = ((p) => (p ? JSON.parse(p) : null))(
-      localStorage.getItem('tvass-preferences'),
-    );
+    const p = ((p) => (p ? JSON.parse(p) : null))(localStorage.getItem('tvass-preferences'));
 
-    preferences && setPreferences(preferences);
+    Object.keys(p).forEach((key) => {
+      if (p[key]) {
+        setPreferences((prevState) => ({ ...prevState, [key]: p[key] }));
+      }
+    });
   }, []);
+
+  const setPreference = (key, value) => {
+    setPreferences({ ...preferences, [key]: value });
+  };
 
   const savePreferences = (e) => {
     e.preventDefault();
-    localStorage.setItem(
-      'tvass-preferences',
-      JSON.stringify({ id, tags, boosterTags, minDuration }),
-    );
+    localStorage.setItem('tvass-preferences', JSON.stringify(preferences));
   };
 
   return (
@@ -41,21 +46,28 @@ const Preferences = () => {
               <input
                 type="text"
                 id="id"
-                value={id}
-                onChange={(e) =>
-                  setPreferences({ tags, boosterTags, minDuration, id: e.target.value })
-                }
+                value={preferences.id}
+                onChange={(e) => setPreference('id', e.target.value)}
               />
               <label htmlFor="tags">Default tags</label>
+              <InputTags tags={preferences.tags} setTags={(t) => setPreference('tags', t)} />
+              <label htmlFor="exclude-tags">Default exclude tags</label>
               <InputTags
-                tags={tags}
-                setTags={(tags) => setPreferences({ id, tags, boosterTags, minDuration })}
+                htmlId="exclude-tags"
+                tags={preferences.excludeTags}
+                setTags={(t) => setPreference('excludeTags', t)}
               />
               <label htmlFor="booster-tags">Default booster tags</label>
               <InputTags
                 htmlId="booster-tags"
-                tags={boosterTags}
-                setTags={(boosterTags) => setPreferences({ id, tags, boosterTags, minDuration })}
+                tags={preferences.boosterTags}
+                setTags={(t) => setPreference('boosterTags', t)}
+              />
+              <label htmlFor="diminishing-tags">Default diminishing tags</label>
+              <InputTags
+                htmlId="diminishing-tags"
+                tags={preferences.diminishingTags}
+                setTags={(t) => setPreference('diminishingTags', t)}
               />
               <label htmlFor="min-duration">Min Duration (minutes)</label>
               <input
@@ -63,15 +75,8 @@ const Preferences = () => {
                 min="0"
                 id="min-duration"
                 required
-                value={minDuration}
-                onChange={(e) =>
-                  setPreferences({
-                    id,
-                    tags,
-                    boosterTags,
-                    minDuration: parseInt(e.target.value || 0),
-                  })
-                }
+                value={preferences.minDuration}
+                onChange={(e) => setPreference('minDuration', e.target.value)}
               />
             </div>
             <div className="button-columns">

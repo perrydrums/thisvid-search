@@ -107,7 +107,9 @@ const Search = () => {
     }
 
     preferences.tags && setIncludeTags(preferences.tags);
+    preferences.excludeTags && setExcludeTags(preferences.excludeTags);
     preferences.boosterTags && setBoosterTags(preferences.boosterTags);
+    preferences.diminishingTags && setDiminishingTags(preferences.diminishingTags);
     preferences.minDuration && setMinDuration(preferences.minDuration);
   }, [mode]);
 
