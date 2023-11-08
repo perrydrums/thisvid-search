@@ -92,26 +92,39 @@ const Search = () => {
   const [advanced, setAdvanced] = useState(false);
   const [searchObject, setSearchObject] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [moods, setMoods] = useState([]);
+  const [activeMood, setActiveMood] = useState('');
 
   useEffect(() => {
     getCategories().then((categories) => {
       setCategories(categories);
     });
 
-    const preferences = ((p) => (p ? JSON.parse(p) : {}))(
-      localStorage.getItem('tvass-preferences'),
-    );
+    const m = ((p) => (p ? JSON.parse(p) : {}))(localStorage.getItem('tvass-moods'));
+    setMoods(m);
+  }, [mode]);
 
-    if (mode === 'friend') {
-      preferences.id && setId(preferences.id);
+  useEffect(() => {
+    const mood = moods.find((m) => m.name === activeMood);
+    const preferences = mood?.preferences;
+
+    if (!preferences) {
+      setId('');
+      setIncludeTags([]);
+      setExcludeTags([]);
+      setBoosterTags([]);
+      setDiminishingTags([]);
+      setMinDuration(0);
+      return;
     }
 
+    preferences.id && setId(preferences.id);
     preferences.tags && setIncludeTags(preferences.tags);
     preferences.excludeTags && setExcludeTags(preferences.excludeTags);
     preferences.boosterTags && setBoosterTags(preferences.boosterTags);
     preferences.diminishingTags && setDiminishingTags(preferences.diminishingTags);
     preferences.minDuration && setMinDuration(preferences.minDuration);
-  }, [mode]);
+  }, [activeMood, moods]);
 
   useEffect(() => {
     if (params.run) {
@@ -356,7 +369,9 @@ const Search = () => {
         onLoaderFinished={() => setProgressCount(0)}
       />
       <div className="header">
-        <span className="subtitle">ThisVid Advanced Search Site</span>
+        <span className="subtitle">
+          <a href="/">ThisVid Advanced Search Site</a>
+        </span>
       </div>
       <div className="container">
         <div className="form-container">
@@ -388,6 +403,33 @@ const Search = () => {
           <form onSubmit={submit}>
             <div>
               <div className="form-columns">
+                <label htmlFor="mood">
+                  Mood{' '}
+                  <a className="username" href="/moods">
+                    Manage moods
+                  </a>
+                </label>
+                <div>
+                  <select
+                    id="mood"
+                    value={activeMood}
+                    onChange={(e) => setActiveMood(e.target.value)}
+                    data-tooltip-id="mood"
+                  >
+                    <option value="">None</option>
+                    {moods.map((mood) => {
+                      return (
+                        <option key={mood.name} value={mood.name}>
+                          {mood.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <Tooltip id="mood" className="label-tooltip" place="left-start">
+                    Prefill the search options.
+                  </Tooltip>
+                </div>
+
                 {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
                 <label htmlFor="search-mode">Search by</label>
                 <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>

@@ -13,6 +13,11 @@ body {
   font-size: 18px;
 }
 
+.subtitle a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
 .container {
   display: grid;
   grid-auto-rows: 1fr;
@@ -69,6 +74,12 @@ body {
 .results {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.mood-results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
