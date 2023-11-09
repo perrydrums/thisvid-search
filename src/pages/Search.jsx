@@ -102,7 +102,12 @@ const Search = () => {
 
     const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
     setMoods([{ name: 'Select a mood' }, ...m]);
-  }, []);
+
+    const u = localStorage.getItem('tvass-user-id');
+    if (u && mode === 'friend') {
+      setId(u);
+    }
+  }, [mode]);
 
   useEffect(() => {
     if (moods.length === 0) {
@@ -112,7 +117,6 @@ const Search = () => {
     const mood = moods.find((m) => m.name === activeMood);
 
     if (mood?.name === 'Select a mood') {
-      setId('');
       setIncludeTags([]);
       setExcludeTags([]);
       setBoosterTags([]);
@@ -127,7 +131,6 @@ const Search = () => {
       return;
     }
 
-    preferences.id && setId(preferences.id);
     preferences.tags && setIncludeTags(preferences.tags);
     preferences.excludeTags && setExcludeTags(preferences.excludeTags);
     preferences.boosterTags && setBoosterTags(preferences.boosterTags);

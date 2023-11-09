@@ -7,8 +7,8 @@ import InputTags from '../components/input/Tags';
 const Moods = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
 
+  const [userId, setUserId] = useState('');
   const [preferences, setPreferences] = useState({
-    id: '',
     tags: [],
     excludeTags: [],
     boosterTags: [],
@@ -35,11 +35,21 @@ const Moods = () => {
       });
   }, [activeMood, moods]);
 
+  useEffect(() => {
+    const u = localStorage.getItem('tvass-user-id');
+    if (u) {
+      setUserId(u);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('tvass-user-id', userId);
+  }, [userId]);
+
   const newMood = (name) => {
     const mood = {
       name,
       preferences: {
-        id: '',
         tags: [],
         excludeTags: [],
         boosterTags: [],
@@ -94,6 +104,21 @@ const Moods = () => {
       <div className="container">
         <div className="results-container">
           <div className="results-header">
+            <h2>Preferences</h2>
+          </div>
+          <div className="form-columns">
+            <label htmlFor="user-id">Your ThisVid User ID</label>
+            <input
+              type="text"
+              id="user-id"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            />
+          </div>
+
+          <div style={{ marginBottom: '50px' }}></div>
+
+          <div className="results-header">
             <h2>Moods</h2>
             <div>
               <input
@@ -132,15 +157,6 @@ const Moods = () => {
                 e.preventDefault();
               }}
             >
-              <div className="form-columns">
-                <label htmlFor="id">Your User ID</label>
-                <input
-                  type="text"
-                  id="id"
-                  value={preferences.id}
-                  onChange={(e) => setPreference('id', e.target.value)}
-                />
-              </div>
               <div className="form-columns form-columns-group">
                 <label htmlFor="tags">Default tags</label>
                 <InputTags
