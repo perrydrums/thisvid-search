@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
 
 import '../App.css';
 import MoodResult from '../components/Result/MoodResult';
@@ -95,12 +96,19 @@ const Moods = () => {
             </div>
             <div className="form-columns">
               <label htmlFor="user-id">Your ThisVid User ID</label>
-              <input
-                type="text"
-                id="user-id"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-              />
+              <div>
+                <input
+                  type="text"
+                  id="user-id"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  data-tooltip-id="user-id"
+                />
+                <Tooltip id="user-id" className="label-tooltip" place="left-start">
+                  The ID of the ThisVid user profile. You can find this in the URL of the profile
+                  page on ThisVid.
+                </Tooltip>
+              </div>
             </div>
           </div>
           <div className="container-section ">
