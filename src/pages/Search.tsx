@@ -658,9 +658,8 @@ const Search = () => {
                   type="number"
                   min="0"
                   id="min-duration"
-                  required
                   value={minDuration}
-                  onChange={(e) => setMinDuration(parseInt(e.target.value || '0'))}
+                  onChange={(e) => setMinDuration(parseInt(e.target.value) || null)}
                 />
                 <label htmlFor="amount">Number of Pages</label>
                 <input
