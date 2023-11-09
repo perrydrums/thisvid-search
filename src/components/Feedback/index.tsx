@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 
 import { logFeedback } from '../../helpers/supabase/feedback';
+import { LogParams } from '../../helpers/types';
 import './style.css';
 
-interface Props {
-  search: {
-    id: number;
-  };
-}
+type FeedbackProps = {
+  search: LogParams;
+};
 
-const Feedback = ({ search: { id } }: Props) => {
+const Feedback = ({ search }: FeedbackProps) => {
   const [showStars, setShowStars] = useState(false);
   const [hoveringOnStar, setHoveringOnStar] = useState(0);
   const [rating, setRating] = useState(0);
 
   const handleStarClick = (value: number) => {
     setRating(value);
-    logFeedback(id, value);
+    logFeedback(search.id, value);
   };
 
   const stars = [1, 2, 3, 4, 5];

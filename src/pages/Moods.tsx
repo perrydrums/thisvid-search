@@ -4,15 +4,7 @@ import { Tooltip } from 'react-tooltip';
 import '../App.css';
 import MoodResult from '../components/Result/MoodResult';
 import InputTags from '../components/input/Tags';
-
-type Preferences = {
-  [key: string]: any;
-};
-
-type Mood = {
-  name: string;
-  preferences: Preferences;
-};
+import { Mood, Preferences } from '../helpers/types';
 
 const Moods = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));

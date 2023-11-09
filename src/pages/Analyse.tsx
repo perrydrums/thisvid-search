@@ -4,9 +4,40 @@ import React, { useRef, useState } from 'react';
 import '../App.css';
 import Result from '../components/Result';
 
+type User = {
+  username: string;
+  url: string;
+  avatar: string;
+  videos: Video[];
+  count: number;
+};
+
+type Users = {
+  [username: string]: User;
+};
+
+type Categories = {
+  [category: string]: number;
+};
+
+type Video = {
+  title: string;
+  thumbnail: string;
+  description: string;
+  category: string;
+  tags: string[];
+  username: string;
+  userUrl: string;
+  url: string;
+};
+
+type Tags = {
+  [tag: string]: number;
+};
+
 const Analyse = () => {
   const [uid, setUid] = useState('');
-  const [users, setUsers] = useState({});
+  const [users, setUsers] = useState<Users>({});
   const [progressCount, setProgressCount] = useState(0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(true);
@@ -18,10 +49,10 @@ const Analyse = () => {
     setUid(localUid);
   }
 
-  const resultsRef = useRef(null);
-  const executeScroll = () => resultsRef.current.scrollIntoView();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const executeScroll = () => resultsRef.current?.scrollIntoView();
 
-  const getAvatar = async (username, uid) => {
+  const getAvatar = async (username: string, uid: number) => {
     if (!users[username]) {
       const userResponse = await fetch(`/members/${uid}/`);
       const userBody = await userResponse.text();
@@ -32,7 +63,7 @@ const Analyse = () => {
     return users[username].avatar;
   };
 
-  const analyseFavourites = async (page) => {
+  const analyseFavourites = async (page: number) => {
     const url = `/members/${uid}/favourite_videos/${page}/`;
     const response = await fetch(url);
 
@@ -73,7 +104,7 @@ const Analyse = () => {
         const userUrl = videoInfo.find('li:nth-child(4) a').first().attr('href');
         // userID is last part of url
         const userID = userUrl ? userUrl.split('/').slice(-2)[0] : '';
-        const avatar = await getAvatar(username, userID);
+        const avatar = await getAvatar(username, parseInt(userID));
 
         const video = {
           title,
@@ -87,6 +118,7 @@ const Analyse = () => {
         };
 
         // Add or update the user object
+        // @ts-ignore
         setUsers((users) => {
           const newUser = {
             ...users[username],
@@ -138,12 +170,12 @@ const Analyse = () => {
     executeScroll();
   };
 
-  const submit = (e) => {
+  const submit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault();
     localStorage.setItem('uid', uid);
     setErrorMessage('');
     setFinished(false);
-    if (e.nativeEvent.submitter.name === 'next') {
+    if ((e.nativeEvent as SubmitEvent).submitter?.id === 'next') {
       next();
       return;
     }
@@ -162,13 +194,13 @@ const Analyse = () => {
 
   // returns array of category objects
   const getCategoriesAndCounts = () => {
-    const categories = {};
+    const categories: Categories = {};
     Object.values(users).forEach((user) => {
-      user.videos.forEach((video) => {
-        if (!categories[video.category]) {
-          categories[video.category] = 0;
+      user.videos.forEach((video: Video) => {
+        if (!categories[video.category || '']) {
+          categories[video.category || ''] = 0;
         }
-        categories[video.category]++;
+        categories[video.category || '']++;
       });
     });
     return Object.entries(categories).sort((a, b) => b[1] - a[1]);
@@ -176,7 +208,7 @@ const Analyse = () => {
 
   // returns array of tag objects
   const getTagsAndCounts = () => {
-    const tags = {};
+    const tags: Tags = {};
     Object.values(users).forEach((user) => {
       user.videos.forEach((video) => {
         video.tags.forEach((tag) => {
@@ -273,6 +305,8 @@ const Analyse = () => {
                     url={user.url}
                     duration={`${user.count} videos`}
                     imageSrc={user.avatar}
+                    date=""
+                    views={0}
                   />
                 ))}
             {show === 'videos' &&
@@ -286,6 +320,8 @@ const Analyse = () => {
                       url={video.url}
                       duration={video.category}
                       imageSrc={video.thumbnail}
+                      date=""
+                      views={0}
                     />
                   )),
                 )}
@@ -300,6 +336,8 @@ const Analyse = () => {
                     ' ',
                     '+',
                   )}`}
+                  views={0}
+                  date=""
                 />
               ))}
             {show === 'tags' &&
@@ -313,6 +351,8 @@ const Analyse = () => {
                     ' ',
                     '+',
                   )}`}
+                  views={0}
+                  date=""
                 />
               ))}
           </div>

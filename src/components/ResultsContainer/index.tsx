@@ -4,7 +4,11 @@ import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import { Video } from '../../helpers/types';
 import Result from '../Result';
 
-const ResultsContainer = ({ videos = [] }) => {
+type ResultsContainerProps = {
+  videos: Array<Video>;
+};
+
+const ResultsContainer = ({ videos = [] }: ResultsContainerProps) => {
   return (
     <div className="results-scroll-container">
       <div className="results">

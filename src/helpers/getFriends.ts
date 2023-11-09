@@ -1,14 +1,16 @@
 import cheerio from 'cheerio';
 
+import { Friend } from './types';
+
 export const getFriends = async (
   userId: string,
   setTotalPages: (totalPages: number) => void,
   updateProgress: (progress: number) => void,
-): Promise<Array<object>> => {
+): Promise<Array<Friend> | boolean> => {
   const response = await fetch(`/members/${userId}/friends/`);
 
   if (response.status === 404) {
-    return [];
+    return false;
   }
 
   const body = await response.text();
@@ -34,10 +36,10 @@ export const getFriends = async (
       return $('.tumbpu')
         .map((i, e) => {
           const $e = $(e);
-          const url = $e.attr('href');
-          const uid = $e.attr('href')?.split('/').filter(Boolean).pop();
-          const avatar = $e.find('.thumb img').attr('src');
-          const username = $e.find('.title').text();
+          const url = $e.attr('href') || '';
+          const uid = $e.attr('href')?.split('/').filter(Boolean).pop() || '';
+          const avatar = $e.find('.thumb img').attr('src') || '';
+          const username = $e.find('.title').text() || '';
 
           return { uid, username, avatar, url };
         })

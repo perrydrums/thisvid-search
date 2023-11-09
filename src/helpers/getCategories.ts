@@ -1,10 +1,6 @@
 import cheerio from 'cheerio';
 
-type Category = {
-  name: string;
-  image: string;
-  slug: string;
-};
+import { Category } from './types';
 
 export const getCategories = async (): Promise<Array<Category>> => {
   const response = await fetch('/categories/');

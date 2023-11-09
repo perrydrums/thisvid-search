@@ -14,16 +14,17 @@ import InputTags from '../components/input/Tags';
 import { getCategories } from '../helpers/getCategories';
 import { getFriends } from '../helpers/getFriends';
 import { log } from '../helpers/supabase/log';
+import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../helpers/types';
 import { getVideos, sortVideos } from '../helpers/videos';
 
-const modes = {
+const modes: Modes = {
   user: 'User ID',
   friend: 'Friend',
   category: 'Category',
   tags: 'Tags',
 };
 
-const types = {
+const types: Types = {
   category: [
     { value: 'most-popular', label: 'Popular' },
     { value: 'latest', label: 'Newest' },
@@ -46,7 +47,9 @@ const types = {
 
 const Search = () => {
   const [searchParams] = useSearchParams();
-  const params = {};
+  const params: {
+    [key: string]: any;
+  } = {};
 
   searchParams.forEach((value, key) => {
     params[key] = value;
@@ -74,13 +77,13 @@ const Search = () => {
   const [quick, setQuick] = useState(true);
   const [omitPrivate, setOmitPrivate] = useState(false);
   const [preserveResults, setPreserveResults] = useState(false);
-  const [videos, setVideos] = useState([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [progressCount, setProgressCount] = useState(0);
   const [amount, setAmount] = useState(params.amount ? params.amount : 30);
   const [minDuration, setMinDuration] = useState(params.minDuration ? params.minDuration : 0);
   const [pageLimit, setPageLimit] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [friends, setFriends] = useState([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [friendId, setFriendId] = useState(params.friendId || '');
   const [loading, setLoading] = useState(false);
   const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
@@ -90,13 +93,13 @@ const Search = () => {
   const [sort, setSort] = useState(params.orderBy ? params.orderBy : 'relevance');
   const [username, setUsername] = useState('');
   const [advanced, setAdvanced] = useState(false);
-  const [searchObject, setSearchObject] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [moods, setMoods] = useState([]);
+  const [searchObject, setSearchObject] = useState<LogParams | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [moods, setMoods] = useState<Mood[]>([]);
   const [activeMood, setActiveMood] = useState(localStorage.getItem('tvass-default-mood') || '');
 
   useEffect(() => {
-    getCategories().then((categories) => {
+    getCategories().then((categories: Category[]) => {
       setCategories(categories);
     });
 
@@ -186,8 +189,8 @@ const Search = () => {
     getPageLimit();
   }, [mode, id, type, friendId]);
 
-  const resultsRef = useRef(null);
-  const executeScroll = () => resultsRef.current.scrollIntoView();
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const executeScroll = () => resultsRef.current?.scrollIntoView();
 
   const getFriendsById = async () => {
     setLoading(true);
@@ -198,19 +201,21 @@ const Search = () => {
       return;
     }
 
-    if (f.length === 0) {
+    if ((f as Array<Friend>).length === 0) {
       setErrorMessage('No friends found');
       return;
     }
 
-    setFriends(f);
+    setFriends(f as Array<Friend>);
     setLoading(false);
     localStorage.setItem('uid', id);
   };
 
-  const getUrl = (page) => {
+  const getUrl = (page: number): string => {
     // Define the base URLs for each search mode
-    const baseUrl = {
+    const baseUrl: {
+      [key: string]: string;
+    } = {
       user: `/members/${id}/${type}_videos/${page}/`,
       friend: `/members/${friendId}/${type}_videos/${page}/`,
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
@@ -221,22 +226,24 @@ const Search = () => {
       return `/categories/${category}/${page}/`;
     }
 
-    return baseUrl[mode];
+    return baseUrl[mode] || '';
   };
 
   const getSourceUrl = () => {
     // Define the base URLs for each search mode
-    const baseUrl = {
+    const baseUrl: {
+      [key: string]: string;
+    } = {
       user: `/members/${id}/`,
       friend: `/members/${friendId}/`,
       tags: `/tags/${primaryTag}/`,
       category: `/categories/${category}/`,
     };
 
-    return baseUrl[mode];
+    return baseUrl[mode] || '';
   };
 
-  const urlExists = async (url) => {
+  const urlExists = async (url: string) => {
     const response = await fetch(url);
     return response.status !== 404;
   };
@@ -249,14 +256,15 @@ const Search = () => {
   };
 
   const logSearch = async () => {
-    const s = await log({
+    const s: LogParams | null = await log({
+      id,
       mode,
       type,
       advanced,
       tags: includeTags,
       pageAmount: amount,
       quick,
-      minDuration,
+      duration: minDuration,
       primaryTag,
       category,
       userId: id,
@@ -266,7 +274,7 @@ const Search = () => {
     setSearchObject(s);
   };
 
-  const run = async (offset) => {
+  const run = async (offset: number) => {
     setLoading(true);
     setProgressCount(0);
 
@@ -304,6 +312,7 @@ const Search = () => {
           omitPrivate,
           // eslint-disable-next-line
         }).then((s) => {
+          // @ts-ignore
           if (s && s.error === 404) {
             // Set page limit but only if it hasn't been set yet or
             // if the current page limit is lower than the current page.
@@ -322,8 +331,8 @@ const Search = () => {
     try {
       const videos = (await Promise.all(promises)).flat();
       preserveResults
-        ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos], sort))
-        : setVideos(sortVideos(videos, sort));
+        ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos] as Video[], sort))
+        : setVideos(sortVideos(videos as Video[], sort));
       setFinished(true);
       executeScroll();
       logSearch();
@@ -340,13 +349,13 @@ const Search = () => {
     setStart(start + amount);
   };
 
-  const submit = (e) => {
+  const submit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault();
     setErrorMessage('');
     setFinished(false);
     setSearchObject(null);
 
-    if (e.nativeEvent.submitter.name === 'next') {
+    if ((e.nativeEvent as SubmitEvent).submitter?.id === 'share') {
       next();
       return;
     }
@@ -354,6 +363,7 @@ const Search = () => {
   };
 
   const getShareUrl = () => {
+    // @ts-ignore
     const params = new URLSearchParams({
       mode,
       type,
@@ -536,7 +546,7 @@ const Search = () => {
                           ? 'Change category'
                           : categories.find((c) => c.slug === category)?.name || ''
                       }
-                      onClick={() => setCategory(null)}
+                      onClick={() => setCategory('')}
                       onMouseEnter={() => setFriendIdFieldHover(true)}
                       onMouseLeave={() => setFriendIdFieldHover(false)}
                       style={{ cursor: 'pointer' }}
@@ -650,7 +660,7 @@ const Search = () => {
                   id="min-duration"
                   required
                   value={minDuration}
-                  onChange={(e) => setMinDuration(parseInt(e.target.value || 0))}
+                  onChange={(e) => setMinDuration(parseInt(e.target.value || '0'))}
                 />
                 <label htmlFor="amount">Number of Pages</label>
                 <input
@@ -766,7 +776,7 @@ const Search = () => {
                 </h2>
                 {searchObject && (
                   <>
-                    <Feedback search={searchObject} resultCount={videos.length} />
+                    <Feedback search={searchObject} />
                     <Share url={getShareUrl()} />
                   </>
                 )}
