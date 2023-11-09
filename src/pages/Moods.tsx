@@ -5,24 +5,34 @@ import '../App.css';
 import MoodResult from '../components/Result/MoodResult';
 import InputTags from '../components/input/Tags';
 
+type Preferences = {
+  [key: string]: any;
+};
+
+type Mood = {
+  name: string;
+  preferences: Preferences;
+};
+
 const Moods = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
 
   const [userId, setUserId] = useState(localStorage.getItem('tvass-user-id') || '');
   const [defaultMood, setDefaultMood] = useState(localStorage.getItem('tvass-default-mood') || '');
-  const [preferences, setPreferences] = useState({
+  const [preferences, setPreferences] = useState<Preferences>({
     tags: [],
     excludeTags: [],
     boosterTags: [],
     diminishingTags: [],
     minDuration: 0,
   });
-  const [moods, setMoods] = useState(m);
+  const [moods, setMoods] = useState<Array<Mood>>(m);
   const [activeMood, setActiveMood] = useState('');
   const [newMoodName, setNewMoodName] = useState('');
 
   useEffect(() => {
-    const p = moods.find((mood) => mood.name === activeMood)?.preferences;
+    const m: Mood | undefined = moods.find((mood: Mood) => mood.name === activeMood);
+    const p = m?.preferences;
 
     p &&
       Object.keys(p).forEach((key) => {
@@ -58,18 +68,19 @@ const Moods = () => {
     localStorage.setItem('tvass-moods', JSON.stringify([...moods, mood]));
   };
 
-  const setPreference = (key, value) => {
+  const setPreference = (key: string, value: any) => {
     setPreferences({ ...preferences, [key]: value });
   };
 
   const saveMood = () => {
     const mood = moods.find((mood) => mood.name === activeMood);
-    mood.preferences = preferences;
 
-    localStorage.setItem('tvass-moods', JSON.stringify(moods));
-
-    const newMoods = moods.filter((mood) => mood.name !== activeMood);
-    setMoods([...newMoods, mood]);
+    if (mood) {
+      mood.preferences = preferences;
+      localStorage.setItem('tvass-moods', JSON.stringify(moods));
+      const newMoods = moods.filter((mood) => mood.name !== activeMood);
+      setMoods([...newMoods, mood]);
+    }
   };
 
   const deleteMood = () => {
