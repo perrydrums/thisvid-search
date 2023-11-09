@@ -101,20 +101,29 @@ const Search = () => {
     });
 
     const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
-    setMoods(m);
-  }, [mode]);
+    setMoods([{ name: 'Select a mood' }, ...m]);
+  }, []);
 
   useEffect(() => {
-    const mood = moods.find((m) => m.name === activeMood);
-    const preferences = mood?.preferences;
+    if (moods.length === 0) {
+      return;
+    }
 
-    if (!preferences) {
+    const mood = moods.find((m) => m.name === activeMood);
+
+    if (mood?.name === 'Select a mood') {
       setId('');
       setIncludeTags([]);
       setExcludeTags([]);
       setBoosterTags([]);
       setDiminishingTags([]);
       setMinDuration(0);
+      return;
+    }
+
+    const preferences = mood?.preferences;
+
+    if (!preferences) {
       return;
     }
 
@@ -416,7 +425,6 @@ const Search = () => {
                     onChange={(e) => setActiveMood(e.target.value)}
                     data-tooltip-id="mood"
                   >
-                    <option value="">None</option>
                     {moods.map((mood) => {
                       return (
                         <option key={mood.name} value={mood.name}>
