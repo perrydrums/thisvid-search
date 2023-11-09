@@ -169,6 +169,8 @@ const Moods = () => {
                     setTags={(t) => setPreference('diminishingTags', t)}
                     tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
                   />
+                </div>
+                <div className="form-columns">
                   <label htmlFor="min-duration">Min Duration (minutes)</label>
                   <input
                     type="number"

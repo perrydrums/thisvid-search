@@ -145,7 +145,7 @@ h2 {
 
 .form-columns-group > ul {
   padding: 12px;
-  background-color: var(--overlay-lighter);
+  background-color: var(--overlay-darker);
   border-radius: 0.5rem;
 }
 
