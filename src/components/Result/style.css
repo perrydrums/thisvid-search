@@ -116,6 +116,24 @@
   stroke: var(--green);
 }
 
+.result .default-mood {
+  display: inline-block;
+  float: right;
+}
+
+.result .default-mood.active {
+  color: var(--accent-color);
+}
+
+.result .default-mood:hover {
+  color: var(--accent-color);
+}
+
+.result .default-mood.active:hover {
+  color: var(--text-color);
+}
+
+
 @keyframes loading {
   0% {
     stroke: var(--accent-color);

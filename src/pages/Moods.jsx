@@ -8,7 +8,8 @@ import InputTags from '../components/input/Tags';
 const Moods = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
 
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(localStorage.getItem('tvass-user-id') || '');
+  const [defaultMood, setDefaultMood] = useState(localStorage.getItem('tvass-default-mood') || '');
   const [preferences, setPreferences] = useState({
     tags: [],
     excludeTags: [],
@@ -32,15 +33,12 @@ const Moods = () => {
   }, [activeMood, moods]);
 
   useEffect(() => {
-    const u = localStorage.getItem('tvass-user-id');
-    if (u) {
-      setUserId(u);
-    }
-  }, []);
-
-  useEffect(() => {
     localStorage.setItem('tvass-user-id', userId);
   }, [userId]);
+
+  useEffect(() => {
+    localStorage.setItem('tvass-default-mood', defaultMood);
+  }, [defaultMood]);
 
   const newMood = () => {
     const mood = {
@@ -135,7 +133,9 @@ const Moods = () => {
                   <MoodResult
                     key={mood.name}
                     name={mood.name}
-                    selectFunction={setActiveMood}
+                    editFunction={setActiveMood}
+                    setDefaultFunction={setDefaultMood}
+                    defaultMood={defaultMood === mood.name}
                     preferences={mood.preferences}
                   />
                 ))}

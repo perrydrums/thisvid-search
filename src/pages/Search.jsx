@@ -93,7 +93,7 @@ const Search = () => {
   const [searchObject, setSearchObject] = useState(null);
   const [categories, setCategories] = useState([]);
   const [moods, setMoods] = useState([]);
-  const [activeMood, setActiveMood] = useState('');
+  const [activeMood, setActiveMood] = useState(localStorage.getItem('tvass-default-mood') || '');
 
   useEffect(() => {
     getCategories().then((categories) => {
