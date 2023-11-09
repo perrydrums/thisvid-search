@@ -3,7 +3,11 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import './style.css';
 
-const Share = ({ url }) => {
+type ShareProps = {
+  url: string;
+};
+
+const Share = ({ url }: ShareProps) => {
   const [copied, setCopied] = useState(false);
 
   return copied ? (

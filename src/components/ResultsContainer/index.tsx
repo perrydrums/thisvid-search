@@ -1,14 +1,15 @@
 import React from 'react';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
-import debug from '../../helpers/debug';
+import { Video } from '../../helpers/types';
 import Result from '../Result';
 
 const ResultsContainer = ({ videos = [] }) => {
   return (
     <div className="results-scroll-container">
       <div className="results">
-        {videos.map((video, index) => (
+        {videos.map((video: Video, index) => (
+          // @ts-ignore
           <LazyLoadComponent height={150} key={index}>
             <Result
               title={video.title}
@@ -19,8 +20,8 @@ const ResultsContainer = ({ videos = [] }) => {
               date={video.date}
               views={video.views}
               // isFriend={mode === 'friend'}
-              page={debug ? video.page : null}
-              relevance={debug ? video.relevance : null}
+              page={video.page}
+              relevance={video.relevance}
             />
           </LazyLoadComponent>
         ))}

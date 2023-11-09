@@ -1,6 +1,21 @@
 import { supabase } from './client';
 import { getIp } from './getIp';
 
+type LogParams = {
+  mode: string;
+  advanced: boolean;
+  type: string;
+  tags: string[];
+  pageAmount: number;
+  quick: boolean;
+  duration: number;
+  primaryTag: string;
+  category: string;
+  userId?: string;
+  friendId?: string;
+  resultCount: number;
+};
+
 export const log = async ({
   mode,
   advanced,
@@ -14,7 +29,7 @@ export const log = async ({
   userId,
   friendId,
   resultCount,
-}) => {
+}: LogParams): Promise<Object | null> => {
   const ipAddress = await getIp();
   const { data, error } = await supabase
     .from('searches')

@@ -1,10 +1,14 @@
 import cheerio from 'cheerio';
 
-export const getFriends = async (userId, setTotalPages, updateProgress) => {
+export const getFriends = async (
+  userId: string,
+  setTotalPages: (totalPages: number) => void,
+  updateProgress: (progress: number) => void,
+): Promise<Array<object>> => {
   const response = await fetch(`/members/${userId}/friends/`);
 
   if (response.status === 404) {
-    return false;
+    return [];
   }
 
   const body = await response.text();
@@ -31,7 +35,7 @@ export const getFriends = async (userId, setTotalPages, updateProgress) => {
         .map((i, e) => {
           const $e = $(e);
           const url = $e.attr('href');
-          const uid = $e.attr('href').split('/').filter(Boolean).pop();
+          const uid = $e.attr('href')?.split('/').filter(Boolean).pop();
           const avatar = $e.find('.thumb img').attr('src');
           const username = $e.find('.title').text();
 

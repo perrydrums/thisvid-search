@@ -1,5 +1,6 @@
 import React from 'react';
 
+import debug from '../../helpers/debug';
 import getDownloadUrl from '../../helpers/getDownloadUrl';
 import friendsIcon from '../../images/friends.png';
 import './style.css';
@@ -12,9 +13,9 @@ type ResultProps = {
   date: string;
   isFriend?: boolean;
   imageSrc?: string;
-  page?: string;
+  page?: number;
   isPrivate?: boolean;
-  relevance?: string;
+  relevance?: number;
 };
 
 const Result = ({
@@ -25,9 +26,9 @@ const Result = ({
   date,
   isFriend = false,
   imageSrc = '',
-  page = '',
+  page,
   isPrivate = false,
-  relevance = '',
+  relevance,
 }: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -75,8 +76,8 @@ const Result = ({
         )}
         <div className="title">
           <span onClick={() => window.open(url, '_blank')}>
-            {page !== null && `[${page}] `}
-            {relevance !== null && `(${relevance}) `}
+            {debug && `[${page}] `}
+            {debug && `(${relevance}) `}
             {title}
           </span>
         </div>

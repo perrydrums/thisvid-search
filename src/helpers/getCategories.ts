@@ -1,6 +1,12 @@
 import cheerio from 'cheerio';
 
-export const getCategories = async () => {
+type Category = {
+  name: string;
+  image: string;
+  slug: string;
+};
+
+export const getCategories = async (): Promise<Array<Category>> => {
   const response = await fetch('/categories/');
   const body = await response.text();
   const $ = cheerio.load(body);
@@ -11,8 +17,8 @@ export const getCategories = async () => {
         name: $('span.title', element)
           .text()
           .replace(/\w\S*/g, (w) => w.replace(/^\w/, (c) => c.toUpperCase())),
-        image: $('img', element).attr('src').replace('//', 'https://'),
-        slug: $(element).attr('href').split('/').filter(Boolean).pop(),
+        image: $('img', element).attr('src')?.replace('//', 'https://') || '',
+        slug: $(element).attr('href')?.split('/').filter(Boolean).pop() || '',
       };
     })
     .get();

@@ -1,5 +1,31 @@
 import cheerio from 'cheerio';
 
+import { Video } from './types';
+
+type GetVideosOptions = {
+  url: string;
+  page: number;
+  includeTags?: string[];
+  excludeTags?: string[];
+  termsOperator?: 'AND' | 'OR';
+  boosterTags?: string[];
+  diminishingTags?: string[];
+  omitPrivate?: boolean;
+  minDuration?: number;
+  quick?: boolean;
+};
+
+type VideoUrl = {
+  title: string;
+  url: string;
+  isPrivate: boolean;
+  duration: string;
+  avatar: string;
+  views: number;
+  date: string;
+  relevance: number;
+};
+
 export const getVideos = async ({
   url,
   page,
@@ -11,8 +37,8 @@ export const getVideos = async ({
   omitPrivate = false,
   minDuration = 0,
   quick = true,
-}) => {
-  const videos = [];
+}: GetVideosOptions) => {
+  const videos: Array<Video> = [];
 
   try {
     const response = await fetch(url);
@@ -24,7 +50,7 @@ export const getVideos = async ({
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    const urls = [];
+    const urls: Array<VideoUrl> = [];
     $('.tumbpu').each((i, element) => {
       const isPrivate = $('span', element).first().hasClass('private');
       if (omitPrivate && isPrivate) {
@@ -32,14 +58,17 @@ export const getVideos = async ({
       }
 
       const avatar = isPrivate
-        ? $('span', element)
+        ? // @ts-ignore
+          $('span', element)
             .first()
             .attr('style')
             .match(/url\((.*?)\)/)[1]
             .replace('//', 'https://')
-        : $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
+        : // @ts-ignore
+          $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
 
       const viewsHtml = $('.view', element).first().text();
+      // @ts-ignore
       const views = viewsHtml.match(/\d+/)[0];
       const date = $('.date', element).first().text();
 
@@ -47,7 +76,7 @@ export const getVideos = async ({
       const [minutes, seconds] = duration.split(':').map(Number);
       const time = minutes * 60 + seconds;
 
-      const title = $(element).attr('title');
+      const title = $(element).attr('title') || '';
       if (quick) {
         // Skip if video title contains any of the exclude tags.
         if (excludeTags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()))) {
@@ -83,11 +112,11 @@ export const getVideos = async ({
           if (time >= minDuration * 60) {
             videos.push({
               title,
-              url: $(element).attr('href'),
+              url: $(element).attr('href') || '',
               isPrivate,
               duration,
               avatar,
-              views,
+              views: parseInt(views),
               date,
               relevance,
               page,
@@ -98,12 +127,13 @@ export const getVideos = async ({
         if (time >= minDuration * 60) {
           urls.push({
             title,
-            url: $(element).attr('href'),
+            url: $(element).attr('href') || '',
             isPrivate,
             duration,
             avatar,
-            views,
+            views: parseInt(views),
             date,
+            relevance: 0,
           });
         }
       }
@@ -124,6 +154,7 @@ export const getVideos = async ({
 
           if (hasAllTags) {
             videos.push({
+              relevance: video.relevance,
               title: video.title,
               url: video.url,
               isPrivate: video.isPrivate,
@@ -146,7 +177,7 @@ export const getVideos = async ({
   return videos;
 };
 
-export const sortVideos = (videos = [], sortMode) => {
+export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<Video> => {
   const sortedVideos = videos;
   switch (sortMode) {
     default:
