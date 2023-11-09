@@ -19,11 +19,6 @@ const Moods = () => {
   const [activeMood, setActiveMood] = useState('');
   const [newMoodName, setNewMoodName] = useState('');
 
-  /**
-   * @type {HTMLInputElement|null}
-   */
-  let newMoodInput = null;
-
   useEffect(() => {
     const p = moods.find((mood) => mood.name === activeMood)?.preferences;
 
@@ -46,9 +41,9 @@ const Moods = () => {
     localStorage.setItem('tvass-user-id', userId);
   }, [userId]);
 
-  const newMood = (name) => {
+  const newMood = () => {
     const mood = {
-      name,
+      name: newMoodName,
       preferences: {
         tags: [],
         excludeTags: [],
@@ -60,17 +55,8 @@ const Moods = () => {
 
     setMoods([...moods, mood]);
     setNewMoodName('');
-    newMoodInput.blur();
 
     localStorage.setItem('tvass-moods', JSON.stringify([...moods, mood]));
-  };
-
-  const inputKeyDown = (e) => {
-    const val = e.target.value;
-    if (e.key === 'Enter' && val) {
-      e.preventDefault();
-      newMood(val);
-    }
   };
 
   const setPreference = (key, value) => {
@@ -103,103 +89,102 @@ const Moods = () => {
       </div>
       <div className="container">
         <div className="results-container">
-          <div className="results-header">
-            <h2>Preferences</h2>
-          </div>
-          <div className="form-columns">
-            <label htmlFor="user-id">Your ThisVid User ID</label>
-            <input
-              type="text"
-              id="user-id"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-            />
-          </div>
-
-          <div style={{ marginBottom: '50px' }}></div>
-
-          <div className="results-header">
-            <h2>Moods</h2>
-            <div>
+          <div className="container-section">
+            <div className="container-section-header">
+              <h2>Preferences</h2>
+            </div>
+            <div className="form-columns">
+              <label htmlFor="user-id">Your ThisVid User ID</label>
               <input
                 type="text"
-                onKeyDown={inputKeyDown}
-                value={newMoodName}
-                onChange={(e) => setNewMoodName(e.target.value)}
-                placeholder="New mood name"
-                ref={(c) => {
-                  newMoodInput = c;
-                }}
+                id="user-id"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
               />
-              {newMoodName && (
-                <div className="input-tag__tooltip" onClick={newMood}>
-                  Add <b>{newMoodName}</b> ⏎
-                </div>
-              )}
             </div>
           </div>
-          <div className="mood-results">
-            {moods.map((mood) => (
-              <MoodResult
-                key={mood.name}
-                name={mood.name}
-                selectFunction={setActiveMood}
-                preferences={mood.preferences}
-              />
-            ))}
+          <div className="container-section ">
+            <div className="container-section-header">
+              <h2>Moods</h2>
+            </div>
+            <div className="form-columns">
+              <div>
+                <input
+                  type="text"
+                  value={newMoodName}
+                  onChange={(e) => setNewMoodName(e.target.value)}
+                  placeholder="Name your mood"
+                />
+              </div>
+              <button onClick={newMood}>Add</button>
+            </div>
+            <div className="mood-results-container">
+              <div className="mood-results">
+                {moods.map((mood) => (
+                  <MoodResult
+                    key={mood.name}
+                    name={mood.name}
+                    selectFunction={setActiveMood}
+                    preferences={mood.preferences}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
         <div className="form-container">
-          <h2>Preferences</h2>
           {activeMood && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <div className="form-columns form-columns-group">
-                <label htmlFor="tags">Default tags</label>
-                <InputTags
-                  tags={preferences.tags}
-                  setTags={(t) => setPreference('tags', t)}
-                  tooltip="Find videos with any/all of these words in the title."
-                />
-                <label htmlFor="exclude-tags">Default exclude tags</label>
-                <InputTags
-                  htmlId="exclude-tags"
-                  tags={preferences.excludeTags}
-                  setTags={(t) => setPreference('excludeTags', t)}
-                  tooltip="Videos with these tags will be excluded from the search results."
-                />
-                <label htmlFor="booster-tags">Default booster tags</label>
-                <InputTags
-                  htmlId="booster-tags"
-                  tags={preferences.boosterTags}
-                  setTags={(t) => setPreference('boosterTags', t)}
-                  tooltip="Videos with these tags will be boosted to the top of the search results, when sorting by relevance."
-                />
-                <label htmlFor="diminishing-tags">Default diminishing tags</label>
-                <InputTags
-                  htmlId="diminishing-tags"
-                  tags={preferences.diminishingTags}
-                  setTags={(t) => setPreference('diminishingTags', t)}
-                  tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
-                />
-                <label htmlFor="min-duration">Min Duration (minutes)</label>
-                <input
-                  type="number"
-                  min="0"
-                  id="min-duration"
-                  required
-                  value={preferences.minDuration}
-                  onChange={(e) => setPreference('minDuration', e.target.value)}
-                />
-              </div>
-              <div className="button-columns">
-                <button onClick={saveMood}>Save</button>
-                <button onClick={deleteMood}>Delete</button>
-              </div>
-            </form>
+            <>
+              <h2>Preferences for {activeMood}</h2>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <div className="form-columns form-columns-group">
+                  <label htmlFor="tags">Default tags</label>
+                  <InputTags
+                    tags={preferences.tags}
+                    setTags={(t) => setPreference('tags', t)}
+                    tooltip="Find videos with any/all of these words in the title."
+                  />
+                  <label htmlFor="exclude-tags">Default exclude tags</label>
+                  <InputTags
+                    htmlId="exclude-tags"
+                    tags={preferences.excludeTags}
+                    setTags={(t) => setPreference('excludeTags', t)}
+                    tooltip="Videos with these tags will be excluded from the search results."
+                  />
+                  <label htmlFor="booster-tags">Default booster tags</label>
+                  <InputTags
+                    htmlId="booster-tags"
+                    tags={preferences.boosterTags}
+                    setTags={(t) => setPreference('boosterTags', t)}
+                    tooltip="Videos with these tags will be boosted to the top of the search results, when sorting by relevance."
+                  />
+                  <label htmlFor="diminishing-tags">Default diminishing tags</label>
+                  <InputTags
+                    htmlId="diminishing-tags"
+                    tags={preferences.diminishingTags}
+                    setTags={(t) => setPreference('diminishingTags', t)}
+                    tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
+                  />
+                  <label htmlFor="min-duration">Min Duration (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    id="min-duration"
+                    required
+                    value={preferences.minDuration}
+                    onChange={(e) => setPreference('minDuration', e.target.value)}
+                  />
+                </div>
+                <div className="button-columns">
+                  <button onClick={saveMood}>Save</button>
+                  <button onClick={deleteMood}>Delete</button>
+                </div>
+              </form>
+            </>
           )}
         </div>
       </div>

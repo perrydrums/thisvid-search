@@ -83,6 +83,13 @@ body {
   gap: 8px;
 }
 
+.mood-results-container {
+  max-height: 50vh;
+  padding: 0 8px 20px 8px;
+  margin: 12px -8px 0 -8px;
+  overflow-y: scroll;
+}
+
 h1 {
   margin-bottom: 8px;
   font-size: 28px;
@@ -107,15 +114,23 @@ h2 {
 
 .form-columns-group {
   margin: 12px 0;
-  /*background-color: var(--overlay-darker);*/
-  /*padding: 12px;*/
-  /*border-radius: 0.5rem;*/
 }
 
 .form-columns-group > ul {
   border-radius: 0.5rem;
   padding: 12px;
   background-color: var(--overlay-lighter);
+}
+
+.container-section {
+  background-color: var(--overlay-darker);
+  padding: 12px;
+  border-radius: 0.5rem;
+  margin-bottom: 12px;
+}
+
+.container-section-header {
+  margin-bottom: 12px;
 }
 
 .button-columns {
