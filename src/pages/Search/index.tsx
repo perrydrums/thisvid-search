@@ -4,18 +4,18 @@ import { useSearchParams } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import LoadingBar from 'react-top-loading-bar';
 
-import '../App.css';
-import Feedback from '../components/Feedback';
-import ResultsContainer from '../components/ResultsContainer';
-import CategoriesContainer from '../components/ResultsContainer/CategoriesContainer';
-import FriendsContainer from '../components/ResultsContainer/FriendsContainer';
-import Share from '../components/Share';
-import InputTags from '../components/input/Tags';
-import { getCategories } from '../helpers/getCategories';
-import { getFriends } from '../helpers/getFriends';
-import { log } from '../helpers/supabase/log';
-import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../helpers/types';
-import { getVideos, sortVideos } from '../helpers/videos';
+import '../../App.css';
+import Feedback from '../../components/Feedback';
+import ResultsContainer from '../../components/ResultsContainer';
+import CategoriesContainer from '../../components/ResultsContainer/CategoriesContainer';
+import FriendsContainer from '../../components/ResultsContainer/FriendsContainer';
+import Share from '../../components/Share';
+import InputTags from '../../components/input/Tags';
+import { getCategories } from '../../helpers/getCategories';
+import { getFriends } from '../../helpers/getFriends';
+import { log } from '../../helpers/supabase/log';
+import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../helpers/types';
+import { getVideos, sortVideos } from '../../helpers/videos';
 
 const modes: Modes = {
   user: 'User ID',

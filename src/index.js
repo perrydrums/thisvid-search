@@ -5,7 +5,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './index.css';
 import Analyse from './pages/Analyse';
 import Home from './pages/Home';
-import Moods from './pages/Moods';
+import Preferences from './pages/Preferences';
 import Search from './pages/Search';
 
 const router = createBrowserRouter([
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/preferences',
-    element: <Moods />,
+    element: <Preferences />,
   },
 ]);
 

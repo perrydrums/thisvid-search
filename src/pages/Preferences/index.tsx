@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
-import '../App.css';
-import MoodResult from '../components/Result/MoodResult';
-import InputTags from '../components/input/Tags';
-import { Mood, Preferences } from '../helpers/types';
+import '../../App.css';
+import MoodResult from '../../components/Result/MoodResult';
+import InputTags from '../../components/input/Tags';
+import { Mood, Preferences as PreferencesType } from '../../helpers/types';
 
-const Moods = () => {
+const Preferences = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
 
   const [userId, setUserId] = useState(localStorage.getItem('tvass-user-id') || '');
   const [defaultMood, setDefaultMood] = useState(localStorage.getItem('tvass-default-mood') || '');
-  const [preferences, setPreferences] = useState<Preferences>({
+  const [preferences, setPreferences] = useState<PreferencesType>({
     tags: [],
     excludeTags: [],
     boosterTags: [],
@@ -208,4 +208,4 @@ const Moods = () => {
   );
 };
 
-export default Moods;
+export default Preferences;
