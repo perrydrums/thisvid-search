@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     element: <Analyse />,
   },
   {
-    path: '/moods',
+    path: '/preferences',
     element: <Moods />,
   },
 ]);

@@ -417,7 +417,7 @@ const Search = () => {
               <div className="form-columns">
                 <label htmlFor="mood">
                   Mood{' '}
-                  <a className="username" href="/moods">
+                  <a className="username" href="/preferences">
                     Manage moods
                   </a>
                 </label>

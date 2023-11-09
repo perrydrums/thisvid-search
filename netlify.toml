@@ -12,7 +12,7 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
-from = "/moods"
+from = "/preferences"
 to = "/index.html"
 status = 200
 
