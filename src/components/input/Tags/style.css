@@ -26,26 +26,11 @@
 }
 
 .input-tag__tags li.input-tag__tags__item {
-  transition: background-color 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .input-tag__tags li.input-tag__tags__item:hover {
-  background-color: var(--accent-color-translucent);
-}
-
-.input-tag__tags li.input-tag__tags__item:hover:after {
-  position: absolute;
-  top: 45%;
-  right: 0;
-  left: 0;
-  width: 80%;
-  margin: 0 auto;
-  border-top: 4px solid var(--accent-color);
-  color: white;
-  transform: rotate(-30deg);
-  animation: fade-in 0.2s ease-in-out;
-  content: '';
-  -ms-transform: rotate(-30deg);
+  opacity: .5;
 }
 
 .input-tag__tags li.input-tag__tags__input {
@@ -56,7 +41,6 @@
   width: 100%;
 }
 
-/* hovering tooltip */
 .input-tag__tooltip {
   position: absolute;
   display: inline-block;

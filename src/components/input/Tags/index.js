@@ -6,6 +6,7 @@ import './style.css';
 const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
   const [input, setInput] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const [remove, setRemove] = React.useState(false);
 
   useEffect(() => {
     if (tags.length > 0) {
@@ -40,7 +41,12 @@ const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
 
       addTag(val);
     } else if (e.key === 'Backspace' && !val) {
-      removeTag(tags.length - 1);
+      if (remove) {
+        removeTag(tags.length - 1);
+        setRemove(false);
+      } else {
+        setRemove(true);
+      }
     }
   };
 
@@ -50,6 +56,7 @@ const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
         <li
           className="input-tag__tags__item"
           key={tag}
+          style={remove && i === tags.length - 1 ? { opacity: 0.5 } : {}}
           onClick={() => {
             removeTag(i);
           }}
