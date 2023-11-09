@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import './index.css';
 import Analyse from './pages/Analyse';
+import Home from './pages/Home';
 import Moods from './pages/Moods';
 import Search from './pages/Search';
 import reportWebVitals from './reportWebVitals';
@@ -11,6 +12,10 @@ import reportWebVitals from './reportWebVitals';
 const router = createBrowserRouter([
   {
     path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/search',
     element: <Search />,
   },
   {

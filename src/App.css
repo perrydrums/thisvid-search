@@ -4,6 +4,27 @@ body {
   color: var(--text-color);
 }
 
+.home {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 30vw;
+  padding: 20px;
+  margin: 100px auto;
+}
+
+.home-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  background-color: var(--container-background-color);
+  border-radius: 0.5rem;
+  gap: 12px;
+}
+
 .header {
   padding: 12px;
   text-align: center;
@@ -11,6 +32,12 @@ body {
 
 .subtitle {
   font-size: 18px;
+}
+
+.home .subtitle {
+  margin-bottom: 12px;
+  color: var(--accent-color);
+  font-size: 1.4rem;
 }
 
 .subtitle a {
@@ -54,15 +81,15 @@ body {
 }
 
 .results-container.inactive {
-  pointer-events: none;
   animation: loading-results 0.5s ease-in-out alternate infinite;
+  pointer-events: none;
 }
 
 .results-scroll-container {
   height: 90%;
-  overflow-y: scroll;
   padding: 0 8px 20px 8px;
   margin: 0 -8px;
+  overflow-y: scroll;
 }
 
 .results-scroll-progress {
@@ -117,16 +144,16 @@ h2 {
 }
 
 .form-columns-group > ul {
-  border-radius: 0.5rem;
   padding: 12px;
   background-color: var(--overlay-lighter);
+  border-radius: 0.5rem;
 }
 
 .container-section {
-  background-color: var(--overlay-darker);
   padding: 12px;
-  border-radius: 0.5rem;
   margin-bottom: 12px;
+  background-color: var(--overlay-darker);
+  border-radius: 0.5rem;
 }
 
 .container-section-header {
@@ -171,12 +198,12 @@ h2 {
 }
 
 div.label-tooltip {
-  background-color: var(--accent-color);
-  opacity: 1;
-  font-size: 0.8em;
   max-width: 150px;
   padding: 8px 12px;
+  background-color: var(--accent-color);
   border-radius: 0.5rem;
+  opacity: 1;
+  font-size: 0.8em;
   animation: fade-in 0.2s;
 }
 
@@ -324,6 +351,10 @@ input[type='radio']:checked + label.checkbox-button {
 }
 
 @media (max-width: 600px) {
+  .home {
+    width: 80vw;
+  }
+
   .container {
     grid-template-columns: 1fr; /* Change to a single column on smaller screens */
   }
@@ -334,6 +365,10 @@ input[type='radio']:checked + label.checkbox-button {
 }
 
 @media (max-width: 900px) {
+  .home {
+    width: 80vw;
+  }
+
   .results {
     grid-template-columns: 1fr 1fr;
   }
