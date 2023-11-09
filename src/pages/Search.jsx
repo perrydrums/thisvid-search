@@ -100,7 +100,7 @@ const Search = () => {
       setCategories(categories);
     });
 
-    const m = ((p) => (p ? JSON.parse(p) : {}))(localStorage.getItem('tvass-moods'));
+    const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
     setMoods(m);
   }, [mode]);
 
