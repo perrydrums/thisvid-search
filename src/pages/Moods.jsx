@@ -105,9 +105,9 @@ const Moods = () => {
           </div>
           <div className="container-section ">
             <div className="container-section-header">
-              <h2>Moods</h2>
+              <h3>Add a new mood</h3>
             </div>
-            <div className="form-columns">
+            <div className="form-columns" style={{ marginBottom: '12px' }}>
               <div>
                 <input
                   type="text"
@@ -117,6 +117,9 @@ const Moods = () => {
                 />
               </div>
               <button onClick={newMood}>Add</button>
+            </div>
+            <div className="container-section-header">
+              <h2>Moods</h2>
             </div>
             <div className="mood-results-container">
               <div className="mood-results">
