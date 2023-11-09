@@ -3,7 +3,14 @@ import { Tooltip } from 'react-tooltip';
 
 import './style.css';
 
-const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
+type InputTagsProps = {
+  tags: string[];
+  setTags: (tags: string[]) => void;
+  tooltip?: string;
+  htmlId?: string;
+};
+
+const InputTags = ({ tags, setTags, tooltip, htmlId = 'tags' }: InputTagsProps) => {
   const [input, setInput] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [remove, setRemove] = React.useState(false);
@@ -14,28 +21,28 @@ const InputTags = ({ tags, setTags, htmlId = 'tags', tooltip = null }) => {
     }
   }, [tags]);
 
-  /**
-   * @type {HTMLInputElement|null}
-   */
-  let tagInput = null;
+  let tagInput: HTMLInputElement | null = null;
 
-  const removeTag = (i) => {
+  const removeTag = (i: number) => {
     const newTags = [...tags];
     newTags.splice(i, 1);
     setTags(newTags);
   };
 
-  const addTag = (val) => {
+  const addTag = (val: string) => {
     if (tags.find((tag) => tag.toLowerCase() === val.toLowerCase())) {
       return;
     }
     setTags([...tags, val]);
-    tagInput.value = null;
+    if (tagInput) {
+      tagInput.value = '';
+    }
     setInput('');
   };
 
-  const inputKeyDown = (e) => {
-    const val = e.target.value;
+  const inputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const target = e.target;
+    const val = (target as HTMLInputElement).value;
     if ((e.key === 'Enter' || e.key === ',') && val) {
       e.preventDefault();
 

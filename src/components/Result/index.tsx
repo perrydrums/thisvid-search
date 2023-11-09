@@ -4,6 +4,19 @@ import getDownloadUrl from '../../helpers/getDownloadUrl';
 import friendsIcon from '../../images/friends.png';
 import './style.css';
 
+type ResultProps = {
+  title: string;
+  url: string;
+  duration: string;
+  views: number;
+  date: string;
+  isFriend?: boolean;
+  imageSrc?: string;
+  page?: string;
+  isPrivate?: boolean;
+  relevance?: string;
+};
+
 const Result = ({
   title,
   url,
@@ -11,11 +24,11 @@ const Result = ({
   views,
   date,
   isFriend = false,
-  imageSrc = null,
-  page = null,
+  imageSrc = '',
+  page = '',
   isPrivate = false,
-  relevance = null,
-}) => {
+  relevance = '',
+}: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
@@ -74,13 +87,15 @@ const Result = ({
         {!isPrivate ? (
           <div
             className={`download ${loading ? 'loading' : ''} ${downloadUrl ? 'done' : ''}`}
-            onClick={
-              downloadUrl
-                ? () => window.open(downloadUrl, '_blank')
-                : !loading
-                ? fetchDownloadUrl
-                : null
-            }
+            onClick={() => {
+              if (downloadUrl) {
+                window.open(downloadUrl, '_blank');
+              } else {
+                if (!loading) {
+                  fetchDownloadUrl();
+                }
+              }
+            }}
           >
             <svg
               width="800px"
