@@ -369,7 +369,7 @@ const Search = () => {
       start,
       run: true,
     });
-    return `${window.location.origin}/?${params.toString()}`;
+    return `${window.location.origin}/search?${params.toString()}`;
   };
 
   return (
