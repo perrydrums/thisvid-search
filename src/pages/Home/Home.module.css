@@ -8,7 +8,7 @@
   margin: 100px auto;
 }
 
-.home-buttons {
+.buttons {
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -19,8 +19,16 @@
   gap: 12px;
 }
 
-@media (max-width: 600px) {
+.title {
+  font-size: 18px;
+}
+
+@media (max-width: 800px) {
   .home {
     width: 80vw;
+  }
+
+  .buttons {
+    flex-direction: column;
   }
 }
