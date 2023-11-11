@@ -335,10 +335,16 @@ const Search = () => {
     }
 
     try {
-      const videos = (await Promise.all(promises)).flat();
+      // Add all the videos to array and remove duplicates.
+      const videos = (await Promise.all(promises)).flat().filter(
+        // @ts-ignore
+        (value, index, self) => index === self.findIndex((v) => v.url === value.url),
+      );
+
       preserveResults
         ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos] as Video[], sort))
         : setVideos(sortVideos(videos as Video[], sort));
+
       setFinished(true);
       executeScroll();
       logSearch();
