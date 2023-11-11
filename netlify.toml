@@ -17,6 +17,16 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/newest/*"
+to = "https://thisvid.com/newest/:splat"
+status = 200
+
+[[redirects]]
+from = "/gay-newest/*"
+to = "https://thisvid.com/gay-newest/:splat"
+status = 200
+
+[[redirects]]
 from = "/members/*"
 to = "https://thisvid.com/members/:splat"
 status = 200

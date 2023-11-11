@@ -18,6 +18,7 @@ import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../he
 import { getVideos, sortVideos } from '../../helpers/videos';
 
 const modes: Modes = {
+  newest: 'Newest videos',
   user: 'User ID',
   friend: 'Friend',
   category: 'Category',
@@ -25,6 +26,10 @@ const modes: Modes = {
 };
 
 const types: Types = {
+  newest: [
+    { value: 'newest', label: 'Straight' },
+    { value: 'gay-newest', label: 'Gay' },
+  ],
   category: [
     { value: 'most-popular', label: 'Popular' },
     { value: 'latest', label: 'Newest' },
@@ -212,10 +217,10 @@ const Search = () => {
   };
 
   const getUrl = (page: number): string => {
-    // Define the base URLs for each search mode
     const baseUrl: {
       [key: string]: string;
     } = {
+      newest: `/${type}/${page}/`,
       user: `/members/${id}/${type}_videos/${page}/`,
       friend: `/members/${friendId}/${type}_videos/${page}/`,
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
@@ -234,6 +239,7 @@ const Search = () => {
     const baseUrl: {
       [key: string]: string;
     } = {
+      newest: `/${type}/`,
       user: `/members/${id}/`,
       friend: `/members/${friendId}/`,
       tags: `/tags/${primaryTag}/`,

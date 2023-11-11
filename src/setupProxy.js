@@ -2,6 +2,22 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {
   app.use(
+    '/newest',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
+    '/gay-newest',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
     '/members',
     createProxyMiddleware({
       target: 'https://thisvid.com',
