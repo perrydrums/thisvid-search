@@ -367,7 +367,9 @@ const Search = () => {
     setFinished(false);
     setSearchObject(null);
 
-    if ((e.nativeEvent as SubmitEvent).submitter?.id === 'share') {
+    if (
+      (e.nativeEvent.submitter as SubmitEvent['submitter'] as HTMLInputElement)?.name === 'next'
+    ) {
       next();
       return;
     }
