@@ -6,6 +6,7 @@ import LoadingBar from 'react-top-loading-bar';
 
 import '../../App.css';
 import Feedback from '../../components/Feedback';
+import Header from '../../components/Header';
 import ResultsContainer from '../../components/ResultsContainer';
 import CategoriesContainer from '../../components/ResultsContainer/CategoriesContainer';
 import FriendsContainer from '../../components/ResultsContainer/FriendsContainer';
@@ -410,11 +411,7 @@ const Search = () => {
         height={10}
         onLoaderFinished={() => setProgressCount(0)}
       />
-      <div className="header">
-        <span className="subtitle">
-          <a href="/">ThisVid Advanced Search Site</a>
-        </span>
-      </div>
+      <Header backButtonUrl="/" showPreferences={true} />
       <div className="container">
         <div className="form-container">
           <div className="button-columns-3">

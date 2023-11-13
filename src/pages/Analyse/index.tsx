@@ -2,6 +2,7 @@ import cheerio from 'cheerio';
 import React, { useRef, useState } from 'react';
 
 import '../../App.css';
+import Header from '../../components/Header';
 import Result from '../../components/Result';
 
 type User = {
@@ -224,9 +225,7 @@ const Analyse = () => {
 
   return (
     <>
-      <div className="header">
-        <span className="subtitle">ThisVid Advanced Search Site</span>
-      </div>
+      <Header backButtonUrl="/" showPreferences={true} />
       <div className="container">
         <div className="form-container">
           <h2>Analyse Favourites</h2>

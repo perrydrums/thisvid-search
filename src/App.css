@@ -4,11 +4,6 @@ body {
   color: var(--text-color);
 }
 
-.header {
-  padding: 12px;
-  text-align: center;
-}
-
 .subtitle {
   font-size: 18px;
 }

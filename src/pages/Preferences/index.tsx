@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
 import '../../App.css';
+import Header from '../../components/Header';
 import MoodResult from '../../components/Result/MoodResult';
 import InputTags from '../../components/input/Tags';
 import { Mood, Preferences as PreferencesType } from '../../helpers/types';
@@ -84,11 +85,7 @@ const Preferences = () => {
 
   return (
     <>
-      <div className="header">
-        <span className="subtitle">
-          <a href="/">ThisVid Advanced Search Site</a>
-        </span>
-      </div>
+      <Header backButtonUrl="/search" />
       <div className="container">
         <div className="results-container">
           <div className="container-section">

@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.header span {
+  min-width: 50px;
+}
+
+.title {
+  font-size: 18px;
+}
+
+.title a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.title a:hover {
+  color: var(--accent-color);
+}
+
+.backButton {
+  font-size: 28px;
+  line-height: 24px;
+}
+
+.preferences {
+  font-size: 32px;
+  line-height: 24px;
+}
