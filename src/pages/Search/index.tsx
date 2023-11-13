@@ -101,7 +101,9 @@ const Search = () => {
   const [searchObject, setSearchObject] = useState<LogParams | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [moods, setMoods] = useState<Mood[]>([]);
-  const [activeMood, setActiveMood] = useState(localStorage.getItem('tvass-default-mood') || '');
+  const [activeMood, setActiveMood] = useState(
+    params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : '',
+  );
 
   useEffect(() => {
     getCategories().then((categories: Category[]) => {
@@ -380,8 +382,12 @@ const Search = () => {
     // @ts-ignore
     const params = new URLSearchParams({
       mode,
+      activeMood,
       type,
       tags: includeTags.join(','),
+      excludeTags: excludeTags.join(','),
+      boosterTags: boosterTags.join(','),
+      diminishingTags: diminishingTags.join(','),
       amount,
       minDuration,
       primaryTag,
