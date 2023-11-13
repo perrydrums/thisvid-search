@@ -225,17 +225,24 @@ select {
   position: absolute;
   pointer-events: none;
   opacity: 0.5;
-  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, padding-top 0.2s ease-in-out, right 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .select-wrapper:hover:after {
   opacity: 1;
 }
 
-.select-wrapper-alt:hover:after {
-  transform: rotate(-90deg);
-  padding-top: 18px;
-  right: 20px;
+.select-wrapper-alt:after {
+  content: '\0025B6';
+}
+
+.select-wrapper-alt input::placeholder {
+  transition: color 0.2s ease-in-out;
+}
+
+.select-wrapper-alt:hover input::placeholder,
+.select-wrapper-alt input:focus::placeholder {
+  color: var(--text-color);
 }
 
 input,

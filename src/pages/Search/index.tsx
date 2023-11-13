@@ -559,11 +559,7 @@ const Search = () => {
                         required={true}
                         id="category"
                         placeholder="Choose category"
-                        value={
-                          friendIdFieldHover
-                            ? 'Change category'
-                            : categories.find((c) => c.slug === category)?.name || ''
-                        }
+                        value={categories.find((c) => c.slug === category)?.name || ''}
                         onClick={() => setCategory('')}
                         onMouseEnter={() => setFriendIdFieldHover(true)}
                         onMouseLeave={() => setFriendIdFieldHover(false)}
