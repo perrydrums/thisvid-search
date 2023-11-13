@@ -444,20 +444,23 @@ const Search = () => {
                   </a>
                 </label>
                 <div>
-                  <select
-                    id="mood"
-                    value={activeMood}
-                    onChange={(e) => setActiveMood(e.target.value)}
-                    data-tooltip-id="mood"
-                  >
-                    {moods.map((mood) => {
-                      return (
-                        <option key={mood.name} value={mood.name}>
-                          {mood.name}
-                        </option>
-                      );
-                    })}
-                  </select>
+                  <div className="select-wrapper">
+                    <select
+                      id="mood"
+                      value={activeMood}
+                      onChange={(e) => setActiveMood(e.target.value)}
+                      data-tooltip-id="mood"
+                    >
+                      {moods.map((mood) => {
+                        return (
+                          <option key={mood.name} value={mood.name}>
+                            {mood.name}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
                   <Tooltip id="mood" className="label-tooltip" place="left-start">
                     Prefill the search options.
                   </Tooltip>
@@ -465,15 +468,17 @@ const Search = () => {
 
                 {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
                 <label htmlFor="search-mode">Search by</label>
-                <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-                  {Object.keys(modes).map((key) => {
-                    return (
-                      <option key={key} value={key}>
-                        {modes[key]}
-                      </option>
-                    );
-                  })}
-                </select>
+                <div className="select-wrapper">
+                  <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+                    {Object.keys(modes).map((key) => {
+                      return (
+                        <option key={key} value={key}>
+                          {modes[key]}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
                 {(mode === 'user' || mode === 'friend') && (
                   <>
                     <div>
@@ -547,22 +552,24 @@ const Search = () => {
                 {mode === 'category' && (
                   <>
                     <label htmlFor="category">Category</label>
-                    <input
-                      type="text"
-                      readOnly={true}
-                      required={true}
-                      id="category"
-                      placeholder="Choose category"
-                      value={
-                        friendIdFieldHover
-                          ? 'Change category'
-                          : categories.find((c) => c.slug === category)?.name || ''
-                      }
-                      onClick={() => setCategory('')}
-                      onMouseEnter={() => setFriendIdFieldHover(true)}
-                      onMouseLeave={() => setFriendIdFieldHover(false)}
-                      style={{ cursor: 'pointer' }}
-                    />
+                    <div className="select-wrapper select-wrapper-alt">
+                      <input
+                        type="text"
+                        readOnly={true}
+                        required={true}
+                        id="category"
+                        placeholder="Choose category"
+                        value={
+                          friendIdFieldHover
+                            ? 'Change category'
+                            : categories.find((c) => c.slug === category)?.name || ''
+                        }
+                        onClick={() => setCategory('')}
+                        onMouseEnter={() => setFriendIdFieldHover(true)}
+                        onMouseLeave={() => setFriendIdFieldHover(false)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </div>
                   </>
                 )}
                 {mode === 'tags' && (
@@ -581,19 +588,21 @@ const Search = () => {
                   </>
                 )}
                 <label htmlFor="type">Type</label>
-                <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
-                  <option disabled value="">
-                    {' '}
-                    - Select -
-                  </option>
-                  {types[mode].map(({ value, label }) => {
-                    return (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    );
-                  })}
-                </select>
+                <div className="select-wrapper">
+                  <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
+                    <option disabled value="">
+                      {' '}
+                      - Select -
+                    </option>
+                    {types[mode].map(({ value, label }) => {
+                      return (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
               </div>
               <div className="form-columns form-columns-group">
                 <label htmlFor="tags">Title</label>
@@ -608,16 +617,18 @@ const Search = () => {
                   <>
                     <label htmlFor="tags-operator">Operator</label>
                     <div>
-                      <select
-                        id="tags-operator"
-                        value={termsOperator}
-                        required
-                        onChange={(e) => setTermsOperator(e.target.value)}
-                        data-tooltip-id="tags-operator-tooltip"
-                      >
-                        <option value="OR">OR</option>
-                        <option value="AND">AND</option>
-                      </select>
+                      <div className="select-wrapper">
+                        <select
+                          id="tags-operator"
+                          value={termsOperator}
+                          required
+                          onChange={(e) => setTermsOperator(e.target.value)}
+                          data-tooltip-id="tags-operator-tooltip"
+                        >
+                          <option value="OR">OR</option>
+                          <option value="AND">AND</option>
+                        </select>
+                      </div>
                       <Tooltip
                         id="tags-operator-tooltip"
                         className="label-tooltip"

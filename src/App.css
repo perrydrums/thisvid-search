@@ -203,6 +203,41 @@ a.username:hover {
   text-decoration-color: var(--text-color);
 }
 
+select {
+  /* Make it work on ios safari. */
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+/* Add back arrow. */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+.select-wrapper:after {
+  content: '\0025BC';
+  font-size: 10px;
+  color: white;
+  right: 14px;
+  top: 4px;
+  padding-top: 10px;
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, padding-top 0.2s ease-in-out, right 0.2s ease-in-out;
+}
+
+.select-wrapper:hover:after {
+  opacity: 1;
+}
+
+.select-wrapper-alt:hover:after {
+  transform: rotate(-90deg);
+  padding-top: 18px;
+  right: 20px;
+}
+
 input,
 select,
 button {
