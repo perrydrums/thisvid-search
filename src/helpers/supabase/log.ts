@@ -15,6 +15,7 @@ export const log = async ({
   userId,
   friendId,
   resultCount,
+  visitorId,
 }: LogParams): Promise<LogParams | null> => {
   const ipAddress = await getIp();
   const { data, error } = await supabase
@@ -34,6 +35,7 @@ export const log = async ({
         friendId: friendId || null,
         resultCount,
         ipAddress,
+        visitorId,
       },
     ])
     .select();

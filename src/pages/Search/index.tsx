@@ -43,11 +43,13 @@ const types: Types = {
     { value: 'public', label: 'Public' },
     { value: 'private', label: 'Private' },
     { value: 'favourite', label: 'Favourites' },
+    { value: 'all', label: 'All' },
   ],
   friend: [
     { value: 'public', label: 'Public' },
     { value: 'private', label: 'Private' },
     { value: 'favourite', label: 'Favourites' },
+    { value: 'all', label: 'All' },
   ],
 };
 
