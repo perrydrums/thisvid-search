@@ -52,8 +52,11 @@ module.exports = function (app) {
   app.use(
     '/getVideos',
     createProxyMiddleware({
-      target: 'https://tvass.netlify.app/.netlify/videos',
+      target: 'https://tvass.netlify.app/.netlify/functions',
       changeOrigin: true,
+      pathRewrite: {
+        '^/getVideos': '/videos',
+      },
     }),
   );
 

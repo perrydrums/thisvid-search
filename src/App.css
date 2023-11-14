@@ -184,6 +184,7 @@ div.label-tooltip {
   opacity: 1;
   font-size: 0.8em;
   animation: fade-in 0.2s;
+  z-index: 100;
 }
 
 a.username {

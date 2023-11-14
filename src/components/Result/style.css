@@ -116,6 +116,15 @@
   stroke: var(--green);
 }
 
+.result .error svg {
+  stroke: var(--accent-color);
+}
+
+.result .done svg path,
+.result .error svg path {
+  stroke-width: .13em;
+}
+
 .result .default-mood {
   display: inline-block;
   float: right;

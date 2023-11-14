@@ -1,4 +1,5 @@
 import React from 'react';
+import { Tooltip } from 'react-tooltip';
 
 import debug from '../../helpers/debug';
 import getDownloadUrl from '../../helpers/getDownloadUrl';
@@ -32,11 +33,20 @@ const Result = ({
 }: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [downloadError, setDownloadError] = React.useState(false);
 
   const fetchDownloadUrl = async () => {
     setLoading(true);
+    setDownloadError(false);
     const dUrl = await getDownloadUrl(url);
-    setDownloadUrl(dUrl);
+
+    // If dUrl is bool false, show error, else it is a string
+
+    if (dUrl && typeof dUrl === 'string') {
+      setDownloadUrl(dUrl);
+    } else {
+      setDownloadError(true);
+    }
     setLoading(false);
   };
 
@@ -87,7 +97,10 @@ const Result = ({
         {date && <span className="date">{date}</span>}
         {!isPrivate ? (
           <div
-            className={`download ${loading ? 'loading' : ''} ${downloadUrl ? 'done' : ''}`}
+            className={`download ${loading ? 'loading' : ''} ${downloadUrl ? 'done' : ''} ${
+              downloadError ? 'error' : ''
+            }`}
+            data-tooltip-id={`download-tooltip-${url}`}
             onClick={() => {
               if (downloadUrl) {
                 window.open(downloadUrl, '_blank');
@@ -98,6 +111,18 @@ const Result = ({
               }
             }}
           >
+            <Tooltip
+              id={`download-tooltip-${url}`}
+              className="label-tooltip"
+              place="left-start"
+              delayHide={downloadError ? 5 : undefined}
+            >
+              {downloadError
+                ? "Couldn't download this video. Sometimes ThisVid is a bit slow, just try again."
+                : downloadUrl
+                ? 'Click here and open the video in a new tab. Right click on the video and click "Save video as" to download it.'
+                : 'Download this video'}
+            </Tooltip>
             <svg
               width="800px"
               height="800px"
