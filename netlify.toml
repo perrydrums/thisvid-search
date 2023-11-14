@@ -47,6 +47,11 @@ to = "https://thisvid.com/tags/:splat"
 status = 200
 
 [[redirects]]
+from = "/getVideos"
+to = "https://tvass.netlify.app/.netlify/functions/videos"
+status = 200
+
+[[redirects]]
 from = "/download"
 to = "https://tvass.netlify.app/.netlify/functions/download"
 status = 200

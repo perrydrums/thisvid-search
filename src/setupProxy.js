@@ -50,6 +50,14 @@ module.exports = function (app) {
   );
 
   app.use(
+    '/getVideos',
+    createProxyMiddleware({
+      target: 'https://tvass.netlify.app/.netlify/videos',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
     '/download',
     createProxyMiddleware({
       target: 'https://tvass.netlify.app/.netlify/functions',

@@ -10,6 +10,11 @@ export type Video = {
   page: number;
 };
 
+export type VideoResponse = {
+  success: boolean;
+  videos: Video[];
+};
+
 export type Category = {
   name: string;
   image: string;
