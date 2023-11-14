@@ -831,6 +831,7 @@ const Search = () => {
                   >
                     <option value="relevance">Relevance</option>
                     <option value="views">Views</option>
+                    <option value="viewsAsc">Least views</option>
                     <option value="newest">
                       Page {start} → {amount}
                     </option>

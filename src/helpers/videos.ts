@@ -204,6 +204,9 @@ export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<V
     case 'views':
       sortedVideos.sort((a, b) => b.views - a.views);
       break;
+    case 'viewsAsc':
+      sortedVideos.sort((a, b) => a.views - b.views);
+      break;
     case 'relevance':
       sortedVideos.sort((a, b) => b.relevance - a.relevance || b.views - a.views);
       break;
