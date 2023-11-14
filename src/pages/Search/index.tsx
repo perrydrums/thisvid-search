@@ -12,8 +12,8 @@ import CategoriesContainer from '../../components/ResultsContainer/CategoriesCon
 import FriendsContainer from '../../components/ResultsContainer/FriendsContainer';
 import Share from '../../components/Share';
 import InputTags from '../../components/input/Tags';
+import { getFriends } from '../../helpers/friends';
 import { getCategories } from '../../helpers/getCategories';
-import { getFriends } from '../../helpers/getFriends';
 import { log } from '../../helpers/supabase/log';
 import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../helpers/types';
 import { getVideos, sortVideos } from '../../helpers/videos';
@@ -204,17 +204,17 @@ const Search = () => {
     setLoading(true);
     const f = await getFriends(id, setAmount, setProgressCount);
 
-    if (f === false) {
+    if (!f.success) {
       setErrorMessage('User not found');
       return;
     }
 
-    if ((f as Array<Friend>).length === 0) {
+    if (f.friends.length === 0) {
       setErrorMessage('No friends found');
       return;
     }
 
-    setFriends(f as Array<Friend>);
+    setFriends(f.friends);
     setLoading(false);
     localStorage.setItem('uid', id);
   };

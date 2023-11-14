@@ -38,7 +38,11 @@ exports.handler = async function (event, context) {
   const $ = cheerio.load(body);
 
   // Get the text inside "a" inside li class="pagination-last".
-  const pageAmount = parseInt($('li.pagination-last a').text());
+  // If that doesn't exist, get the second-to-last li inside ul class="pagination-list".
+  const pageAmount =
+    parseInt($('li.pagination-last a').text()) ||
+    parseInt($('ul.pagination-list li:nth-last-child(2) a').text()) ||
+    1;
 
   // Fetch every page (except the first one) and get the friends.
   const friends = await Promise.all(
