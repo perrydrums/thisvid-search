@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 
 const headers = {
   'Content-Type': 'application/json',
-  'Cache-Control': 'public, max-age=31536000',
+  'Cache-Control': 'public, max-age=86400',
   'Netlify-Vary': 'query',
 };
 
