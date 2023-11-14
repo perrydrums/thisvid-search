@@ -107,6 +107,13 @@ const Search = () => {
   );
 
   useEffect(() => {
+    if (params.run) {
+      run(Number(params.start) || 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     getCategories().then((categories: Category[]) => {
       setCategories(categories);
     });
@@ -150,11 +157,35 @@ const Search = () => {
   }, [activeMood, moods]);
 
   useEffect(() => {
-    if (params.run) {
-      run(Number(params.start) || 1);
+    if (mode === 'friend') {
+      setFriendId('');
+      setFriends([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mode, id]);
+
+  useEffect(() => {
+    const getUsernames = async () => {
+      if (id) {
+        const userResponse = await fetch(`/members/${id}/`);
+
+        if (userResponse.status === 404) {
+          setErrorMessage(`User ${id} does not exist.`);
+          setUsername('');
+          return;
+        }
+
+        const userBody = await userResponse.text();
+        const $user = cheerio.load(userBody);
+
+        const username = $user('.profile-menu .headline h2').text() || 'username not found';
+        setUsername(username);
+      } else {
+        setUsername('');
+      }
+    };
+
+    getUsernames();
+  }, [mode, id]);
 
   useEffect(() => {
     const getPageLimit = async () => {
@@ -163,19 +194,6 @@ const Search = () => {
       }
 
       const userId = mode === 'friend' ? friendId : id;
-
-      const userResponse = await fetch(`/members/${userId}/`);
-
-      if (userResponse.status === 404) {
-        setErrorMessage(`User ${userId} does not exist.`);
-        return;
-      }
-
-      const userBody = await userResponse.text();
-      const $user = cheerio.load(userBody);
-
-      const username = $user('.profile-menu .headline h2').text() || 'username not found';
-      setUsername(username);
 
       const response = await fetch(`/members/${userId}/${type}_videos/`);
 
@@ -206,16 +224,13 @@ const Search = () => {
 
     if (!f.success) {
       setErrorMessage('User not found');
-      return;
-    }
-
-    if (f.friends.length === 0) {
+    } else if (f.friends.length === 0) {
       setErrorMessage('No friends found');
-      return;
     }
 
     setFriends(f.friends);
     setLoading(false);
+    setFinished(true);
     localStorage.setItem('uid', id);
   };
 
@@ -438,7 +453,6 @@ const Search = () => {
               Advanced search
             </label>
           </div>
-          <span className="error"> {errorMessage} </span>
           <form onSubmit={submit}>
             <div>
               <div className="form-columns">
@@ -488,7 +502,7 @@ const Search = () => {
                   <>
                     <div>
                       <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                      {mode === 'user' && username && (
+                      {username && (
                         <a
                           href={`https://thisvid.com/members/${id}/`}
                           target="_blank"
@@ -541,11 +555,7 @@ const Search = () => {
                         required={true}
                         id="friendId"
                         placeholder="Choose friend"
-                        value={
-                          friendIdFieldHover
-                            ? 'Change friend'
-                            : friends.find((friend) => friend.uid === friendId)?.username || ''
-                        }
+                        value={friendIdFieldHover ? 'Change friend' : friendId || ''}
                         onClick={() => setFriendId(null)}
                         onMouseEnter={() => setFriendIdFieldHover(true)}
                         onMouseLeave={() => setFriendIdFieldHover(false)}
@@ -763,12 +773,16 @@ const Search = () => {
           {mode === 'friend' && !friendId ? (
             <>
               <div className="results-header">
-                {loading ? (
-                  <span>Collecting friends...</span>
-                ) : finished ? (
-                  `Found ${friends.length} friends`
+                {errorMessage ? (
+                  <span className="error">{errorMessage}</span>
                 ) : (
-                  <span></span>
+                  <h2>
+                    {loading
+                      ? 'Collecting friends...'
+                      : finished
+                      ? `Found ${friends.length} friends`
+                      : ''}
+                  </h2>
                 )}
                 <div>
                   <input
