@@ -50,3 +50,9 @@ status = 200
 from = "/download"
 to = "https://tvass.netlify.app/.netlify/functions/download"
 status = 200
+
+[[redirects]]
+from = "/friends"
+to = "https://tvass.netlify.app/.netlify/functions/friends"
+status = 200
+

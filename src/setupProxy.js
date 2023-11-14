@@ -56,4 +56,12 @@ module.exports = function (app) {
       changeOrigin: true,
     }),
   );
+
+  app.use(
+    '/friends',
+    createProxyMiddleware({
+      target: 'https://tvass.netlify.app/.netlify/functions',
+      changeOrigin: true,
+    }),
+  );
 };

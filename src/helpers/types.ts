@@ -32,6 +32,12 @@ export type Friend = {
   url: string;
 };
 
+export type FriendsResponse = {
+  success: boolean;
+  pageAmount: number;
+  friends: Friend[];
+};
+
 export type LogParams = {
   id: number;
   mode: string;
