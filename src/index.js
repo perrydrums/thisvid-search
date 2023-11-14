@@ -8,6 +8,11 @@ import Home from './pages/Home';
 import Preferences from './pages/Preferences';
 import Search from './pages/Search';
 
+// Generate random visitor ID if not already set in local storage.
+if (!localStorage.getItem('visitorId')) {
+  localStorage.setItem('visitorId', Math.random().toString(36).substring(2));
+}
+
 const router = createBrowserRouter([
   {
     path: '/',

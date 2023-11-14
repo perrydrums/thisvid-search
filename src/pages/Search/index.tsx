@@ -297,7 +297,7 @@ const Search = () => {
       userId: id,
       friendId,
       resultCount: 0,
-      visitorId: localStorage.getItem('tvass-user-id') || '',
+      visitorId: localStorage.getItem('visitorId'),
     });
     setSearchObject(s);
   };
