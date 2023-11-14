@@ -52,6 +52,7 @@ export type LogParams = {
   userId?: string;
   friendId?: string;
   resultCount: number;
+  visitorId: string;
 };
 
 export type Modes = {

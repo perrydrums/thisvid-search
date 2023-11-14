@@ -209,6 +209,7 @@ const Search = () => {
         parseInt(
           $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
         ) || 1;
+
       setPageLimit(lastPage);
       setAmount(lastPage);
     };
@@ -294,6 +295,7 @@ const Search = () => {
       userId: id,
       friendId,
       resultCount: 0,
+      visitorId: localStorage.getItem('tvass-user-id') || '',
     });
     setSearchObject(s);
   };
