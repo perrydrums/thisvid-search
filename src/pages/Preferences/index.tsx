@@ -194,7 +194,7 @@ const Preferences = () => {
                   />
                 </div>
               </div>
-              <div className="button-columns">
+              <div className="button-columns" style={{ margin: '12px 0' }}>
                 <button onClick={saveMood}>Save</button>
                 <button onClick={deleteMood}>Delete</button>
               </div>
