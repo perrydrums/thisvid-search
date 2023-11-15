@@ -143,15 +143,16 @@ const Preferences = () => {
             </div>
           </div>
         </div>
-        <div className="form-container">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+          className="form-container"
+        >
           {activeMood && (
             <>
               <h2>Preferences for {activeMood}</h2>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
+              <div className="form-container-scroll">
                 <div className="form-columns form-columns-group">
                   <label htmlFor="tags">Default tags</label>
                   <InputTags
@@ -192,14 +193,14 @@ const Preferences = () => {
                     onChange={(e) => setPreference('minDuration', e.target.value)}
                   />
                 </div>
-                <div className="button-columns">
-                  <button onClick={saveMood}>Save</button>
-                  <button onClick={deleteMood}>Delete</button>
-                </div>
-              </form>
+              </div>
+              <div className="button-columns">
+                <button onClick={saveMood}>Save</button>
+                <button onClick={deleteMood}>Delete</button>
+              </div>
             </>
           )}
-        </div>
+        </form>
       </div>
     </>
   );
