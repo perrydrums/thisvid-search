@@ -432,7 +432,7 @@ const Search = () => {
       />
       <Header backButtonUrl="/" showPreferences={true} />
       <div className="container">
-        <div className="form-container">
+        <form onSubmit={submit} className="form-container">
           <div className="button-columns-3">
             <input
               type="radio"
@@ -457,314 +457,312 @@ const Search = () => {
               Advanced search
             </label>
           </div>
-          <form onSubmit={submit}>
-            <div>
-              <div className="form-columns">
-                <label htmlFor="mood">
-                  Mood{' '}
-                  <a className="username" href="/preferences">
-                    Manage moods
-                  </a>
-                </label>
-                <div>
-                  <div className="select-wrapper">
-                    <select
-                      id="mood"
-                      value={activeMood}
-                      onChange={(e) => setActiveMood(e.target.value)}
-                      data-tooltip-id="mood"
-                    >
-                      {moods.map((mood) => {
-                        return (
-                          <option key={mood.name} value={mood.name}>
-                            {mood.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-
-                  <Tooltip id="mood" className="label-tooltip" place="left-start">
-                    Prefill the search options.
-                  </Tooltip>
-                </div>
-
-                {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
-                <label htmlFor="search-mode">Search by</label>
+          <div className="form-container-scroll">
+            <div className="form-columns">
+              <label htmlFor="mood">
+                Mood{' '}
+                <a className="username" href="/preferences">
+                  Manage moods
+                </a>
+              </label>
+              <div>
                 <div className="select-wrapper">
-                  <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-                    {Object.keys(modes).map((key) => {
+                  <select
+                    id="mood"
+                    value={activeMood}
+                    onChange={(e) => setActiveMood(e.target.value)}
+                    data-tooltip-id="mood"
+                  >
+                    {moods.map((mood) => {
                       return (
-                        <option key={key} value={key}>
-                          {modes[key]}
+                        <option key={mood.name} value={mood.name}>
+                          {mood.name}
                         </option>
                       );
                     })}
                   </select>
                 </div>
-                {(mode === 'user' || mode === 'friend') && (
-                  <>
-                    <div>
-                      <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
-                      {username && (
-                        <a
-                          href={`https://thisvid.com/members/${id}/`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="username"
-                        >
-                          {username}
-                        </a>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      id="id"
-                      value={id}
-                      required
-                      onChange={(e) => setId(e.target.value)}
-                      data-tooltip-id="id"
-                    />
-                    <Tooltip id="id" className="label-tooltip" place="left-start">
-                      The ID of the ThisVid user profile. You can find this in the URL of the
-                      profile page on ThisVid.
-                    </Tooltip>
-                  </>
-                )}
-                {mode === 'friend' && (
-                  <>
-                    <div>
-                      <label htmlFor="friendId">
-                        <span>Choose Friend</span>
-                      </label>
-                      {friendId && (
-                        <a
-                          href={`https://thisvid.com/members/${friendId}/`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="username"
-                        >
-                          {friends.find((friend) => friend.uid === friendId)?.username}
-                        </a>
-                      )}
-                    </div>
-                    {friends.length === 0 ? (
-                      <button type="button" onClick={getFriendsById} disabled={id === ''}>
-                        Get Friends
-                      </button>
-                    ) : (
-                      <input
-                        type="text"
-                        readOnly={true}
-                        required={true}
-                        id="friendId"
-                        placeholder="Choose friend"
-                        value={friendIdFieldHover ? 'Change friend' : friendId || ''}
-                        onClick={() => setFriendId(null)}
-                        onMouseEnter={() => setFriendIdFieldHover(true)}
-                        onMouseLeave={() => setFriendIdFieldHover(false)}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    )}
-                  </>
-                )}
-                {mode === 'category' && (
-                  <>
-                    <label htmlFor="category">Category</label>
-                    <div className="select-wrapper select-wrapper-alt">
-                      <input
-                        type="text"
-                        readOnly={true}
-                        required={true}
-                        id="category"
-                        placeholder="Choose category"
-                        value={categories.find((c) => c.slug === category)?.name || ''}
-                        onClick={() => setCategory('')}
-                        onMouseEnter={() => setFriendIdFieldHover(true)}
-                        onMouseLeave={() => setFriendIdFieldHover(false)}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    </div>
-                  </>
-                )}
-                {mode === 'tags' && (
-                  <>
-                    <label htmlFor="primary-tag">
-                      Primary Tag {!sourceExists && 'Tag does not exist'}
-                    </label>
-                    <input
-                      type="text"
-                      id="primary-tag"
-                      value={primaryTag}
-                      required
-                      onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
-                      onBlur={checkSourceExists}
-                    />
-                  </>
-                )}
-                <label htmlFor="type">Type</label>
-                <div className="select-wrapper">
-                  <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
-                    <option disabled value="">
-                      {' '}
-                      - Select -
-                    </option>
-                    {types[mode].map(({ value, label }) => {
-                      return (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              </div>
-              <div className="form-columns form-columns-group">
-                <label htmlFor="tags">Title</label>
-                <InputTags
-                  tags={includeTags}
-                  setTags={setIncludeTags}
-                  tooltip={`Find videos with ${
-                    termsOperator === 'AND' ? 'all' : 'any'
-                  } of these words in the title.`}
-                />
-                {advanced && (
-                  <>
-                    <label htmlFor="tags-operator">Operator</label>
-                    <div>
-                      <div className="select-wrapper">
-                        <select
-                          id="tags-operator"
-                          value={termsOperator}
-                          required
-                          onChange={(e) => setTermsOperator(e.target.value)}
-                          data-tooltip-id="tags-operator-tooltip"
-                        >
-                          <option value="OR">OR</option>
-                          <option value="AND">AND</option>
-                        </select>
-                      </div>
-                      <Tooltip
-                        id="tags-operator-tooltip"
-                        className="label-tooltip"
-                        place="left-start"
-                      >
-                        OR will return videos that contain <b>any</b> of the tags. AND will return
-                        videos that contain <b>all</b> of the tags.
-                      </Tooltip>
-                    </div>
 
-                    <label htmlFor="exclude-tags">Title does not contain</label>
-                    <InputTags
-                      htmlId="exclude-tags"
-                      tags={excludeTags}
-                      setTags={setExcludeTags}
-                      tooltip="Videos with these tags will be excluded from the search results."
-                    />
-                    <label htmlFor="booster-tags">Booster tags</label>
-                    <InputTags
-                      htmlId="booster-tags"
-                      tags={boosterTags}
-                      setTags={setBoosterTags}
-                      tooltip="Videos with these tags will be boosted to the top of the search results, when sorting by relevance."
-                    />
-                    <label htmlFor="diminishing-tags">Diminishing tags</label>
-                    <InputTags
-                      htmlId="diminishing-tags"
-                      tags={diminishingTags}
-                      setTags={setDiminishingTags}
-                      tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
-                    />
-                  </>
-                )}
+                <Tooltip id="mood" className="label-tooltip" place="left-start">
+                  Prefill the search options.
+                </Tooltip>
               </div>
-              <div className="form-columns">
-                {advanced && (
-                  <>
-                    <label htmlFor="start">Start Page</label>
-                    <input
-                      type="number"
-                      id="start"
-                      value={start}
-                      required
-                      onChange={(e) => setStart(parseInt(e.target.value))}
-                    />
-                  </>
-                )}
-                <label htmlFor="min-duration">Min Duration (minutes)</label>
-                <input
-                  type="number"
-                  min="0"
-                  id="min-duration"
-                  value={minDuration}
-                  onChange={(e) => setMinDuration(parseInt(e.target.value) || null)}
-                />
-                <label htmlFor="amount">Number of Pages</label>
-                <input
-                  type="number"
-                  min="0"
-                  max={pageLimit || 100}
-                  id="amount"
-                  value={amount}
-                  required
-                  onChange={(e) => setAmount(parseInt(e.target.value))}
-                />
+
+              {/*<p>{advanced && (pageLimit !== 0 && `Page Limit: ${pageLimit}`)}</p>*/}
+              <label htmlFor="search-mode">Search by</label>
+              <div className="select-wrapper">
+                <select id="search-mode" value={mode} onChange={(e) => setMode(e.target.value)}>
+                  {Object.keys(modes).map((key) => {
+                    return (
+                      <option key={key} value={key}>
+                        {modes[key]}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
-            </div>
-            <div>
-              <div className="button-columns-3" style={{ margin: '12px 0' }}>
-                <div>
-                  <input
-                    type="checkbox"
-                    id="quick"
-                    checked={quick}
-                    onChange={() => setQuick(!quick)}
-                    disabled={true}
-                  />
-                  <label htmlFor="quick" className="checkbox-button">
-                    Quick Search
-                  </label>
-                </div>
-                <div>
-                  <input
-                    type="checkbox"
-                    id="preserve-results"
-                    checked={preserveResults}
-                    onChange={() => setPreserveResults(!preserveResults)}
-                  />
-                  <label htmlFor="preserve-results" className="checkbox-button">
-                    Preserve Results
-                  </label>
-                </div>
-                {(type === 'favourite' || mode !== 'user') && (
+              {(mode === 'user' || mode === 'friend') && (
+                <>
                   <div>
-                    <input
-                      type="checkbox"
-                      id="omit-private"
-                      checked={omitPrivate}
-                      onChange={() => setOmitPrivate(!omitPrivate)}
-                    />
-                    <label htmlFor="omit-private" className="checkbox-button">
-                      No Private Videos
-                    </label>
+                    <label htmlFor="id">{mode === 'friend' && 'Your '}User ID</label>
+                    {username && (
+                      <a
+                        href={`https://thisvid.com/members/${id}/`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="username"
+                      >
+                        {username}
+                      </a>
+                    )}
                   </div>
-                )}
-              </div>
-              <div className="button-columns">
-                <button type="submit" name="run">
-                  Run
-                </button>
-                <button
-                  type="submit"
-                  name="next"
-                  disabled={start + amount > pageLimit && pageLimit !== 0}
-                >
-                  Next
-                </button>
+                  <input
+                    type="text"
+                    id="id"
+                    value={id}
+                    required
+                    onChange={(e) => setId(e.target.value)}
+                    data-tooltip-id="id"
+                  />
+                  <Tooltip id="id" className="label-tooltip" place="left-start">
+                    The ID of the ThisVid user profile. You can find this in the URL of the profile
+                    page on ThisVid.
+                  </Tooltip>
+                </>
+              )}
+              {mode === 'friend' && (
+                <>
+                  <div>
+                    <label htmlFor="friendId">
+                      <span>Choose Friend</span>
+                    </label>
+                    {friendId && (
+                      <a
+                        href={`https://thisvid.com/members/${friendId}/`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="username"
+                      >
+                        {friends.find((friend) => friend.uid === friendId)?.username}
+                      </a>
+                    )}
+                  </div>
+                  {friends.length === 0 ? (
+                    <button type="button" onClick={getFriendsById} disabled={id === ''}>
+                      Get Friends
+                    </button>
+                  ) : (
+                    <input
+                      type="text"
+                      readOnly={true}
+                      required={true}
+                      id="friendId"
+                      placeholder="Choose friend"
+                      value={friendIdFieldHover ? 'Change friend' : friendId || ''}
+                      onClick={() => setFriendId(null)}
+                      onMouseEnter={() => setFriendIdFieldHover(true)}
+                      onMouseLeave={() => setFriendIdFieldHover(false)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  )}
+                </>
+              )}
+              {mode === 'category' && (
+                <>
+                  <label htmlFor="category">Category</label>
+                  <div className="select-wrapper select-wrapper-alt">
+                    <input
+                      type="text"
+                      readOnly={true}
+                      required={true}
+                      id="category"
+                      placeholder="Choose category"
+                      value={categories.find((c) => c.slug === category)?.name || ''}
+                      onClick={() => setCategory('')}
+                      onMouseEnter={() => setFriendIdFieldHover(true)}
+                      onMouseLeave={() => setFriendIdFieldHover(false)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </div>
+                </>
+              )}
+              {mode === 'tags' && (
+                <>
+                  <label htmlFor="primary-tag">
+                    Primary Tag {!sourceExists && 'Tag does not exist'}
+                  </label>
+                  <input
+                    type="text"
+                    id="primary-tag"
+                    value={primaryTag}
+                    required
+                    onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
+                    onBlur={checkSourceExists}
+                  />
+                </>
+              )}
+              <label htmlFor="type">Type</label>
+              <div className="select-wrapper">
+                <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
+                  <option disabled value="">
+                    {' '}
+                    - Select -
+                  </option>
+                  {types[mode].map(({ value, label }) => {
+                    return (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             </div>
-          </form>
-        </div>
+            <div className="form-columns form-columns-group">
+              <label htmlFor="tags">Title</label>
+              <InputTags
+                tags={includeTags}
+                setTags={setIncludeTags}
+                tooltip={`Find videos with ${
+                  termsOperator === 'AND' ? 'all' : 'any'
+                } of these words in the title.`}
+              />
+              {advanced && (
+                <>
+                  <label htmlFor="tags-operator">Operator</label>
+                  <div>
+                    <div className="select-wrapper">
+                      <select
+                        id="tags-operator"
+                        value={termsOperator}
+                        required
+                        onChange={(e) => setTermsOperator(e.target.value)}
+                        data-tooltip-id="tags-operator-tooltip"
+                      >
+                        <option value="OR">OR</option>
+                        <option value="AND">AND</option>
+                      </select>
+                    </div>
+                    <Tooltip
+                      id="tags-operator-tooltip"
+                      className="label-tooltip"
+                      place="left-start"
+                    >
+                      OR will return videos that contain <b>any</b> of the tags. AND will return
+                      videos that contain <b>all</b> of the tags.
+                    </Tooltip>
+                  </div>
+
+                  <label htmlFor="exclude-tags">Title does not contain</label>
+                  <InputTags
+                    htmlId="exclude-tags"
+                    tags={excludeTags}
+                    setTags={setExcludeTags}
+                    tooltip="Videos with these tags will be excluded from the search results."
+                  />
+                  <label htmlFor="booster-tags">Booster tags</label>
+                  <InputTags
+                    htmlId="booster-tags"
+                    tags={boosterTags}
+                    setTags={setBoosterTags}
+                    tooltip="Videos with these tags will be boosted to the top of the search results, when sorting by relevance."
+                  />
+                  <label htmlFor="diminishing-tags">Diminishing tags</label>
+                  <InputTags
+                    htmlId="diminishing-tags"
+                    tags={diminishingTags}
+                    setTags={setDiminishingTags}
+                    tooltip="Videos with these tags will be lower in the search results, when sorting by relevance."
+                  />
+                </>
+              )}
+            </div>
+            <div className="form-columns">
+              {advanced && (
+                <>
+                  <label htmlFor="start">Start Page</label>
+                  <input
+                    type="number"
+                    id="start"
+                    value={start}
+                    required
+                    onChange={(e) => setStart(parseInt(e.target.value))}
+                  />
+                </>
+              )}
+              <label htmlFor="min-duration">Min Duration (minutes)</label>
+              <input
+                type="number"
+                min="0"
+                id="min-duration"
+                value={minDuration}
+                onChange={(e) => setMinDuration(parseInt(e.target.value) || null)}
+              />
+              <label htmlFor="amount">Number of Pages</label>
+              <input
+                type="number"
+                min="0"
+                max={pageLimit || 100}
+                id="amount"
+                value={amount}
+                required
+                onChange={(e) => setAmount(parseInt(e.target.value))}
+              />
+            </div>
+          </div>
+          <div>
+            <div className="button-columns-3" style={{ margin: '12px 0' }}>
+              <div>
+                <input
+                  type="checkbox"
+                  id="quick"
+                  checked={quick}
+                  onChange={() => setQuick(!quick)}
+                  disabled={true}
+                />
+                <label htmlFor="quick" className="checkbox-button">
+                  Quick Search
+                </label>
+              </div>
+              <div>
+                <input
+                  type="checkbox"
+                  id="preserve-results"
+                  checked={preserveResults}
+                  onChange={() => setPreserveResults(!preserveResults)}
+                />
+                <label htmlFor="preserve-results" className="checkbox-button">
+                  Preserve Results
+                </label>
+              </div>
+              {(type === 'favourite' || mode !== 'user') && (
+                <div>
+                  <input
+                    type="checkbox"
+                    id="omit-private"
+                    checked={omitPrivate}
+                    onChange={() => setOmitPrivate(!omitPrivate)}
+                  />
+                  <label htmlFor="omit-private" className="checkbox-button">
+                    No Private Videos
+                  </label>
+                </div>
+              )}
+            </div>
+            <div className="button-columns">
+              <button type="submit" name="run">
+                Run
+              </button>
+              <button
+                type="submit"
+                name="next"
+                disabled={start + amount > pageLimit && pageLimit !== 0}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </form>
         <div className={`results-container ${loading ? 'inactive' : ''}`} ref={resultsRef}>
           {mode === 'category' && !category && (
             <>

@@ -37,11 +37,7 @@ body {
   border-radius: 0.5rem;
 }
 
-.form-container form {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 90%;
+.form-container-scroll {
   overflow: scroll;
 }
 
