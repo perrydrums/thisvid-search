@@ -720,9 +720,23 @@ const Search = () => {
                   onChange={() => setQuick(!quick)}
                   disabled={true}
                 />
-                <label htmlFor="quick" className="checkbox-button">
+                <label
+                  htmlFor="quick"
+                  className="checkbox-button"
+                  data-tooltip-id="quick"
+                  onClick={() =>
+                    alert(
+                      'For the moment, Quick Search is always enabled to prevent fucking up and crashing ThisVid :p',
+                    )
+                  }
+                >
                   Quick Search
                 </label>
+                <Tooltip id="quick" className="label-tooltip" place="top-start">
+                  When enabled, videos will only be filtered using the video title. When disabled,
+                  videos will be filtered by their actual tags. Currently, to prevent ThisVid
+                  crashing and to make the search much faster, it's always enabled.
+                </Tooltip>
               </div>
               <div>
                 <input
