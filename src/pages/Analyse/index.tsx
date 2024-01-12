@@ -1,7 +1,9 @@
 import cheerio from 'cheerio';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import '../../App.css';
+import { CirclePacking } from '../../components/CircularPacking';
+import { Node } from '../../components/CircularPacking/data';
 import Header from '../../components/Header';
 import Result from '../../components/Result';
 
@@ -44,14 +46,49 @@ const Analyse = () => {
   const [finished, setFinished] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [show, setShow] = useState('users');
+  const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const localUid = localStorage.getItem('uid');
+  const localUid = localStorage.getItem('tvass-user-id');
   if (localUid && !uid) {
     setUid(localUid);
   }
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();
+
+  // Get container width on mount and on resize.
+  // Used to calculate number of tags to show in circular packing.
+  useEffect(() => {
+    const updateContainerWidth = () => {
+      if (resultsRef.current) {
+        setContainerWidth(resultsRef.current.clientWidth);
+      }
+    };
+
+    updateContainerWidth();
+    window.addEventListener('resize', updateContainerWidth);
+
+    return () => {
+      window.removeEventListener('resize', updateContainerWidth);
+    };
+  }, []);
+
+  const getPageLimit = async () => {
+    const response = await fetch(`/members/${uid}/favourite_videos/`);
+
+    const body = await response.text();
+    const $ = cheerio.load(body);
+
+    const lastPage = parseInt(
+      $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+    );
+    // const lastPage = 1;
+    setPageLimit(lastPage);
+  };
+
+  useEffect(() => {
+    getPageLimit();
+  }, [getPageLimit, uid]);
 
   const getAvatar = async (username: string, uid: number) => {
     if (!users[username]) {
@@ -135,19 +172,6 @@ const Analyse = () => {
     );
   };
 
-  const getPageLimit = async () => {
-    const response = await fetch(`/members/${uid}/favourite_videos/`);
-
-    const body = await response.text();
-    const $ = cheerio.load(body);
-
-    const lastPage = parseInt(
-      $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-    );
-    // const lastPage = 1;
-    setPageLimit(lastPage);
-  };
-
   const run = async () => {
     setProgressCount(0);
     setUsers({});
@@ -223,6 +247,25 @@ const Analyse = () => {
     return Object.entries(tags).sort((a, b) => b[1] - a[1]);
   };
 
+  const getCircularPackingTagsData = () => {
+    return getTagsAndCounts()
+      .map(([tag, count]) => ({ id: tag, name: tag, value: count }) as Node)
+      .slice(0, (containerWidth / 100) * 3);
+  };
+
+  const getCircularPackingCategoriesData = () => {
+    return getCategoriesAndCounts()
+      .map(([category, count]) => ({ id: category, name: category, value: count }) as Node)
+      .slice(0, (containerWidth / 100) * 3);
+  };
+
+  const getCircularPackingUsersData = () => {
+    const sortedUsers = Object.values(users).sort((a, b) => b.count - a.count);
+    return sortedUsers
+      .map((user) => ({ id: user.username, name: user.username, value: user.count }) as Node)
+      .slice(0, 20);
+  };
+
   return (
     <>
       <Header backButtonUrl="/" showPreferences={true} />
@@ -246,114 +289,112 @@ const Analyse = () => {
                 value={uid}
                 required
                 onChange={(e) => setUid(e.target.value)}
-                onBlur={getPageLimit}
               />
             </div>
             <div className="button-columns">
-              <button type="submit" name="next" disabled={!pageLimit || !finished}>
+              <button type="submit" name="next" id="next" disabled={!pageLimit || !finished}>
                 Analyse page {progressCount + 1}/{pageLimit}
               </button>
-              <button type="submit" name="run" disabled={!pageLimit || !finished}>
+              <button type="submit" name="run" id="run" disabled={!pageLimit || !finished}>
                 Analyse all videos
               </button>
             </div>
           </form>
         </div>
         <div className="results-container" ref={resultsRef}>
-          <h2>Favourite {show}</h2>
-          {Object.keys(users).length > 0 && (
-            <div className="filter-buttons">
-              <button
-                name="show-videos"
-                disabled={show === 'videos'}
-                onClick={() => setShow('videos')}
-              >
-                Videos
-              </button>
-              <button
-                name="show-favourite-users"
-                disabled={show === 'users'}
-                onClick={() => setShow('users')}
-              >
-                Users
-              </button>
-              <button
-                name="show-favourite-categories"
-                disabled={show === 'categories'}
-                onClick={() => setShow('categories')}
-              >
-                Categories
-              </button>
-              <button
-                name="show-favourite-tags"
-                disabled={show === 'tags'}
-                onClick={() => setShow('tags')}
-              >
-                Tags
-              </button>
-            </div>
-          )}
-          <div className="results">
-            {show === 'users' &&
-              Object.values(users)
-                .sort((a, b) => b.count - a.count)
-                .map((user) => (
-                  <Result
-                    key={user.username}
-                    title={user.username}
-                    url={user.url}
-                    duration={`${user.count} videos`}
-                    imageSrc={user.avatar}
-                    date=""
-                    views={0}
-                  />
-                ))}
-            {show === 'videos' &&
-              Object.values(users)
-                .sort((a, b) => b.count - a.count)
-                .map((user) =>
-                  user.videos.map((video) => (
+          <div className="results-scroll-container">
+            <h2>Favourite {show}</h2>
+            {Object.keys(users).length > 0 && (
+              <div className="filter-buttons">
+                <button
+                  name="show-summary"
+                  disabled={show === 'summary'}
+                  onClick={() => setShow('summary')}
+                >
+                  Summary
+                </button>
+                <button
+                  name="show-favourite-users"
+                  disabled={show === 'users'}
+                  onClick={() => setShow('users')}
+                >
+                  Users
+                </button>
+                <button
+                  name="show-favourite-categories"
+                  disabled={show === 'categories'}
+                  onClick={() => setShow('categories')}
+                >
+                  Categories
+                </button>
+                <button
+                  name="show-favourite-tags"
+                  disabled={show === 'tags'}
+                  onClick={() => setShow('tags')}
+                >
+                  Tags
+                </button>
+              </div>
+            )}
+            {show === 'summary' ? (
+              <div className="summary">
+                <h2 style={{ textAlign: 'center', marginBottom: '-20px' }}>Favourite tags</h2>
+                <CirclePacking data={getCircularPackingTagsData()} />
+
+                <h2 style={{ textAlign: 'center', marginBottom: '-20px' }}>Favourite categories</h2>
+                <CirclePacking data={getCircularPackingCategoriesData()} />
+
+                <h2 style={{ textAlign: 'center', marginBottom: '-20px' }}>Favourite profiles</h2>
+                <CirclePacking data={getCircularPackingUsersData()} />
+              </div>
+            ) : (
+              <div className="results">
+                {show === 'users' &&
+                  Object.values(users)
+                    .sort((a, b) => b.count - a.count)
+                    .map((user) => (
+                      <Result
+                        key={user.username}
+                        title={user.username}
+                        url={user.url}
+                        duration={`${user.count} videos`}
+                        imageSrc={user.avatar}
+                        date=""
+                        views={0}
+                      />
+                    ))}
+                {show === 'categories' &&
+                  getCategoriesAndCounts().map(([category, count]) => (
                     <Result
-                      key={video.title}
-                      title={video.title}
-                      url={video.url}
-                      duration={video.category}
-                      imageSrc={video.thumbnail}
-                      date=""
+                      key={category}
+                      title={category}
+                      url={`/categories/${category.replaceAll(' ', '-')}`}
+                      duration={`${count} videos`}
+                      imageSrc={`https://placehold.co/100x100/000000/b60707?text=${category.replaceAll(
+                        ' ',
+                        '+',
+                      )}`}
                       views={0}
+                      date=""
                     />
-                  )),
-                )}
-            {show === 'categories' &&
-              getCategoriesAndCounts().map(([category, count]) => (
-                <Result
-                  key={category}
-                  title={category}
-                  url={`/categories/${category.replaceAll(' ', '-')}`}
-                  duration={`${count} videos`}
-                  imageSrc={`https://placehold.co/100x100/000000/b60707?text=${category.replaceAll(
-                    ' ',
-                    '+',
-                  )}`}
-                  views={0}
-                  date=""
-                />
-              ))}
-            {show === 'tags' &&
-              getTagsAndCounts().map(([tag, count]) => (
-                <Result
-                  key={tag}
-                  title={tag}
-                  url={`/categories/${tag.replaceAll(' ', '-')}`}
-                  duration={`${count} videos`}
-                  imageSrc={`https://placehold.co/100x100/000000/b60707?text=${tag.replaceAll(
-                    ' ',
-                    '+',
-                  )}`}
-                  views={0}
-                  date=""
-                />
-              ))}
+                  ))}
+                {show === 'tags' &&
+                  getTagsAndCounts().map(([tag, count]) => (
+                    <Result
+                      key={tag}
+                      title={tag}
+                      url={`/categories/${tag.replaceAll(' ', '-')}`}
+                      duration={`${count} videos`}
+                      imageSrc={`https://placehold.co/100x100/000000/b60707?text=${tag.replaceAll(
+                        ' ',
+                        '+',
+                      )}`}
+                      views={0}
+                      date=""
+                    />
+                  ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

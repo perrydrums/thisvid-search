@@ -87,6 +87,16 @@ body {
   overflow-y: scroll;
 }
 
+/* container has width and height as parent */
+.summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  height: 50vh;
+  width: 100%;
+  padding-top: 24px;
+}
+
 h1 {
   margin-bottom: 8px;
   font-size: 28px;
