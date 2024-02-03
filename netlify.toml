@@ -61,3 +61,8 @@ from = "/friends"
 to = "https://tvass.netlify.app/.netlify/functions/friends"
 status = 200
 
+[[redirects]]
+from = "/feed"
+to = "https://tvass.netlify.app/.netlify/functions/feed"
+status = 200
+
