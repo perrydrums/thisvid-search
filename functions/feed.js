@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 const headers = {
   'Content-Type': 'application/json',
   'Cache-Control': 'public, max-age=80000',
