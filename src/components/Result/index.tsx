@@ -80,7 +80,6 @@ const Result = ({
         <div className="title">
           <span onClick={() => window.open(url, '_blank')}>
             {debug && `[${page}] `}
-            {debug && `(${relevance}) `}
             {title}
           </span>
         </div>
@@ -88,6 +87,12 @@ const Result = ({
 
       <div className="details">
         {date && <span className="date">{date}</span>}
+        {debug && (
+          <span className="date">
+            <br />
+            Relevance: {relevance}
+          </span>
+        )}
         {!isPrivate ? (
           <div
             className={`download ${loading ? 'loading' : ''} ${downloadUrl ? 'done' : ''} ${
