@@ -33,3 +33,13 @@
   font-size: 32px;
   line-height: 24px;
 }
+
+.infoIcon {
+  cursor: pointer;
+  font-weight: bolder;
+  margin-left: .5ch;
+}
+
+.infoIcon:hover {
+  color: var(--accent-color);
+}

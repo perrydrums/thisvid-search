@@ -20,9 +20,9 @@ const Header = ({ backButtonUrl, showPreferences = false }: HeaderProps) => {
       </span>
       <span className={styles.title}>
         <a href="/">ThisVid Advanced Search Site</a>
-        <a style={{ fontWeight: 'bolder' }} data-tooltip-id="info">
-          &nbsp;ⓘ
-        </a>
+        <span className={styles.infoIcon} data-tooltip-id="info">
+          ⓘ
+        </span>
         <Tooltip clickable={true} id="info" className="label-tooltip" place="bottom">
           Need help, found a bug or are interested in how this site works?{' '}
           <a style={{ color: 'white' }} href="mailto:psperryjanssen@gmail.com">

@@ -73,22 +73,21 @@ const Analyse = () => {
     };
   }, []);
 
-  const getPageLimit = async () => {
-    const response = await fetch(`/members/${uid}/favourite_videos/`);
-
-    const body = await response.text();
-    const $ = cheerio.load(body);
-
-    const lastPage = parseInt(
-      $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-    );
-    // const lastPage = 1;
-    setPageLimit(lastPage);
-  };
-
   useEffect(() => {
+    const getPageLimit = async () => {
+      const response = await fetch(`/members/${uid}/favourite_videos/`);
+
+      const body = await response.text();
+      const $ = cheerio.load(body);
+
+      const lastPage = parseInt(
+        $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+      );
+      setPageLimit(lastPage);
+    };
+
     getPageLimit();
-  }, [getPageLimit, uid]);
+  }, [uid]);
 
   const getAvatar = async (username: string, uid: number) => {
     if (!users[username]) {
