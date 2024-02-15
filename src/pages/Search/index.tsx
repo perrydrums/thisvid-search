@@ -42,13 +42,11 @@ const types: Types = {
   user: [
     { value: 'public', label: 'Public' },
     { value: 'private', label: 'Private' },
-    { value: 'uploaded', label: 'Public & Private' },
     { value: 'favourite', label: 'Favourites' },
   ],
   friend: [
     { value: 'public', label: 'Public' },
     { value: 'private', label: 'Private' },
-    { value: 'uploaded', label: 'Public & Private' },
     { value: 'favourite', label: 'Favourites' },
   ],
 };
