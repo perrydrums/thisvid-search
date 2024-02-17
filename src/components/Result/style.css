@@ -14,6 +14,10 @@
   background-color: var(--input-hover-background-color);
 }
 
+.result.favourite:hover {
+  background-color: var(--green-overlay);
+}
+
 .result .thumbnail {
   position: relative;
   display: flex;

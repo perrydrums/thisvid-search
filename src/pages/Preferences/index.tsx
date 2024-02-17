@@ -1,3 +1,4 @@
+import cheerio from 'cheerio';
 import React, { useEffect, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
@@ -6,12 +7,17 @@ import Header from '../../components/Header';
 import MoodResult from '../../components/Result/MoodResult';
 import InputTags from '../../components/input/Tags';
 import { Mood, Preferences as PreferencesType } from '../../helpers/types';
+import { getVideos } from '../../helpers/videos';
 
 const Preferences = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
 
   const [userId, setUserId] = useState(localStorage.getItem('tvass-user-id') || '');
   const [defaultMood, setDefaultMood] = useState(localStorage.getItem('tvass-default-mood') || '');
+  const [favourites, setFavourites] = useState(localStorage.getItem('tvass-favourites') || '');
+  const [lastSyncDate, setLastSyncDate] = useState(
+    localStorage.getItem('tvass-last-sync-date') || '',
+  );
   const [preferences, setPreferences] = useState<PreferencesType>({
     tags: [],
     excludeTags: [],
@@ -42,6 +48,14 @@ const Preferences = () => {
   useEffect(() => {
     localStorage.setItem('tvass-default-mood', defaultMood);
   }, [defaultMood]);
+
+  useEffect(() => {
+    localStorage.setItem('tvass-favourites', favourites);
+  }, [favourites]);
+
+  useEffect(() => {
+    localStorage.setItem('tvass-last-sync-date', lastSyncDate);
+  }, [lastSyncDate]);
 
   const newMood = () => {
     const mood = {
@@ -83,6 +97,39 @@ const Preferences = () => {
     setActiveMood('');
   };
 
+  const getFavourites = async () => {
+    const response = await fetch(`/members/${userId}/favourite_videos/`);
+
+    const body = await response.text();
+    const $ = cheerio.load(body);
+
+    const lastPage =
+      parseInt(
+        $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+      ) || 1;
+
+    let promises = [];
+
+    for (let i = 1; i <= lastPage; i++) {
+      promises.push(
+        getVideos({
+          url: `/members/${userId}/favourite_videos/${i}`,
+          page: i,
+        }),
+      );
+    }
+
+    const videos = (await Promise.all(promises)).flat().filter(
+      // @ts-ignore
+      (value, index, self) => index === self.findIndex((v) => v.url === value.url),
+    );
+
+    const videoUrls = videos.map((v) => v.url);
+
+    setFavourites(videoUrls.join(','));
+    setLastSyncDate(new Date().toLocaleString());
+  };
+
   return (
     <>
       <Header backButtonUrl="/search" />
@@ -105,6 +152,24 @@ const Preferences = () => {
                 <Tooltip id="user-id" className="label-tooltip" place="left-start">
                   The ID of the ThisVid user profile. You can find this in the URL of the profile
                   page on ThisVid.
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+          <div className="container-section">
+            <div className="container-section-header">
+              <h2>Favourites</h2>
+            </div>
+            <p style={{ color: '#666' }}>Last sync date: {lastSyncDate}</p>
+            <div className="form-columns">
+              <div>Found {favourites.split(',').length} favourite videos</div>
+              <div>
+                <button data-tooltip-id="sync-date" onClick={getFavourites} disabled={!userId}>
+                  Sync favourites
+                </button>
+                <Tooltip id="sync-date" className="label-tooltip" place="left-start">
+                  Load your favourite videos from ThisVid, so they can be filtered out of search
+                  results.
                 </Tooltip>
               </div>
             </div>

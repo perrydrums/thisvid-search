@@ -1,6 +1,7 @@
 import React from 'react';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
+import { getLocalFavourites } from '../../helpers/favourites';
 import { Video } from '../../helpers/types';
 import Result from '../Result';
 
@@ -9,6 +10,7 @@ type ResultsContainerProps = {
 };
 
 const ResultsContainer = ({ videos = [] }: ResultsContainerProps) => {
+  const favourites = getLocalFavourites();
   return (
     <div className="results-scroll-container">
       <div className="results">
@@ -26,6 +28,7 @@ const ResultsContainer = ({ videos = [] }: ResultsContainerProps) => {
               // isFriend={mode === 'friend'}
               page={video.page}
               relevance={video.relevance}
+              isFavourite={favourites.includes(video.url)}
             />
           </LazyLoadComponent>
         ))}

@@ -16,6 +16,7 @@ type ResultProps = {
   imageSrc?: string;
   page?: number;
   isPrivate?: boolean;
+  isFavourite?: boolean;
   relevance?: number;
 };
 
@@ -29,6 +30,7 @@ const Result = ({
   imageSrc = '',
   page,
   isPrivate = false,
+  isFavourite = false,
   relevance,
 }: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
@@ -51,7 +53,7 @@ const Result = ({
   };
 
   return (
-    <div className="result">
+    <div className={`result ${isFavourite ? 'favourite' : ''}`}>
       <div>
         {imageSrc && (
           <div
