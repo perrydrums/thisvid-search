@@ -54,10 +54,29 @@ export const drawCircles = (
     context.stroke();
 
     context.fillStyle = textColorScale(node.value);
-    const fontSize = Math.min(radius / 2);
-    context.font = `${fontSize}px 'Open Sans', sans-serif`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
+
+    // fill text. font-size based on radius and new line when needed
+    const fontSize = Math.min(radius / node.name.length, radius / 2) * 2.5;
+    context.font = `${fontSize}px 'Open Sans', sans-serif`;
     context.fillText(node.name, node.x, node.y);
+
+    // // fill text but new line on space
+    // const words = node.name.split(' ');
+    // const lineHeight = fontSize * 1.5;
+    // const y = node.y - (lineHeight * (words.length - 1)) / 2;
+    // words.forEach((word, i) => {
+    //   // @ts-ignore
+    //   context.fillText(word, node.x, y + i * lineHeight);
+    //
+    //   // font size based on character length and radius
+    //   const fontSize = Math.min(radius / node.name.length, radius / 2) * 2;
+    //
+    //   // const fontSize = Math.min(radius / node.name.length) * 3;
+    //
+    //   // const fontSize = Math.min(radius / 2);
+    //   context.font = `${fontSize}px 'Open Sans', sans-serif`;
+    // });
   });
 };

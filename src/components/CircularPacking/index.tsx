@@ -38,8 +38,6 @@ export const CirclePacking = ({ data }: CirclePackingProps) => {
 
     // run d3-force to find the position of nodes on the canvas
     d3.forceSimulation(nodes)
-
-      // list of forces we apply to get node positions
       .force(
         'collide',
         // @ts-ignore

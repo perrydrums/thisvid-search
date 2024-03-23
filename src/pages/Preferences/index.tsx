@@ -7,6 +7,7 @@ import Header from '../../components/Header';
 import MoodResult from '../../components/Result/MoodResult';
 import InputTags from '../../components/input/Tags';
 import { Mood, Preferences as PreferencesType } from '../../helpers/types';
+import { getNameWithSeed, getUsername } from '../../helpers/users';
 import { getVideos } from '../../helpers/videos';
 
 const Preferences = () => {
@@ -43,6 +44,16 @@ const Preferences = () => {
 
   useEffect(() => {
     localStorage.setItem('tvass-user-id', userId);
+
+    getUsername(userId).then((username) => {
+      if (typeof username === 'string') {
+        localStorage.setItem('visitorName', username);
+      } else {
+        getNameWithSeed(localStorage.getItem('visitorId') || '').then((name) => {
+          localStorage.setItem('visitorName', name);
+        });
+      }
+    });
   }, [userId]);
 
   useEffect(() => {

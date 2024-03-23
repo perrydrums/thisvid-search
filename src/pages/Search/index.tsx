@@ -16,6 +16,7 @@ import { getFriends } from '../../helpers/friends';
 import { getCategories } from '../../helpers/getCategories';
 import { log } from '../../helpers/supabase/log';
 import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../helpers/types';
+import { getUsername } from '../../helpers/users';
 import { getVideos, sortVideos } from '../../helpers/videos';
 
 const modes: Modes = {
@@ -164,27 +165,20 @@ const Search = () => {
   }, [mode, id]);
 
   useEffect(() => {
-    const getUsernames = async () => {
-      if (id) {
-        const userResponse = await fetch(`/members/${id}/`);
+    const updateUsername = async () => {
+      const username = await getUsername(id);
 
-        if (userResponse.status === 404) {
-          setErrorMessage(`User ${id} does not exist.`);
-          setUsername('');
-          return;
-        }
-
-        const userBody = await userResponse.text();
-        const $user = cheerio.load(userBody);
-
-        const username = $user('.profile-menu .headline h2').text() || 'username not found';
+      if (username) {
         setUsername(username);
       } else {
+        setErrorMessage(`User ${id} does not exist.`);
         setUsername('');
       }
     };
 
-    getUsernames();
+    if (id) {
+      updateUsername();
+    }
   }, [mode, id]);
 
   useEffect(() => {
@@ -295,7 +289,8 @@ const Search = () => {
       userId: id,
       friendId,
       resultCount: 0,
-      visitorId: localStorage.getItem('visitorId'),
+      visitorId: localStorage.getItem('visitorId') || '',
+      visitorName: localStorage.getItem('visitorName') || '',
     });
     setSearchObject(s);
   };

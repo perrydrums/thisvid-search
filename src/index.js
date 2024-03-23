@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
+import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Analyse from './pages/Analyse';
 import Home from './pages/Home';
@@ -11,6 +12,17 @@ import Search from './pages/Search';
 // Generate random visitor ID if not already set in local storage.
 if (!localStorage.getItem('visitorId')) {
   localStorage.setItem('visitorId', Math.random().toString(36).substring(2));
+
+  // Get name with seed
+  getNameWithSeed(localStorage.getItem('visitorId')).then((name) => {
+    localStorage.setItem('visitorName', name);
+  });
+}
+
+if (!localStorage.getItem('visitorName')) {
+  getNameWithSeed(localStorage.getItem('visitorId')).then((name) => {
+    localStorage.setItem('visitorName', name);
+  });
 }
 
 const router = createBrowserRouter([
