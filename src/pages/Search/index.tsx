@@ -78,7 +78,8 @@ const Search = () => {
     params.termsOperator ? params.termsOperator : 'OR',
   );
   const [primaryTag, setPrimaryTag] = useState(params.primaryTag ? params.primaryTag : '');
-  const [category, setCategory] = useState(`${params.category}` || '');
+  const [category, setCategory] = useState(params.category || '');
+  const [categoryType, setCategoryType] = useState('');
   const [start, setStart] = useState(params.start || 1);
   const [type, setType] = useState(params.type || '');
   const [quick, setQuick] = useState(true);
@@ -116,7 +117,14 @@ const Search = () => {
 
   useEffect(() => {
     getCategories().then((categories: Category[]) => {
-      setCategories(categories);
+      const filteredCategories =
+        categoryType === 'straight'
+          ? categories.slice(0, 40)
+          : categoryType === 'gay'
+          ? categories.slice(40)
+          : categories;
+
+      setCategories(filteredCategories);
     });
 
     const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
@@ -126,7 +134,7 @@ const Search = () => {
     if (u && mode === 'friend') {
       setId(u);
     }
-  }, [mode]);
+  }, [categoryType, mode]);
 
   useEffect(() => {
     if (moods.length === 0) {
@@ -391,6 +399,9 @@ const Search = () => {
     run(start);
   };
 
+  console.log('category', category);
+  console.log('categoryType', categoryType);
+
   const getShareUrl = () => {
     // @ts-ignore
     const params = new URLSearchParams({
@@ -564,18 +575,34 @@ const Search = () => {
                 <>
                   <label htmlFor="category">Category</label>
                   <div className="select-wrapper select-wrapper-alt">
-                    <input
-                      type="text"
-                      readOnly={true}
-                      required={true}
-                      id="category"
-                      placeholder="Choose category"
-                      value={categories.find((c) => c.slug === category)?.name || ''}
-                      onClick={() => setCategory('')}
-                      onMouseEnter={() => setFriendIdFieldHover(true)}
-                      onMouseLeave={() => setFriendIdFieldHover(false)}
-                      style={{ cursor: 'pointer' }}
-                    />
+                    {!category && (
+                      <select
+                        id="category-type"
+                        value={categoryType}
+                        required
+                        onChange={(e) => setCategoryType(e.target.value)}
+                      >
+                        <option disabled selected value="">
+                          - Select -
+                        </option>
+                        <option value="straight">Straight</option>
+                        <option value="gay">Gay</option>
+                      </select>
+                    )}
+                    {category && (
+                      <input
+                        type="text"
+                        readOnly={true}
+                        required={true}
+                        id="category"
+                        placeholder="Choose category"
+                        value={categories.find((c) => c.slug === category)?.name || ''}
+                        onClick={() => setCategory('')}
+                        onMouseEnter={() => setFriendIdFieldHover(true)}
+                        onMouseLeave={() => setFriendIdFieldHover(false)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    )}
                   </div>
                 </>
               )}
@@ -771,7 +798,7 @@ const Search = () => {
           </div>
         </form>
         <div className={`results-container ${loading ? 'inactive' : ''}`} ref={resultsRef}>
-          {mode === 'category' && !category && (
+          {mode === 'category' && !category && categoryType !== '' && (
             <>
               <div className="results-header">
                 <h2>Select a category</h2>
