@@ -36,30 +36,35 @@ export const getVideos = async ({
   minDuration = 0,
   quick = true,
 }: GetVideosOptions): Promise<Array<Video>> => {
-  const response = await fetch(`/getVideos/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      url,
-      page,
-      includeTags,
-      excludeTags,
-      termsOperator,
-      boosterTags,
-      diminishingTags,
-      omitPrivate,
-      minDuration,
-      quick,
-    }),
-  });
+  try {
+    const response = await fetch(`/getVideos/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url,
+        page,
+        includeTags,
+        excludeTags,
+        termsOperator,
+        boosterTags,
+        diminishingTags,
+        omitPrivate,
+        minDuration,
+        quick,
+      }),
+    });
 
-  const body: VideoResponse = await response.json();
+    const body: VideoResponse = await response.json();
 
-  if (!body.success) {
+    if (!body.success) {
+      return [];
+    }
+
+    return body.videos;
+  } catch (error) {
+    console.error(error);
     return [];
   }
-
-  return body.videos;
 };
 
 export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<Video> => {

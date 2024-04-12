@@ -191,16 +191,19 @@ const Search = () => {
 
   useEffect(() => {
     const getPageLimit = async () => {
-      if (!id || (mode === 'friend' && !friendId) || !type) {
-        return;
-      }
+      // if (!id || (mode === 'friend' && !friendId) || !type) {
+      //   return;
+      // }
 
-      const userId = mode === 'friend' ? friendId : id;
+      let url = getPageLimitUrl();
 
-      const response = await fetch(`/members/${userId}/${type}_videos/`);
+      // const userId = mode === 'friend' ? friendId : id;
+
+      // const response = await fetch(`/members/${userId}/${type}_videos/`);
+      const response = await fetch(url);
 
       if (response.status === 404) {
-        setErrorMessage(`User ${userId} does not have any ${type} videos.`);
+        // setErrorMessage(`User ${userId} does not have any ${type} videos.`);
         return;
       }
 
@@ -212,11 +215,12 @@ const Search = () => {
           $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
         ) || 1;
 
+      // setTotalPages(lastPage);
       setPageLimit(lastPage);
-      setAmount(lastPage);
+      setAmount(lastPage < 100 ? lastPage : 100);
     };
     getPageLimit();
-  }, [mode, id, type, friendId]);
+  }, [sourceExists, type, mode, id, friendId, category, primaryTag]);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();
@@ -255,6 +259,20 @@ const Search = () => {
     return baseUrl[mode] || '';
   };
 
+  const getPageLimitUrl = (): string => {
+    const baseUrl: {
+      [key: string]: string;
+    } = {
+      newest: `/${type}/`,
+      user: `/members/${id}/${type}_videos/`,
+      friend: `/members/${friendId}/${type}_videos/`,
+      tags: `/tags/${primaryTag}/popular-males/`,
+      category: `/categories/${category}/`,
+    };
+
+    return baseUrl[mode] || '';
+  };
+
   const getSourceUrl = () => {
     // Define the base URLs for each search mode
     const baseUrl: {
@@ -280,6 +298,7 @@ const Search = () => {
     const exists = await urlExists(url);
 
     setSourceExists(exists);
+    return exists;
   };
 
   const logSearch = async () => {
@@ -398,9 +417,6 @@ const Search = () => {
     }
     run(start);
   };
-
-  console.log('category', category);
-  console.log('categoryType', categoryType);
 
   const getShareUrl = () => {
     // @ts-ignore
@@ -719,15 +735,18 @@ const Search = () => {
                 onChange={(e) => setMinDuration(parseInt(e.target.value) || null)}
               />
               <label htmlFor="amount">Number of Pages</label>
-              <input
-                type="number"
-                min="0"
-                max={pageLimit || 100}
-                id="amount"
-                value={amount}
-                required
-                onChange={(e) => setAmount(parseInt(e.target.value))}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="number"
+                  min="0"
+                  max={pageLimit || 100}
+                  id="amount"
+                  value={amount}
+                  required
+                  onChange={(e) => setAmount(parseInt(e.target.value))}
+                />
+                <div className="amount-suffix"> of {pageLimit - start + 1} remaining</div>
+              </div>
             </div>
           </div>
           <div>

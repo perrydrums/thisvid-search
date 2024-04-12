@@ -378,6 +378,15 @@ input[type='radio']:checked + label.checkbox-button {
   animation: spin 1s linear infinite;
 }
 
+.amount-suffix {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: #979797; /* Grey color */
+  pointer-events: none; /* So that it doesn't interfere with input */
+}
+
 @media (max-width: 600px) {
   .container {
     grid-template-columns: 1fr; /* Change to a single column on smaller screens */
