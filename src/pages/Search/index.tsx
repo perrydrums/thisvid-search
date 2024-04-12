@@ -108,6 +108,67 @@ const Search = () => {
     params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : '',
   );
 
+  const getUrl = (page: number): string => {
+    const baseUrl: {
+      [key: string]: string;
+    } = {
+      newest: `/${type}/${page}/`,
+      user: `/members/${id}/${type}_videos/${page}/`,
+      friend: `/members/${friendId}/${type}_videos/${page}/`,
+      tags: `/tags/${primaryTag}/${type}-males/${page}/`,
+      category: `/categories/${category}/${type}/${page}/`,
+    };
+
+    if (mode === 'category' && type === 'latest') {
+      return `/categories/${category}/${page}/`;
+    }
+
+    return baseUrl[mode] || '';
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const getPageLimitUrl = (): string => {
+    const baseUrl: {
+      [key: string]: string;
+    } = {
+      newest: `/${type}/`,
+      user: `/members/${id}/${type}_videos/`,
+      friend: `/members/${friendId}/${type}_videos/`,
+      tags: `/tags/${primaryTag}/popular-males/`,
+      category: `/categories/${category}/`,
+    };
+
+    return baseUrl[mode] || '';
+  };
+
+  const getSourceUrl = () => {
+    // Define the base URLs for each search mode
+    const baseUrl: {
+      [key: string]: string;
+    } = {
+      newest: `/${type}/`,
+      user: `/members/${id}/`,
+      friend: `/members/${friendId}/`,
+      tags: `/tags/${primaryTag}/`,
+      category: `/categories/${category}/`,
+    };
+
+    return baseUrl[mode] || '';
+  };
+
+  const urlExists = async (url: string) => {
+    const response = await fetch(url);
+    return response.status !== 404;
+  };
+
+  const checkSourceExists = async () => {
+    const url = getSourceUrl();
+    const exists = await urlExists(url);
+
+    setSourceExists(exists);
+    return exists;
+  };
+
   useEffect(() => {
     if (params.run) {
       run(Number(params.start) || 1);
@@ -220,7 +281,7 @@ const Search = () => {
       setAmount(lastPage < 100 ? lastPage : 100);
     };
     getPageLimit();
-  }, [sourceExists, type, mode, id, friendId, category, primaryTag]);
+  }, [getPageLimitUrl, sourceExists, type, mode, id, friendId, category, primaryTag]);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();
@@ -239,66 +300,6 @@ const Search = () => {
     setLoading(false);
     setFinished(true);
     localStorage.setItem('uid', id);
-  };
-
-  const getUrl = (page: number): string => {
-    const baseUrl: {
-      [key: string]: string;
-    } = {
-      newest: `/${type}/${page}/`,
-      user: `/members/${id}/${type}_videos/${page}/`,
-      friend: `/members/${friendId}/${type}_videos/${page}/`,
-      tags: `/tags/${primaryTag}/${type}-males/${page}/`,
-      category: `/categories/${category}/${type}/${page}/`,
-    };
-
-    if (mode === 'category' && type === 'latest') {
-      return `/categories/${category}/${page}/`;
-    }
-
-    return baseUrl[mode] || '';
-  };
-
-  const getPageLimitUrl = (): string => {
-    const baseUrl: {
-      [key: string]: string;
-    } = {
-      newest: `/${type}/`,
-      user: `/members/${id}/${type}_videos/`,
-      friend: `/members/${friendId}/${type}_videos/`,
-      tags: `/tags/${primaryTag}/popular-males/`,
-      category: `/categories/${category}/`,
-    };
-
-    return baseUrl[mode] || '';
-  };
-
-  const getSourceUrl = () => {
-    // Define the base URLs for each search mode
-    const baseUrl: {
-      [key: string]: string;
-    } = {
-      newest: `/${type}/`,
-      user: `/members/${id}/`,
-      friend: `/members/${friendId}/`,
-      tags: `/tags/${primaryTag}/`,
-      category: `/categories/${category}/`,
-    };
-
-    return baseUrl[mode] || '';
-  };
-
-  const urlExists = async (url: string) => {
-    const response = await fetch(url);
-    return response.status !== 404;
-  };
-
-  const checkSourceExists = async () => {
-    const url = getSourceUrl();
-    const exists = await urlExists(url);
-
-    setSourceExists(exists);
-    return exists;
   };
 
   const logSearch = async () => {
