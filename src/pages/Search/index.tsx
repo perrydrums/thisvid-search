@@ -223,7 +223,7 @@ const Search = () => {
     preferences.excludeTags && setExcludeTags(preferences.excludeTags);
     preferences.boosterTags && setBoosterTags(preferences.boosterTags);
     preferences.diminishingTags && setDiminishingTags(preferences.diminishingTags);
-    preferences.minDuration && setMinDuration(preferences.minDuration);
+    preferences.minDuration !== undefined && setMinDuration(preferences.minDuration || 0);
   }, [activeMood, moods]);
 
   useEffect(() => {
