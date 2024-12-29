@@ -47,6 +47,16 @@ to = "https://thisvid.com/tags/:splat"
 status = 200
 
 [[redirects]]
+from = "/female-extreme/*"
+to = "https://thisvid.com/female-extreme/:splat"
+status = 200
+
+[[redirects]]
+from = "/male-extreme/*"
+to = "https://thisvid.com/male-extreme/:splat"
+status = 200
+
+[[redirects]]
 from = "/getVideos"
 to = "https://tvass.netlify.app/.netlify/functions/videos"
 status = 200
