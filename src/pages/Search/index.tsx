@@ -25,6 +25,7 @@ const modes: Modes = {
   friend: 'Friend',
   category: 'Category',
   tags: 'Tags',
+  extreme: 'Extreme',
 };
 
 const types: Types = {
@@ -49,6 +50,10 @@ const types: Types = {
     { value: 'public', label: 'Public' },
     { value: 'private', label: 'Private' },
     { value: 'favourite', label: 'Favourites' },
+  ],
+  extreme: [
+    { value: 'female-extreme', label: 'Straight' },
+    { value: 'male-extreme', label: 'Gay' },
   ],
 };
 
@@ -117,6 +122,7 @@ const Search = () => {
       friend: `/members/${friendId}/${type}_videos/${page}/`,
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
       category: `/categories/${category}/${type}/${page}/`,
+      extreme: `/${type}/${page}/?q=${primaryTag}`,
     };
 
     if (mode === 'category' && type === 'latest') {
@@ -136,6 +142,7 @@ const Search = () => {
       friend: `/members/${friendId}/${type}_videos/`,
       tags: `/tags/${primaryTag}/popular-males/`,
       category: `/categories/${category}/`,
+      extreme: `/${type}/1/?q=${primaryTag}`,
     };
 
     return baseUrl[mode] || '';
@@ -182,8 +189,8 @@ const Search = () => {
         categoryType === 'straight'
           ? categories.slice(0, 40)
           : categoryType === 'gay'
-          ? categories.slice(40)
-          : categories;
+            ? categories.slice(40)
+            : categories;
 
       setCategories(filteredCategories);
     });
@@ -252,33 +259,32 @@ const Search = () => {
 
   useEffect(() => {
     const getPageLimit = async () => {
-      // if (!id || (mode === 'friend' && !friendId) || !type) {
-      //   return;
-      // }
+      const url = getPageLimitUrl();
 
-      let url = getPageLimitUrl();
-
-      // const userId = mode === 'friend' ? friendId : id;
-
-      // const response = await fetch(`/members/${userId}/${type}_videos/`);
-      const response = await fetch(url);
-
-      if (response.status === 404) {
-        // setErrorMessage(`User ${userId} does not have any ${type} videos.`);
+      let response;
+      if (mode === 'extreme' && (!type || !primaryTag)) {
         return;
+      } else {
+        response = await fetch(url);
       }
 
-      const body = await response.text();
-      const $ = cheerio.load(body);
+      if (response) {
+        if (response.status === 404) {
+          // setErrorMessage(`User ${userId} does not have any ${type} videos.`);
+          return;
+        }
 
-      const lastPage =
-        parseInt(
-          $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-        ) || 1;
+        const body = await response.text();
+        const $ = cheerio.load(body);
 
-      // setTotalPages(lastPage);
-      setPageLimit(lastPage);
-      setAmount(lastPage < 100 ? lastPage : 100);
+        const lastPage =
+          parseInt(
+            $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+          ) || 1;
+
+        setPageLimit(lastPage);
+        setAmount(lastPage < 100 ? lastPage : 100);
+      }
     };
     getPageLimit();
   }, [getPageLimitUrl, sourceExists, type, mode, id, friendId, category, primaryTag]);
@@ -654,6 +660,19 @@ const Search = () => {
                   })}
                 </select>
               </div>
+              {mode === 'extreme' && (
+                <>
+                  <label htmlFor="primary-tag">Search</label>
+                  <input
+                    type="text"
+                    id="primary-tag"
+                    value={primaryTag}
+                    required
+                    onChange={(e) => setPrimaryTag(e.target.value.toLowerCase())}
+                    onBlur={checkSourceExists}
+                  />
+                </>
+              )}
             </div>
             <div className="form-columns form-columns-group">
               <label htmlFor="tags">Title</label>
@@ -836,8 +855,8 @@ const Search = () => {
                     {loading
                       ? 'Collecting friends...'
                       : finished
-                      ? `Found ${friends.length} friends`
-                      : ''}
+                        ? `Found ${friends.length} friends`
+                        : ''}
                   </h2>
                 )}
                 <div>
@@ -864,8 +883,8 @@ const Search = () => {
                   {loading
                     ? 'Searching...'
                     : finished
-                    ? `Found ${videos.length} videos`
-                    : 'Search for videos'}
+                      ? `Found ${videos.length} videos`
+                      : 'Search for videos'}
                 </h2>
                 {searchObject && (
                   <>

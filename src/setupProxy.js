@@ -50,6 +50,22 @@ module.exports = function (app) {
   );
 
   app.use(
+    '/female-extreme',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
+    '/male-extreme',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
     '/getVideos',
     createProxyMiddleware({
       target: 'https://tvass.netlify.app/.netlify/functions',
