@@ -12,6 +12,7 @@ import CategoriesContainer from '../../components/ResultsContainer/CategoriesCon
 import FriendsContainer from '../../components/ResultsContainer/FriendsContainer';
 import Share from '../../components/Share';
 import InputTags from '../../components/input/Tags';
+import { getLocalFavourites } from '../../helpers/favourites';
 import { getFriends } from '../../helpers/friends';
 import { getCategories } from '../../helpers/getCategories';
 import { log } from '../../helpers/supabase/log';
@@ -89,6 +90,7 @@ const Search = () => {
   const [type, setType] = useState(params.type || '');
   const [quick, setQuick] = useState(true);
   const [omitPrivate, setOmitPrivate] = useState(false);
+  const [omitFavourites, setOmitFavourites] = useState(false);
   const [preserveResults, setPreserveResults] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
   const [progressCount, setProgressCount] = useState(0);
@@ -393,6 +395,13 @@ const Search = () => {
       preserveResults
         ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos] as Video[], sort))
         : setVideos(sortVideos(videos as Video[], sort));
+
+      // If omitFavourites is enabled, remove favourite videos from the results.
+      console.log('omitFavourites', omitFavourites);
+      if (omitFavourites) {
+        const favourites = getLocalFavourites();
+        setVideos((prevVideos) => prevVideos.filter((video) => !favourites.includes(video.url)));
+      }
 
       setFinished(true);
       executeScroll();
@@ -744,6 +753,18 @@ const Search = () => {
                     required
                     onChange={(e) => setStart(parseInt(e.target.value))}
                   />
+                  <div></div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      id="omit-favourites"
+                      checked={omitFavourites}
+                      onChange={() => setOmitFavourites(!omitFavourites)}
+                    />
+                    <label htmlFor="omit-favourites" className="checkbox-button">
+                      Omit Favourites
+                    </label>
+                  </div>
                 </>
               )}
               <label htmlFor="min-duration">Min Duration (minutes)</label>
