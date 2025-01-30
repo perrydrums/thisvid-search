@@ -14,7 +14,7 @@
   background-color: var(--input-hover-background-color);
 }
 
-.result.favourite:hover {
+.result.favourite {
   background-color: var(--green-overlay);
 }
 
