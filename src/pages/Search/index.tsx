@@ -926,10 +926,10 @@ const Search = () => {
                     <option value="views">Views</option>
                     <option value="viewsAsc">Least views</option>
                     <option value="newest">
-                      Page {start} → {amount}
+                      Newest
                     </option>
                     <option value="oldest">
-                      Page {start} ← {amount}
+                      Oldest
                     </option>
                     <option value="longest">Longest</option>
                     <option value="shortest">Shortest</option>

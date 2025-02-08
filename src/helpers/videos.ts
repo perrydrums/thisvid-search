@@ -72,10 +72,10 @@ export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<V
   switch (sortMode) {
     default:
     case 'newest':
-      sortedVideos.sort((a, b) => a.page - b.page);
+      sortedVideos.sort((a, b) => parseRelativeTime(b.date).getTime() - parseRelativeTime(a.date).getTime());
       break;
     case 'oldest':
-      sortedVideos.sort((a, b) => b.page - a.page);
+      sortedVideos.sort((a, b) => parseRelativeTime(a.date).getTime() - parseRelativeTime(b.date).getTime());
       break;
     case 'longest':
       sortedVideos.sort((a, b) => {
@@ -102,4 +102,35 @@ export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<V
       break;
   }
   return sortedVideos;
+};
+
+const parseRelativeTime = (relativeTime: string): Date => {
+  const now = new Date();
+  const match = relativeTime.match(/(\d+)\s(\w+)/);
+
+  if (!match) return now; // If format is unexpected, return current date
+
+  const [, amount, unit] = match;
+  const value = parseInt(amount, 10);
+
+  switch (unit) {
+    case "day":
+    case "days":
+      now.setDate(now.getDate() - value);
+      break;
+    case "week":
+    case "weeks":
+      now.setDate(now.getDate() - value * 7);
+      break;
+    case "month":
+    case "months":
+      now.setMonth(now.getMonth() - value);
+      break;
+    case "year":
+    case "years":
+      now.setFullYear(now.getFullYear() - value);
+      break;
+  }
+
+  return now;
 };
