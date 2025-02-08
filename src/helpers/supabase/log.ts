@@ -44,5 +44,6 @@ export const log = async ({
   if (error) {
     console.error(error);
   }
+  // @ts-ignore.
   return data ? data[0] : null;
 };

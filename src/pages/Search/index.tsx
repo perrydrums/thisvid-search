@@ -324,7 +324,7 @@ const Search = () => {
       category,
       userId: id,
       friendId,
-      resultCount: 0,
+      resultCount: videos.length,
       visitorId: localStorage.getItem('visitorId') || '',
       visitorName: localStorage.getItem('visitorName') || '',
     });
@@ -397,7 +397,6 @@ const Search = () => {
         : setVideos(sortVideos(videos as Video[], sort));
 
       // If omitFavourites is enabled, remove favourite videos from the results.
-      console.log('omitFavourites', omitFavourites);
       if (omitFavourites) {
         const favourites = getLocalFavourites();
         setVideos((prevVideos) => prevVideos.filter((video) => !favourites.includes(video.url)));
@@ -614,7 +613,7 @@ const Search = () => {
                         required
                         onChange={(e) => setCategoryType(e.target.value)}
                       >
-                        <option disabled selected value="">
+                        <option disabled value="">
                           - Select -
                         </option>
                         <option value="straight">Straight</option>
