@@ -10,7 +10,23 @@ module.exports = function (app) {
   );
 
   app.use(
+    '/new-private',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
     '/gay-newest',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
+    '/gay-private',
     createProxyMiddleware({
       target: 'https://thisvid.com',
       changeOrigin: true,

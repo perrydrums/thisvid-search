@@ -32,7 +32,9 @@ const modes: Modes = {
 const types: Types = {
   newest: [
     { value: 'newest', label: 'Straight' },
+    { value: 'new-private', label: 'Straight (Private)' },
     { value: 'gay-newest', label: 'Gay' },
+    { value: 'gay-private', label: 'Gay (Private)' },
   ],
   category: [
     { value: 'most-popular', label: 'Popular' },
@@ -297,7 +299,10 @@ const Search = () => {
       const url = getPageLimitUrl();
 
       let response;
-      if (mode === 'extreme' && (!type || !primaryTag)) {
+      if (
+        (mode === 'extreme' && (!type || !primaryTag)) ||
+        (mode === 'newest' && !type)
+      ) {
         return;
       } else {
         response = await fetch(url);
@@ -861,7 +866,7 @@ const Search = () => {
                   Preserve Results
                 </label>
               </div>
-              {(type === 'favourite' || mode !== 'user') && (
+              {(type === 'favourite' || (mode !== 'user' && mode !== 'newest')) && (
                 <div>
                   <input
                     type="checkbox"

@@ -22,8 +22,18 @@ to = "https://thisvid.com/newest/:splat"
 status = 200
 
 [[redirects]]
+from = "/new-private/*"
+to = "https://thisvid.com/new-private/:splat"
+status = 200
+
+[[redirects]]
 from = "/gay-newest/*"
 to = "https://thisvid.com/gay-newest/:splat"
+status = 200
+
+[[redirects]]
+from = "/gay-private/*"
+to = "https://thisvid.com/gay-private/:splat"
 status = 200
 
 [[redirects]]
