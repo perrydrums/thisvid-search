@@ -115,6 +115,39 @@ const Search = () => {
     params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : '',
   );
 
+  // update the document.title based on the state
+  useEffect(() => {
+    const title = 'ThisVid ASS'
+    switch (mode) {
+      case 'newest':
+        document.title = `Newest videos - ` + title;
+        break;
+      case 'user':
+        document.title = `${username}'s ${type} videos - ` + title;
+        break;
+      case 'friend':
+        document.title = `${friendId}'s ${type} videos - ` + title;
+        break;
+      case 'tags':
+        document.title = `Tag "${primaryTag}" videos - ` + title;
+        break;
+      case 'category':
+        document.title = `${category
+          .replace(/-/g, ' ') 
+          .replace(/\b\w/g, (char: string) => char.toUpperCase())
+        } videos - ` + title;
+        break;
+      case 'extreme':
+        document.title = `${type
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (char: string) => char.toUpperCase())
+        } videos - ` + title;
+        break;
+      default:
+        document.title = title;
+    }
+  }, [mode, username, type, category, primaryTag, friendId]);
+
   const getUrl = (page: number): string => {
     const baseUrl: {
       [key: string]: string;
