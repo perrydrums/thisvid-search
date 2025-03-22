@@ -59,6 +59,8 @@ export type LogParams = {
   resultCount: number;
   visitorId: string;
   visitorName: string;
+  ipAddress?: string;
+  ipLocation?: string;
 };
 
 export type Modes = {

@@ -18,6 +18,7 @@ type ResultProps = {
   isPrivate?: boolean;
   isFavourite?: boolean;
   relevance?: number;
+  noDebug?: boolean;
 };
 
 const Result = ({
@@ -32,6 +33,7 @@ const Result = ({
   isPrivate = false,
   isFavourite = false,
   relevance,
+  noDebug = false,
 }: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -81,7 +83,7 @@ const Result = ({
         )}
         <div className="title">
           <span onClick={() => window.open(url, '_blank')}>
-            {debug && `[${page}] `}
+            {!noDebug && debug && `[${page}] `}
             {title}
           </span>
         </div>
@@ -89,7 +91,7 @@ const Result = ({
 
       <div className="details">
         {date && <span className="date">{date}</span>}
-        {debug && (
+        {!noDebug && debug && (
           <span className="date">
             <br />
             Relevance: {relevance}

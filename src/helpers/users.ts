@@ -25,8 +25,6 @@ export const getNameWithSeed = async (visitorId: string, numNames = 10): Promise
   // Extract all first names and titles from the response.
   const names = data.results;
 
-  console.log('names', names);
-
   for (const {
     name: { title, first, last },
   } of names) {

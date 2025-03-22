@@ -56,6 +56,32 @@ const Analyse = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();
 
+  // Get users from local storage.
+  useEffect(() => {
+    const storedUsers = localStorage.getItem('tvass-analyse-users');
+    if (storedUsers) {
+      try {
+        const parsedUsers = JSON.parse(storedUsers);
+        if (parsedUsers && Object.keys(parsedUsers).length > 0) {
+          setUsers(parsedUsers);
+        }
+      } catch (error) {
+        console.error('Error parsing users from localStorage:', error);
+      }
+    }
+  }, []);
+
+  // Save users to local storage.
+  useEffect(() => {
+    if (Object.keys(users).length > 0) {
+      try {
+        localStorage.setItem('tvass-analyse-users', JSON.stringify(users));
+      } catch (error) {
+        console.error('Error saving users to localStorage:', error);
+      }
+    }
+  }, [users]);
+
   // Get container width on mount and on resize.
   // Used to calculate number of tags to show in circular packing.
   useEffect(() => {
@@ -280,6 +306,9 @@ const Analyse = () => {
                 )}%)`}
                 {!finished && <div className="small-loading-spinner"></div>}
               </div>
+              <div>
+                {Object.keys(users).length > 0 && `Found ${Object.values(users).reduce((total, user) => total + user.videos.length, 0)} videos`}
+              </div>
               <p></p>
               <label htmlFor="id">Your User ID</label>
               <input
@@ -360,6 +389,7 @@ const Analyse = () => {
                         imageSrc={user.avatar}
                         date=""
                         views={0}
+                        noDebug={true}
                       />
                     ))}
                 {show === 'categories' &&
@@ -375,6 +405,7 @@ const Analyse = () => {
                       )}`}
                       views={0}
                       date=""
+                      noDebug={true}
                     />
                   ))}
                 {show === 'tags' &&
@@ -390,6 +421,7 @@ const Analyse = () => {
                       )}`}
                       views={0}
                       date=""
+                      noDebug={true}
                     />
                   ))}
               </div>

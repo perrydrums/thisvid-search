@@ -1,6 +1,7 @@
 import { LogParams } from '../types';
 import { supabase } from './client';
 import { getIp } from './getIp';
+import { getLocationFromIp } from './getLocation';
 
 export const log = async ({
   mode,
@@ -19,6 +20,8 @@ export const log = async ({
   visitorName,
 }: LogParams): Promise<LogParams | null> => {
   const ipAddress = await getIp();
+  const location = await getLocationFromIp(ipAddress);
+
   const { data, error } = await supabase
     .from('searches')
     .insert([
@@ -38,6 +41,7 @@ export const log = async ({
         ipAddress,
         visitorId,
         visitorGeneratedName: visitorName,
+        ipLocation: location.ipLocation,
       },
     ])
     .select();
