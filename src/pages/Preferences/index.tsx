@@ -31,6 +31,7 @@ const Preferences = () => {
   const [newMoodName, setNewMoodName] = useState('');
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState('');
+  const [showImport, setShowImport] = useState(false);
 
   useEffect(() => {
     const m: Mood | undefined = moods.find((mood: Mood) => mood.name === activeMood);
@@ -130,6 +131,7 @@ const Preferences = () => {
       localStorage.setItem('tvass-moods', importText);
       setMoods(parsedMoods);
       setImportText('');
+      setShowImport(false);
       alert('Moods imported successfully!');
     } catch (error) {
       setImportError('Invalid JSON format. Please check your import data.');
@@ -226,24 +228,15 @@ const Preferences = () => {
                   </Tooltip>
                 </div>
                 <div>
-                  <textarea
-                    placeholder="Paste moods data here to import"
-                    value={importText}
-                    onChange={(e) => setImportText(e.target.value)}
-                    style={{ width: '100%', minHeight: '60px' }}
-                    data-tooltip-id="import-moods"
-                  />
-                  <Tooltip id="import-moods" className="label-tooltip" place="left-start">
-                    Paste exported moods data here to import.
-                  </Tooltip>
-                  {importError && <p style={{ color: 'red', margin: '4px 0' }}>{importError}</p>}
                   <button
-                    onClick={importMoods}
-                    disabled={!importText}
-                    style={{ marginTop: '4px' }}
+                    onClick={() => setShowImport(!showImport)}
+                    data-tooltip-id="toggle-import"
                   >
                     Import Moods
                   </button>
+                  <Tooltip id="toggle-import" className="label-tooltip" place="left-start">
+                    Import moods from exported data
+                  </Tooltip>
                 </div>
               </div>
             </div>
@@ -343,6 +336,77 @@ const Preferences = () => {
           )}
         </form>
       </div>
+
+      {/* Import Dialog */}
+      {showImport && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 1000,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+            onClick={() => setShowImport(false)}
+          ></div>
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: '#fff',
+              padding: '20px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              zIndex: 1001,
+              width: '90%',
+              maxWidth: '500px'
+            }}
+          >
+            <h3 style={{ marginTop: 0 }}>Import Moods</h3>
+            <textarea
+              placeholder="Paste moods data here to import"
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              style={{
+                width: '100%',
+                minHeight: '120px',
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                marginBottom: '10px'
+              }}
+            />
+            {importError && <p style={{ color: 'red', margin: '4px 0' }}>{importError}</p>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button onClick={() => setShowImport(false)}>
+                Cancel
+              </button>
+              <button
+                onClick={importMoods}
+                disabled={!importText}
+                style={{
+                  backgroundColor: importText ? '#4a90e2' : '#ccc',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  cursor: importText ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Import
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };
