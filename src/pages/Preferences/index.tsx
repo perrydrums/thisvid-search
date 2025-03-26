@@ -29,6 +29,8 @@ const Preferences = () => {
   const [moods, setMoods] = useState<Array<Mood>>(m);
   const [activeMood, setActiveMood] = useState('');
   const [newMoodName, setNewMoodName] = useState('');
+  const [importText, setImportText] = useState('');
+  const [importError, setImportError] = useState('');
 
   useEffect(() => {
     const m: Mood | undefined = moods.find((mood: Mood) => mood.name === activeMood);
@@ -110,6 +112,30 @@ const Preferences = () => {
     }
   };
 
+  const exportMoods = () => {
+    const moodsData = localStorage.getItem('tvass-moods') || '[]';
+    navigator.clipboard.writeText(moodsData);
+    alert('Moods data copied to clipboard!');
+  };
+
+  const importMoods = () => {
+    try {
+      setImportError('');
+      const parsedMoods = JSON.parse(importText);
+
+      if (!Array.isArray(parsedMoods)) {
+        throw new Error('Invalid moods data format');
+      }
+
+      localStorage.setItem('tvass-moods', importText);
+      setMoods(parsedMoods);
+      setImportText('');
+      alert('Moods imported successfully!');
+    } catch (error) {
+      setImportError('Invalid JSON format. Please check your import data.');
+    }
+  };
+
   const getFavourites = async () => {
     const response = await fetch(`/members/${userId}/favourite_videos/`);
 
@@ -148,77 +174,112 @@ const Preferences = () => {
       <Header backButtonUrl="/search" />
       <div className="container">
         <div className="results-container">
-          <div className="container-section">
-            <div className="container-section-header">
-              <h2>Preferences</h2>
-            </div>
-            <div className="form-columns">
-              <label htmlFor="user-id">Your ThisVid User ID</label>
-              <div>
-                <input
-                  type="text"
-                  id="user-id"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  data-tooltip-id="user-id"
-                />
-                <Tooltip id="user-id" className="label-tooltip" place="left-start">
-                  The ID of the ThisVid user profile. You can find this in the URL of the profile
-                  page on ThisVid.
-                </Tooltip>
+          <div className="results-scroll-container">
+            <div className="container-section">
+              <div className="container-section-header">
+                <h2>Preferences</h2>
               </div>
-            </div>
-          </div>
-          <div className="container-section">
-            <div className="container-section-header">
-              <h2>Favourites</h2>
-            </div>
-            <p style={{ color: '#666' }}>Last sync date: {lastSyncDate}</p>
-            <div className="form-columns">
-              <div>Found {favourites.split(',').length} favourite videos</div>
-              <div>
-                <button data-tooltip-id="sync-date" onClick={getFavourites} disabled={!userId}>
-                  Sync favourites
-                </button>
-                <Tooltip id="sync-date" className="label-tooltip" place="left-start">
-                  Load your favourite videos from ThisVid, so they can be filtered out of search
-                  results.
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-          <div className="container-section">
-            <div className="container-section-header">
-              <h3>Add a new mood</h3>
-            </div>
-            <div className="form-columns" style={{ marginBottom: '12px' }}>
-              <div>
-                <input
-                  type="text"
-                  value={newMoodName}
-                  onChange={(e) => setNewMoodName(e.target.value)}
-                  placeholder="Name your mood"
-                />
-              </div>
-              <button onClick={newMood}>Add</button>
-            </div>
-          </div>
-          <div className="container-section" style={{ flex: 1, minHeight: 0 }}>
-            <div className="container-section-header">
-              <h2>Moods</h2>
-            </div>
-            <div className="mood-results-container">
-              <div className="mood-results">
-                {moods.map((mood) => (
-                  <MoodResult
-                    key={mood.name}
-                    name={mood.name}
-                    editFunction={setActiveMood}
-                    setDefaultFunction={setDefaultMood}
-                    defaultMood={defaultMood === mood.name}
-                    preferences={mood.preferences}
+              <div className="form-columns">
+                <label htmlFor="user-id">Your ThisVid User ID</label>
+                <div>
+                  <input
+                    type="text"
+                    id="user-id"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    data-tooltip-id="user-id"
                   />
-                ))}
+                  <Tooltip id="user-id" className="label-tooltip" place="left-start">
+                    The ID of the ThisVid user profile. You can find this in the URL of the profile
+                    page on ThisVid.
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+            <div className="container-section">
+              <div className="container-section-header">
+                <h2>Favourites</h2>
+              </div>
+              <p style={{ color: '#666' }}>Last sync date: {lastSyncDate}</p>
+              <div className="form-columns">
+                <div>Found {favourites.split(',').length} favourite videos</div>
+                <div>
+                  <button data-tooltip-id="sync-date" onClick={getFavourites} disabled={!userId}>
+                    Sync favourites
+                  </button>
+                  <Tooltip id="sync-date" className="label-tooltip" place="left-start">
+                    Load your favourite videos from ThisVid, so they can be filtered out of search
+                    results.
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+            <div className="container-section">
+              <div className="container-section-header">
+                <h3>Export/Import Moods</h3>
+              </div>
+              <div className="form-columns" style={{ marginBottom: '12px' }}>
+                <div>
+                  <button onClick={exportMoods} data-tooltip-id="export-moods">Export Moods</button>
+                  <Tooltip id="export-moods" className="label-tooltip" place="left-start">
+                    Copy your mood data to clipboard for backup or sharing.
+                  </Tooltip>
+                </div>
+                <div>
+                  <textarea
+                    placeholder="Paste moods data here to import"
+                    value={importText}
+                    onChange={(e) => setImportText(e.target.value)}
+                    style={{ width: '100%', minHeight: '60px' }}
+                    data-tooltip-id="import-moods"
+                  />
+                  <Tooltip id="import-moods" className="label-tooltip" place="left-start">
+                    Paste exported moods data here to import.
+                  </Tooltip>
+                  {importError && <p style={{ color: 'red', margin: '4px 0' }}>{importError}</p>}
+                  <button
+                    onClick={importMoods}
+                    disabled={!importText}
+                    style={{ marginTop: '4px' }}
+                  >
+                    Import Moods
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="container-section">
+              <div className="container-section-header">
+                <h3>Add a new mood</h3>
+              </div>
+              <div className="form-columns" style={{ marginBottom: '12px' }}>
+                <div>
+                  <input
+                    type="text"
+                    value={newMoodName}
+                    onChange={(e) => setNewMoodName(e.target.value)}
+                    placeholder="Name your mood"
+                  />
+                </div>
+                <button onClick={newMood}>Add</button>
+              </div>
+            </div>
+            <div className="container-section" style={{ flex: 1, minHeight: 0 }}>
+              <div className="container-section-header">
+                <h2>Moods</h2>
+              </div>
+              <div className="mood-results-container">
+                <div className="mood-results">
+                  {moods.map((mood) => (
+                    <MoodResult
+                      key={mood.name}
+                      name={mood.name}
+                      editFunction={setActiveMood}
+                      setDefaultFunction={setDefaultMood}
+                      defaultMood={defaultMood === mood.name}
+                      preferences={mood.preferences}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
