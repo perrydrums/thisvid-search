@@ -17,7 +17,7 @@ const MoodResult = ({
   editFunction,
   setDefaultFunction,
 }: MoodResultProps) => (
-  <div className="result" onClick={() => editFunction(name)} style={{ cursor: 'pointer' }}>
+  <div className="result mood-result" onClick={() => editFunction(name)} style={{ cursor: 'pointer' }}>
     <div className="title">
       {name}
       <div

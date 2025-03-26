@@ -102,10 +102,12 @@ const Preferences = () => {
   };
 
   const deleteMood = () => {
-    const newMoods = moods.filter((mood) => mood.name !== activeMood);
-    setMoods(newMoods);
-    localStorage.setItem('tvass-moods', JSON.stringify(newMoods));
-    setActiveMood('');
+    if (window.confirm(`Are you sure you want to delete the mood "${activeMood}"?`)) {
+      const newMoods = moods.filter((mood) => mood.name !== activeMood);
+      setMoods(newMoods);
+      localStorage.setItem('tvass-moods', JSON.stringify(newMoods));
+      setActiveMood('');
+    }
   };
 
   const getFavourites = async () => {
@@ -185,7 +187,7 @@ const Preferences = () => {
               </div>
             </div>
           </div>
-          <div className="container-section ">
+          <div className="container-section">
             <div className="container-section-header">
               <h3>Add a new mood</h3>
             </div>
@@ -200,6 +202,8 @@ const Preferences = () => {
               </div>
               <button onClick={newMood}>Add</button>
             </div>
+          </div>
+          <div className="container-section" style={{ flex: 1, minHeight: 0 }}>
             <div className="container-section-header">
               <h2>Moods</h2>
             </div>
