@@ -92,8 +92,6 @@ export const filterVideos = ({
       return true;
     })
     .map(video => {
-      const title = video.title.toLowerCase();
-
       // Calculate relevance score
       const tagsRelevance = includeTags.reduce((score, tag) => {
         const regex = new RegExp(tag, 'gi');
