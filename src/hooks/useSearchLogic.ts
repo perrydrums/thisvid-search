@@ -206,9 +206,6 @@ export const useSearchLogic = ({
     }
     const promises = [];
 
-    let tempPageLimit = 0;
-    let progress = 0;
-
     const urlFirstPage = getUrl(offset);
     const firstPageExists = await urlExists(urlFirstPage);
 
@@ -221,30 +218,41 @@ export const useSearchLogic = ({
 
     for (let i = offset; i <= offset - 1 + amount; i++) {
       const url = getUrl(i);
+      const currentPage = i;
       promises.push(
         getVideos({
           url,
           minDuration,
           quick,
-          page: i,
+          page: currentPage,
           omitPrivate,
         }).then((s) => {
-          // @ts-ignore
-          if (s && s.error === 404) {
-            if (tempPageLimit === 0 || tempPageLimit > i) {
-              tempPageLimit = i - 1;
-              setPageLimit(tempPageLimit);
-            }
-          }
-          progress++;
-          setProgressCount(progress);
-          return s;
+          // Return both the result and page info for later processing
+          return {
+            videos: s,
+            page: currentPage,
+            // @ts-ignore
+            hasError: s && s.error === 404
+          };
         }),
       );
     }
 
     try {
-      const videos = (await Promise.all(promises)).flat().filter(
+      const results = await Promise.all(promises);
+
+      // Update progress
+      setProgressCount(results.length);
+
+      // Handle page limits
+      const errorPages = results.filter(r => r.hasError).map(r => r.page);
+      if (errorPages.length > 0) {
+        const minErrorPage = Math.min(...errorPages);
+        setPageLimit(minErrorPage - 1);
+      }
+
+      // Extract videos
+      const videos = results.flatMap(r => r.videos).filter(
         // @ts-ignore
         (value, index, self) => index === self.findIndex((v) => v.url === value.url),
       );
