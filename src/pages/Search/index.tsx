@@ -18,7 +18,7 @@ import { getCategories } from '../../helpers/getCategories';
 import { log } from '../../helpers/supabase/log';
 import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../helpers/types';
 import { getUsername } from '../../helpers/users';
-import { getVideos, sortVideos } from '../../helpers/videos';
+import { getVideos, filterVideos, sortVideos } from '../../helpers/videos';
 
 const modes: Modes = {
   newest: 'Newest videos',
@@ -94,6 +94,7 @@ const Search = () => {
   const [omitPrivate, setOmitPrivate] = useState(false);
   const [omitFavourites, setOmitFavourites] = useState(false);
   const [preserveResults, setPreserveResults] = useState(false);
+  const [rawVideos, setRawVideos] = useState<Video[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [progressCount, setProgressCount] = useState(0);
   const [amount, setAmount] = useState(params.amount ? params.amount : 30);
@@ -135,7 +136,7 @@ const Search = () => {
         break;
       case 'category':
         document.title = `${category
-          .replace(/-/g, ' ') 
+          .replace(/-/g, ' ')
           .replace(/\b\w/g, (char: string) => char.toUpperCase())
         } videos - ` + title;
         break;
@@ -374,6 +375,7 @@ const Search = () => {
     setProgressCount(0);
 
     if (!preserveResults) {
+      setRawVideos([]);
       setVideos([]);
     }
     const promises = [];
@@ -396,11 +398,6 @@ const Search = () => {
       promises.push(
         getVideos({
           url,
-          includeTags,
-          excludeTags,
-          termsOperator,
-          boosterTags,
-          diminishingTags,
           minDuration,
           quick,
           page: i,
@@ -430,15 +427,12 @@ const Search = () => {
         (value, index, self) => index === self.findIndex((v) => v.url === value.url),
       );
 
-      preserveResults
-        ? setVideos((prevVideos) => sortVideos([...prevVideos, ...videos] as Video[], sort))
-        : setVideos(sortVideos(videos as Video[], sort));
+      // Store raw videos for client-side filtering
+      const newRawVideos = preserveResults
+        ? [...rawVideos, ...videos] as Video[]
+        : videos as Video[];
 
-      // If omitFavourites is enabled, remove favourite videos from the results.
-      if (omitFavourites) {
-        const favourites = getLocalFavourites();
-        setVideos((prevVideos) => prevVideos.filter((video) => !favourites.includes(video.url)));
-      }
+      setRawVideos(newRawVideos);
 
       setFinished(true);
       executeScroll();
@@ -494,6 +488,30 @@ const Search = () => {
     });
     return `${window.location.origin}/search?${params.toString()}`;
   };
+
+  // Apply client-side filtering whenever tag settings change
+  useEffect(() => {
+    if (rawVideos.length === 0) return;
+
+    let filteredVideos = filterVideos({
+      videos: rawVideos,
+      includeTags,
+      excludeTags,
+      termsOperator,
+      boosterTags,
+      diminishingTags,
+    });
+
+    // Apply favourites filter if enabled
+    if (omitFavourites) {
+      const favourites = getLocalFavourites();
+      filteredVideos = filteredVideos.filter((video) => !favourites.includes(video.url));
+    }
+
+    // Sort the filtered videos
+    const sortedVideos = sortVideos(filteredVideos, sort);
+    setVideos(sortedVideos);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort]);
 
   return (
     <>

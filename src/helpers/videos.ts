@@ -3,14 +3,18 @@ import { Video, VideoResponse } from './types';
 type GetVideosOptions = {
   url: string;
   page: number;
+  omitPrivate?: boolean;
+  minDuration?: number;
+  quick?: boolean;
+};
+
+type FilterVideosOptions = {
+  videos: Video[];
   includeTags?: string[];
   excludeTags?: string[];
   termsOperator?: 'AND' | 'OR';
   boosterTags?: string[];
   diminishingTags?: string[];
-  omitPrivate?: boolean;
-  minDuration?: number;
-  quick?: boolean;
 };
 
 // type VideoUrl = {
@@ -27,11 +31,6 @@ type GetVideosOptions = {
 export const getVideos = async ({
   url,
   page,
-  includeTags = [],
-  excludeTags = [],
-  termsOperator = 'AND',
-  boosterTags = [],
-  diminishingTags = [],
   omitPrivate = false,
   minDuration = 0,
   quick = true,
@@ -43,11 +42,6 @@ export const getVideos = async ({
       body: JSON.stringify({
         url,
         page,
-        includeTags,
-        excludeTags,
-        termsOperator,
-        boosterTags,
-        diminishingTags,
         omitPrivate,
         minDuration,
         quick,
@@ -65,6 +59,64 @@ export const getVideos = async ({
     console.error(error);
     return [];
   }
+};
+
+export const filterVideos = ({
+  videos,
+  includeTags = [],
+  excludeTags = [],
+  termsOperator = 'OR',
+  boosterTags = [],
+  diminishingTags = [],
+}: FilterVideosOptions): Array<Video> => {
+  return videos
+    .filter(video => {
+      const title = video.title.toLowerCase();
+
+      // Skip if video title contains any of the exclude tags
+      if (excludeTags.some(tag => title.includes(tag.toLowerCase()))) {
+        return false;
+      }
+
+      // Check if video matches include tags criteria
+      if (includeTags.length > 0) {
+        const hasAllTags = termsOperator === 'AND'
+          ? includeTags.every(tag => title.includes(tag.toLowerCase()))
+          : includeTags.some(tag => title.includes(tag.toLowerCase()));
+
+        if (!hasAllTags) {
+          return false;
+        }
+      }
+
+      return true;
+    })
+    .map(video => {
+      const title = video.title.toLowerCase();
+
+      // Calculate relevance score
+      const tagsRelevance = includeTags.reduce((score, tag) => {
+        const regex = new RegExp(tag, 'gi');
+        return score + (video.title.match(regex) || []).length;
+      }, 0);
+
+      const boosterRelevance = boosterTags.reduce((score, tag) => {
+        const regex = new RegExp(tag, 'gi');
+        return score + ((video.title.match(regex) || []).length > 0 ? 2 : 0);
+      }, 0);
+
+      const diminishingRelevance = diminishingTags.reduce((score, tag) => {
+        const regex = new RegExp(tag, 'gi');
+        return score - ((video.title.match(regex) || []).length > 0 ? 2 : 0);
+      }, 0);
+
+      const relevance = tagsRelevance + boosterRelevance + diminishingRelevance;
+
+      return {
+        ...video,
+        relevance,
+      };
+    });
 };
 
 export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<Video> => {

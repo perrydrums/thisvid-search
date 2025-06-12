@@ -11,11 +11,6 @@ exports.handler = async function (event, context) {
   const {
     url,
     page = 1,
-    includeTags = [],
-    excludeTags = [],
-    termsOperator = 'AND',
-    boosterTags = [],
-    diminishingTags = [],
     omitPrivate = false,
     minDuration = 0,
     quick = true,
@@ -79,54 +74,22 @@ exports.handler = async function (event, context) {
       const time = minutes * 60 + seconds;
 
       const title = $(element).attr('title') || '';
-      if (quick) {
-        // Skip if video title contains any of the exclude tags.
-        if (excludeTags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()))) {
-          return;
-        }
 
-        const hasAllTags =
-          termsOperator === 'AND'
-            ? includeTags.every((tag) => title.toLowerCase().includes(tag.toLowerCase()))
-            : includeTags.some((tag) => title.toLowerCase().includes(tag.toLowerCase()));
-
-        const tagsRelevance = includeTags.reduce((score, tag) => {
-          const regex = new RegExp(tag, 'gi');
-          // For each tag present in title, add 1 to the relevance score.
-          return score + (title.match(regex) || []).length;
-        }, 0);
-
-        const boosterRelevance = boosterTags.reduce((score, tag) => {
-          const regex = new RegExp(tag, 'gi');
-          // For each unique booster tag present in title, add 2 to the relevance score.
-          return score + ((title.match(regex) || []).length > 0 ? 2 : 0);
-        }, 0);
-
-        const diminishingRelevance = diminishingTags.reduce((score, tag) => {
-          const regex = new RegExp(tag, 'gi');
-          // For each unique diminishing tag present in title, subtract 2 from the relevance score.
-          return score - ((title.match(regex) || []).length > 0 ? 2 : 0);
-        }, 0);
-
-        const relevance = tagsRelevance + boosterRelevance + diminishingRelevance;
-
-        if (hasAllTags || includeTags.length === 0) {
-          if (time >= minDuration * 60) {
-            videos.push({
-              title,
-              url: $(element).attr('href') || '',
-              isPrivate,
-              duration,
-              avatar,
-              views: parseInt(views),
-              date,
-              relevance,
-              page,
-            });
-          }
-        }
-      } else {
-        if (time >= minDuration * 60) {
+      // Only filter by basic criteria (duration), tags will be filtered client-side
+      if (time >= minDuration * 60) {
+        if (quick) {
+          videos.push({
+            title,
+            url: $(element).attr('href') || '',
+            isPrivate,
+            duration,
+            avatar,
+            views: parseInt(views),
+            date,
+            relevance: 0, // Will be calculated client-side
+            page,
+          });
+        } else {
           urls.push({
             title,
             url: $(element).attr('href') || '',
@@ -136,6 +99,7 @@ exports.handler = async function (event, context) {
             views: parseInt(views),
             date,
             relevance: 0,
+            page,
           });
         }
       }
@@ -149,24 +113,18 @@ exports.handler = async function (event, context) {
           const body = await response.text();
           const $ = cheerio.load(body);
 
-          const hasAllTags =
-            termsOperator === 'AND'
-              ? includeTags.every((tag) => $(`.description a[title*="${tag}"]`).length > 0)
-              : includeTags.some((tag) => $(`.description a[title*="${tag}"]`).length > 0);
-
-          if (hasAllTags) {
-            videos.push({
-              relevance: video.relevance,
-              title: video.title,
-              url: video.url,
-              isPrivate: video.isPrivate,
-              duration: video.duration,
-              avatar: video.avatar,
-              views: video.views,
-              date: video.date,
-              page,
-            });
-          }
+          // Just add the video, tags will be filtered client-side
+          videos.push({
+            relevance: video.relevance,
+            title: video.title,
+            url: video.url,
+            isPrivate: video.isPrivate,
+            duration: video.duration,
+            avatar: video.avatar,
+            views: video.views,
+            date: video.date,
+            page: video.page,
+          });
         } catch (error) {
           console.log(error);
         }
@@ -178,7 +136,7 @@ exports.handler = async function (event, context) {
       headers,
       body: JSON.stringify({
         success: true,
-        videos: videos.sort((a, b) => b.relevance - a.relevance),
+        videos: videos,
       }),
     };
   } catch (error) {
