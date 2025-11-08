@@ -586,8 +586,8 @@ const Search = () => {
       // Update rawVideos with enriched data
       setRawVideos((prevVideos) => {
         const updated = prevVideos.map((v) => {
-          const enriched = enrichedBatch.find((e) => e.url === v.url);
-          return v; // Thumbnails are already set from friendsEvents, no need to update
+          // Thumbnails are already set from friendsEvents, no need to update
+          return v;
         });
         return updated;
       });
