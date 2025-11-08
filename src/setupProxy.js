@@ -116,4 +116,12 @@ module.exports = function (app) {
     }),
   );
 
+  app.use(
+    '/videoDetails',
+    createProxyMiddleware({
+      target: 'https://tvass.netlify.app/.netlify/functions',
+      changeOrigin: true,
+    }),
+  );
+
 };

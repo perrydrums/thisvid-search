@@ -95,3 +95,8 @@ status = 200
 from = "/friendsEvents"
 to = "https://tvass.netlify.app/.netlify/functions/friendsEvents"
 status = 200
+
+[[redirects]]
+from = "/videoDetails"
+to = "https://tvass.netlify.app/.netlify/functions/videoDetails"
+status = 200
