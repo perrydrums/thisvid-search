@@ -8,7 +8,7 @@ puppeteer.use(adBlocker);
 
 const headers = {
   'Content-Type': 'application/json',
-  'Cache-Control': 'no-cache',
+  'Cache-Control': 'public, max-age=7200, s-maxage=7200', // Cache for 2 hours (7200 seconds)
   'Netlify-Vary': 'query',
 };
 
