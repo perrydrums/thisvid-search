@@ -44,8 +44,12 @@ exports.handler = async function (event, context) {
     browser = await puppeteer.launch(options);
     const page = await browser.newPage();
 
+    // Set longer timeout for slow connections
+    page.setDefaultNavigationTimeout(60000);
+    page.setDefaultTimeout(60000);
+
     // Navigate to login page
-    await page.goto('https://thisvid.com/login.php', { waitUntil: 'networkidle2' });
+    await page.goto('https://thisvid.com/login.php', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // Fill login form
     await page.waitForSelector('#login_username');
@@ -56,7 +60,7 @@ exports.handler = async function (event, context) {
     const submitButton = await page.$('input[type="submit"], button[type="submit"], form input[type="submit"]');
     if (submitButton) {
       await Promise.all([
-        page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 }),
         submitButton.click(),
       ]);
     } else {
@@ -65,7 +69,7 @@ exports.handler = async function (event, context) {
         const form = document.querySelector('form');
         if (form) form.submit();
       });
-      await page.waitForNavigation({ waitUntil: 'networkidle2' });
+      await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 });
     }
 
     // Check if login was successful by checking if we're redirected away from login page
@@ -84,7 +88,7 @@ exports.handler = async function (event, context) {
     }
 
     // Navigate to friends events page
-    await page.goto('https://thisvid.com/my_friends_events/', { waitUntil: 'networkidle2' });
+    await page.goto('https://thisvid.com/my_friends_events/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
     // Extract video data
     const videos = await page.evaluate(() => {
