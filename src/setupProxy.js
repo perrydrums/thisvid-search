@@ -107,4 +107,13 @@ module.exports = function (app) {
       changeOrigin: true,
     }),
   );
+
+  app.use(
+    '/friendsEvents',
+    createProxyMiddleware({
+      target: 'https://tvass.netlify.app/.netlify/functions',
+      changeOrigin: true,
+    }),
+  );
+
 };

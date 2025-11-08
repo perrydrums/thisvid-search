@@ -33,7 +33,10 @@ exports.handler = async function (event, context) {
   };
 
   if (!process.env.CHROME_EXECUTABLE_PATH) {
+    // Use @sparticuz/chromium defaults for Netlify/Lambda
     options.args = chromium.args;
+    options.defaultViewport = chromium.defaultViewport;
+    options.headless = chromium.headless;
   }
 
   let browser;
