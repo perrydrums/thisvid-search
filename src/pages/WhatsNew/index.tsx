@@ -23,30 +23,25 @@ const WhatsNew = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedUploader, setSelectedUploader] = useState<string>('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [enriching, setEnriching] = useState(false);
   const [enrichmentProgress, setEnrichmentProgress] = useState(0);
 
   // Get unique uploaders
   const uniqueUploaders = Array.from(new Set(videos.map((video) => video.uploader))).sort();
 
-  // Get unique tags from all videos
-  const allTags = Array.from(
-    new Set(
-      videos
-        .filter((video) => video.tags && video.tags.length > 0)
-        .flatMap((video) => video.tags || []),
-    ),
+  // Get unique categories from all videos
+  const allCategories = Array.from(
+    new Set(videos.filter((video) => video.category).map((video) => video.category || '')),
   ).sort();
 
-  // Filter videos by selected uploader and tags
+  // Filter videos by selected uploader and category
   const filteredVideos = videos.filter((video) => {
     if (selectedUploader && video.uploader !== selectedUploader) {
       return false;
     }
-    if (selectedTags.length > 0) {
-      const videoTags = video.tags || [];
-      return selectedTags.every((tag) => videoTags.includes(tag));
+    if (selectedCategory && video.category !== selectedCategory) {
+      return false;
     }
     return true;
   });
@@ -69,7 +64,6 @@ const WhatsNew = () => {
           if (data.success) {
             return {
               ...video,
-              tags: data.tags || [],
               category: data.category || '',
             };
           }
@@ -151,10 +145,8 @@ const WhatsNew = () => {
       try {
         const parsedVideos = JSON.parse(stored);
         setVideos(parsedVideos);
-        // Check if any videos need enrichment (missing tags or category)
-        const needsEnrichment = parsedVideos.filter(
-          (v: Video) => !v.tags || !v.category || !v.thumbnail,
-        );
+        // Check if any videos need enrichment (missing category)
+        const needsEnrichment = parsedVideos.filter((v: Video) => !v.category);
         if (needsEnrichment.length > 0) {
           enrichVideos(needsEnrichment);
         }
@@ -268,38 +260,29 @@ const WhatsNew = () => {
                     })}
                   </div>
                 </div>
-                {allTags.length > 0 && (
+                {allCategories.length > 0 && (
                   <div className="container-section">
                     <div className="container-section-header">
-                      <h2>Tags ({allTags.length})</h2>
+                      <h2>Category</h2>
                     </div>
                     <div className="form-container-scroll" style={{ maxHeight: '30vh', overflowY: 'auto' }}>
-                      {allTags.map((tag) => {
-                        const isSelected = selectedTags.includes(tag);
-                        const count = videos.filter((v) => v.tags && v.tags.includes(tag)).length;
-                        return (
-                          <div
-                            key={tag}
-                            style={{
-                              padding: '8px',
-                              marginBottom: '4px',
-                              cursor: 'pointer',
-                              backgroundColor: isSelected ? 'var(--accent-color)' : 'var(--input-background-color)',
-                              borderRadius: '4px',
-                              color: isSelected ? 'white' : 'var(--text-color)',
-                            }}
-                            onClick={() => {
-                              if (isSelected) {
-                                setSelectedTags(selectedTags.filter((t) => t !== tag));
-                              } else {
-                                setSelectedTags([...selectedTags, tag]);
-                              }
-                            }}
-                          >
-                            {tag} ({count})
-                          </div>
-                        );
-                      })}
+                      <div className="select-wrapper">
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          style={{ width: '100%' }}
+                        >
+                          <option value="">All Categories</option>
+                          {allCategories.map((category) => {
+                            const count = videos.filter((v) => v.category === category).length;
+                            return (
+                              <option key={category} value={category}>
+                                {category} ({count})
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 )}

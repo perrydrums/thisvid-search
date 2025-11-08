@@ -120,6 +120,8 @@ const Search = () => {
   );
   const [friendsEventsUsername, setFriendsEventsUsername] = useState(params.friendsEventsUsername || '');
   const [friendsEventsPassword, setFriendsEventsPassword] = useState('');
+  const [friendsEventsCategory, setFriendsEventsCategory] = useState(params.friendsEventsCategory || '');
+  const [enrichedVideosData, setEnrichedVideosData] = useState<Map<string, { category?: string }>>(new Map());
   const [enriching, setEnriching] = useState(false);
   const [enrichmentProgress, setEnrichmentProgress] = useState(0);
 
@@ -251,10 +253,17 @@ const Search = () => {
           setRawVideos(mappedVideos);
           setFinished(true);
 
-          // Check if any videos need enrichment (missing tags or category)
-          const needsEnrichment = parsedVideos.filter(
-            (v: any) => !v.tags || !v.category || !v.thumbnail,
-          );
+          // Store enriched data (category) in a Map
+          const enrichedMap = new Map<string, { category?: string }>();
+          parsedVideos.forEach((video: any) => {
+            if (video.category) {
+              enrichedMap.set(video.url, { category: video.category });
+            }
+          });
+          setEnrichedVideosData(enrichedMap);
+
+          // Check if any videos need enrichment (missing category)
+          const needsEnrichment = parsedVideos.filter((v: any) => !v.category);
           if (needsEnrichment.length > 0) {
             enrichVideos(needsEnrichment, mappedVideos);
           }
@@ -470,6 +479,15 @@ const Search = () => {
         // Save to localStorage
         if (data.videos && data.videos.length > 0) {
           localStorage.setItem('tvass-whats-new-videos', JSON.stringify(data.videos));
+
+          // Store enriched data (category) in a Map
+          const enrichedMap = new Map<string, { category?: string }>();
+          data.videos.forEach((video: any) => {
+            if (video.category) {
+              enrichedMap.set(video.url, { category: video.category });
+            }
+          });
+          setEnrichedVideosData(enrichedMap);
         }
 
         // Start async enrichment
@@ -570,7 +588,6 @@ const Search = () => {
           if (data.success) {
             return {
               ...video,
-              tags: data.tags || [],
               category: data.category || '',
             };
           }
@@ -590,6 +607,17 @@ const Search = () => {
           return v;
         });
         return updated;
+      });
+
+      // Update enriched videos data map with category information
+      setEnrichedVideosData((prevMap) => {
+        const newMap = new Map(prevMap);
+        enrichedBatch.forEach((enriched) => {
+          if (enriched.category) {
+            newMap.set(enriched.url, { category: enriched.category });
+          }
+        });
+        return newMap;
       });
 
       enrichedCount += enrichedBatch.length;
@@ -663,10 +691,18 @@ const Search = () => {
       filteredVideos = filteredVideos.filter((video) => !favourites.includes(video.url));
     }
 
+    // Apply category filter for friendsEvents mode
+    if (mode === 'friendsEvents' && friendsEventsCategory) {
+      filteredVideos = filteredVideos.filter((video) => {
+        const enriched = enrichedVideosData.get(video.url);
+        return enriched?.category === friendsEventsCategory;
+      });
+    }
+
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, mode, friendsEventsCategory, enrichedVideosData]);
 
   return (
     <>
@@ -815,39 +851,73 @@ const Search = () => {
               )}
               {mode === 'friendsEvents' && (
                 <>
-                  <div className="form-columns" style={{ marginBottom: '12px' }}>
-                    <label htmlFor="friends-events-username">Thisvid Username</label>
-                    <input
-                      type="text"
-                      id="friends-events-username"
-                      value={friendsEventsUsername}
-                      onChange={(e) => setFriendsEventsUsername(e.target.value)}
-                      placeholder="Enter your username"
-                      disabled={loading}
-                      autoComplete="off"
-                      data-1p-ignore
-                      required
-                    />
-                  </div>
-                  <div className="form-columns" style={{ marginBottom: '12px' }}>
-                    <label htmlFor="friends-events-password">Credential</label>
-                    <input
-                      type="password"
-                      id="friends-events-password"
-                      value={friendsEventsPassword}
-                      onChange={(e) => setFriendsEventsPassword(e.target.value)}
-                      placeholder="Enter your credential"
-                      disabled={loading}
-                      autoComplete="off"
-                      data-1p-ignore
-                      required
-                    />
-                  </div>
+                  <label htmlFor="friends-events-username">Thisvid Username</label>
+                  <input
+                    type="text"
+                    id="friends-events-username"
+                    value={friendsEventsUsername}
+                    onChange={(e) => setFriendsEventsUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    disabled={loading}
+                    autoComplete="off"
+                    data-1p-ignore
+                    required
+                  />
+                  <label htmlFor="friends-events-password">Credential</label>
+                  <input
+                    type="password"
+                    id="friends-events-password"
+                    value={friendsEventsPassword}
+                    onChange={(e) => setFriendsEventsPassword(e.target.value)}
+                    placeholder="Enter your credential"
+                    disabled={loading}
+                    autoComplete="off"
+                    data-1p-ignore
+                    required
+                  />
                   {enriching && (
                     <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
                       Enriching videos... {enrichmentProgress} / {rawVideos.length}
                     </div>
                   )}
+                  {mode === 'friendsEvents' && rawVideos.length > 0 && (() => {
+                    const allCategories = Array.from(
+                      new Set(
+                        Array.from(enrichedVideosData.values())
+                          .map((data) => data.category)
+                          .filter((cat): cat is string => !!cat)
+                      )
+                    ).sort();
+
+                    if (allCategories.length > 0) {
+                      return (
+                        <>
+                          <label htmlFor="friends-events-category">Category</label>
+                          <div className="select-wrapper">
+                            <select
+                              id="friends-events-category"
+                              value={friendsEventsCategory}
+                              onChange={(e) => setFriendsEventsCategory(e.target.value)}
+                            >
+                              <option value="">All Categories</option>
+                              {allCategories.map((category) => {
+                                const count = rawVideos.filter((v) => {
+                                  const enriched = enrichedVideosData.get(v.url);
+                                  return enriched?.category === category;
+                                }).length;
+                                return (
+                                  <option key={category} value={category}>
+                                    {category} ({count})
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </div>
+                        </>
+                      );
+                    }
+                    return null;
+                  })()}
                 </>
               )}
               {mode === 'category' && (
