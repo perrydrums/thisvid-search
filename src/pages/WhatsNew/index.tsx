@@ -71,7 +71,6 @@ const WhatsNew = () => {
               ...video,
               tags: data.tags || [],
               category: data.category || '',
-              thumbnail: data.thumbnail || video.thumbnail,
             };
           }
           return video;

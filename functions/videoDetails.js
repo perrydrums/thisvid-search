@@ -40,13 +40,6 @@ exports.handler = async function (event, context) {
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    // Extract thumbnail from .video-holder img
-    const thumbnailElement = $('.video-holder img').first();
-    let thumbnail = thumbnailElement.attr('src') || '';
-    if (thumbnail && thumbnail.startsWith('//')) {
-      thumbnail = 'https:' + thumbnail;
-    }
-
     // Extract tags and category from ul.description
     // Structure: first li = description, second li = category, third li = tags, fourth li = uploader
     const descriptionList = $('.box ul.description').first();
@@ -95,7 +88,6 @@ exports.handler = async function (event, context) {
         success: true,
         tags,
         category,
-        thumbnail,
       }),
       headers,
     };

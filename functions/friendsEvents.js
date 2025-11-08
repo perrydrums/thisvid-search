@@ -105,8 +105,16 @@ exports.handler = async function (event, context) {
         const titleElement = entry.querySelector('.title');
         const title = titleElement ? titleElement.textContent.trim() : '';
 
-        // Skip thumbnail extraction for now (lazy-loaded images cause timeouts)
-        const thumbnail = '';
+        const thumbImg = entry.querySelector('.thumb img');
+        let thumbnail = '';
+        if (thumbImg) {
+          // Check for lazy-loaded images - try data-original first, then src
+          thumbnail = thumbImg.getAttribute('data-original') || thumbImg.getAttribute('src') || '';
+          // Handle protocol-relative URLs
+          if (thumbnail && thumbnail.startsWith('//')) {
+            thumbnail = 'https:' + thumbnail;
+          }
+        }
 
         if (uploader && videoUrl && title) {
           videoData.push({

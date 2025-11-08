@@ -27,6 +27,7 @@ const modes: Modes = {
   category: 'Category',
   tags: 'Tags',
   extreme: 'Extreme',
+  friendsEvents: "What's New",
 };
 
 const types: Types = {
@@ -117,6 +118,10 @@ const Search = () => {
   const [activeMood, setActiveMood] = useState(
     params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : '',
   );
+  const [friendsEventsUsername, setFriendsEventsUsername] = useState(params.friendsEventsUsername || '');
+  const [friendsEventsPassword, setFriendsEventsPassword] = useState('');
+  const [enriching, setEnriching] = useState(false);
+  const [enrichmentProgress, setEnrichmentProgress] = useState(0);
 
   // update the document.title based on the state
   useEffect(() => {
@@ -145,6 +150,9 @@ const Search = () => {
           .replace(/-/g, ' ')
           .replace(/\b\w/g, (char: string) => char.toUpperCase())
         } videos - ` + title;
+        break;
+      case 'friendsEvents':
+        document.title = `What's New - ` + title;
         break;
       default:
         document.title = title;
@@ -220,6 +228,46 @@ const Search = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Load friendsEvents videos from localStorage when mode is friendsEvents
+  useEffect(() => {
+    if (mode === 'friendsEvents') {
+      const stored = localStorage.getItem('tvass-whats-new-videos');
+      if (stored) {
+        try {
+          const parsedVideos = JSON.parse(stored);
+          // Map friendsEvents videos to Search Video format
+          const mappedVideos: Video[] = parsedVideos.map((video: any) => ({
+            title: video.title,
+            url: video.url,
+            isPrivate: false,
+            duration: '',
+            avatar: video.thumbnail || '',
+            views: 0,
+            date: '',
+            relevance: 0,
+            page: 1,
+          }));
+          setRawVideos(mappedVideos);
+          setFinished(true);
+
+          // Check if any videos need enrichment (missing tags or category)
+          const needsEnrichment = parsedVideos.filter(
+            (v: any) => !v.tags || !v.category || !v.thumbnail,
+          );
+          if (needsEnrichment.length > 0) {
+            enrichVideos(needsEnrichment, mappedVideos);
+          }
+        } catch (err) {
+          console.error('Error parsing stored videos:', err);
+        }
+      }
+    } else {
+      // Reset finished state when switching away from friendsEvents
+      setFinished(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     getCategories().then((categories: Category[]) => {
@@ -302,7 +350,8 @@ const Search = () => {
       let response;
       if (
         (mode === 'extreme' && (!type || !primaryTag)) ||
-        (mode === 'newest' && !type)
+        (mode === 'newest' && !type) ||
+        mode === 'friendsEvents'
       ) {
         return;
       } else {
@@ -378,6 +427,64 @@ const Search = () => {
       setRawVideos([]);
       setVideos([]);
     }
+
+    // Handle friendsEvents mode differently
+    if (mode === 'friendsEvents') {
+      if (!friendsEventsUsername || !friendsEventsPassword) {
+        setErrorMessage('Please enter both username and password');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/friendsEvents?username=${encodeURIComponent(friendsEventsUsername)}&password=${encodeURIComponent(friendsEventsPassword)}`,
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          setErrorMessage(data.message || 'Failed to fetch videos');
+          setLoading(false);
+          return;
+        }
+
+        // Map friendsEvents videos to Search Video format
+        const mappedVideos: Video[] = (data.videos || []).map((video: any, index: number) => ({
+          title: video.title,
+          url: video.url,
+          isPrivate: false,
+          duration: '',
+          avatar: video.thumbnail || '',
+          views: 0,
+          date: '',
+          relevance: 0,
+          page: 1,
+        }));
+
+        setRawVideos(mappedVideos);
+        setFinished(true);
+        executeScroll();
+        logSearch();
+
+        // Save to localStorage
+        if (data.videos && data.videos.length > 0) {
+          localStorage.setItem('tvass-whats-new-videos', JSON.stringify(data.videos));
+        }
+
+        // Start async enrichment
+        if (data.videos && data.videos.length > 0) {
+          enrichVideos(data.videos, mappedVideos);
+        }
+      } catch (err) {
+        setErrorMessage('An error occurred while fetching videos. Please try again.');
+        console.error('Error fetching videos:', err);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     const promises = [];
 
     // We need this because setting state is async.
@@ -442,6 +549,54 @@ const Search = () => {
     }
 
     setLoading(false);
+  };
+
+  // Enrich videos with tags, category, and thumbnail
+  const enrichVideos = async (friendsEventsVideos: any[], mappedVideos: Video[]) => {
+    setEnriching(true);
+    setEnrichmentProgress(0);
+
+    const batchSize = 5;
+    let enrichedCount = 0;
+
+    for (let i = 0; i < friendsEventsVideos.length; i += batchSize) {
+      const batch = friendsEventsVideos.slice(i, i + batchSize);
+
+      const enrichmentPromises = batch.map(async (video) => {
+        try {
+          const response = await fetch(`/videoDetails?url=${encodeURIComponent(video.url)}`);
+          const data = await response.json();
+
+          if (data.success) {
+            return {
+              ...video,
+              tags: data.tags || [],
+              category: data.category || '',
+            };
+          }
+          return video;
+        } catch (err) {
+          console.error(`Error enriching video ${video.url}:`, err);
+          return video;
+        }
+      });
+
+      const enrichedBatch = await Promise.all(enrichmentPromises);
+
+      // Update rawVideos with enriched data
+      setRawVideos((prevVideos) => {
+        const updated = prevVideos.map((v) => {
+          const enriched = enrichedBatch.find((e) => e.url === v.url);
+          return v; // Thumbnails are already set from friendsEvents, no need to update
+        });
+        return updated;
+      });
+
+      enrichedCount += enrichedBatch.length;
+      setEnrichmentProgress(enrichedCount);
+    }
+
+    setEnriching(false);
   };
 
   // Run for the next set of pages.
@@ -658,6 +813,43 @@ const Search = () => {
                   )}
                 </>
               )}
+              {mode === 'friendsEvents' && (
+                <>
+                  <div className="form-columns" style={{ marginBottom: '12px' }}>
+                    <label htmlFor="friends-events-username">Thisvid Username</label>
+                    <input
+                      type="text"
+                      id="friends-events-username"
+                      value={friendsEventsUsername}
+                      onChange={(e) => setFriendsEventsUsername(e.target.value)}
+                      placeholder="Enter your username"
+                      disabled={loading}
+                      autoComplete="off"
+                      data-1p-ignore
+                      required
+                    />
+                  </div>
+                  <div className="form-columns" style={{ marginBottom: '12px' }}>
+                    <label htmlFor="friends-events-password">Credential</label>
+                    <input
+                      type="password"
+                      id="friends-events-password"
+                      value={friendsEventsPassword}
+                      onChange={(e) => setFriendsEventsPassword(e.target.value)}
+                      placeholder="Enter your credential"
+                      disabled={loading}
+                      autoComplete="off"
+                      data-1p-ignore
+                      required
+                    />
+                  </div>
+                  {enriching && (
+                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
+                      Enriching videos... {enrichmentProgress} / {rawVideos.length}
+                    </div>
+                  )}
+                </>
+              )}
               {mode === 'category' && (
                 <>
                   <label htmlFor="category">Category</label>
@@ -708,22 +900,26 @@ const Search = () => {
                   />
                 </>
               )}
-              <label htmlFor="type">Type</label>
-              <div className="select-wrapper">
-                <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
-                  <option disabled value="">
-                    {' '}
-                    - Select -
-                  </option>
-                  {types[mode].map(({ value, label }) => {
-                    return (
-                      <option key={value} value={value}>
-                        {label}
+              {mode !== 'friendsEvents' && (
+                <>
+                  <label htmlFor="type">Type</label>
+                  <div className="select-wrapper">
+                    <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
+                      <option disabled value="">
+                        {' '}
+                        - Select -
                       </option>
-                    );
-                  })}
-                </select>
-              </div>
+                      {types[mode]?.map(({ value, label }) => {
+                        return (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                </>
+              )}
               {mode === 'extreme' && (
                 <>
                   <label htmlFor="primary-tag">Search</label>
