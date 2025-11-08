@@ -19,6 +19,7 @@ type ResultProps = {
   isFavourite?: boolean;
   relevance?: number;
   noDebug?: boolean;
+  uploader?: string;
 };
 
 const Result = ({
@@ -34,6 +35,7 @@ const Result = ({
   isFavourite = false,
   relevance,
   noDebug = false,
+  uploader,
 }: ResultProps) => {
   const [downloadUrl, setDownloadUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -90,6 +92,7 @@ const Result = ({
       </div>
 
       <div className="details">
+        {uploader && <span className="date" style={{ fontWeight: 'bold' }}>{uploader}</span>}
         {date && <span className="date">{date}</span>}
         {!noDebug && debug && (
           <span className="date">

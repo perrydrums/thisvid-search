@@ -8,6 +8,7 @@ import Analyse from './pages/Analyse';
 import Home from './pages/Home';
 import Preferences from './pages/Preferences';
 import Search from './pages/Search';
+import WhatsNew from './pages/WhatsNew';
 
 // Generate random visitor ID if not already set in local storage.
 if (!localStorage.getItem('visitorId')) {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: '/preferences',
     element: <Preferences />,
+  },
+  {
+    path: '/whats-new',
+    element: <WhatsNew />,
   },
 ]);
 

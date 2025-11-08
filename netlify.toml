@@ -17,6 +17,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/whats-new"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/newest/*"
 to = "https://thisvid.com/newest/:splat"
 status = 200
@@ -86,3 +91,7 @@ from = "/feed"
 to = "https://tvass.netlify.app/.netlify/functions/feed"
 status = 200
 
+[[redirects]]
+from = "/friendsEvents"
+to = "https://tvass.netlify.app/.netlify/functions/friendsEvents"
+status = 200
