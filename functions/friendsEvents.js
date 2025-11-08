@@ -106,10 +106,27 @@ exports.handler = async function (event, context) {
         const title = titleElement ? titleElement.textContent.trim() : '';
 
         const thumbImg = entry.querySelector('.thumb img');
+        const thumbElement = entry.querySelector('.thumb');
         let thumbnail = '';
-        if (thumbImg) {
-          // Check for lazy-loaded images - try data-original first, then src
-          thumbnail = thumbImg.getAttribute('data-original') || thumbImg.getAttribute('src') || '';
+
+        if (thumbElement) {
+          // Check if it's a private video (has 'private' class)
+          const isPrivate = thumbElement.classList.contains('private');
+
+          if (isPrivate) {
+            // For private videos, extract from style attribute background
+            const style = thumbElement.getAttribute('style') || '';
+            const backgroundMatch = style.match(/background:\s*url\(([^)]+)\)/);
+            if (backgroundMatch && backgroundMatch[1]) {
+              thumbnail = backgroundMatch[1].trim();
+              // Remove quotes if present
+              thumbnail = thumbnail.replace(/^["']|["']$/g, '');
+            }
+          } else if (thumbImg) {
+            // For non-private videos, use data-original or src
+            thumbnail = thumbImg.getAttribute('data-original') || thumbImg.getAttribute('src') || '';
+          }
+
           // Handle protocol-relative URLs
           if (thumbnail && thumbnail.startsWith('//')) {
             thumbnail = 'https:' + thumbnail;
