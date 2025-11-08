@@ -90,27 +90,6 @@ exports.handler = async function (event, context) {
     // Navigate to friends events page
     await page.goto('https://thisvid.com/my_friends_events/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Scroll page to trigger lazy loading of images
-    await page.evaluate(async () => {
-      await new Promise((resolve) => {
-        let totalHeight = 0;
-        const distance = 100;
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
-
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            resolve(null);
-          }
-        }, 100);
-      });
-    });
-
-    // Wait a bit for lazy-loaded images to load
-    await page.waitForTimeout(1000);
-
     // Extract video data
     const videos = await page.evaluate(() => {
       const entries = document.querySelectorAll('.entry');
@@ -126,24 +105,8 @@ exports.handler = async function (event, context) {
         const titleElement = entry.querySelector('.title');
         const title = titleElement ? titleElement.textContent.trim() : '';
 
-        const thumbImg = entry.querySelector('.thumb img');
-        let thumbnail = '';
-        if (thumbImg) {
-          // Check for lazy-loaded images - try current src first (after lazy load), then data-src, then src
-          thumbnail =
-            thumbImg.src ||
-            thumbImg.getAttribute('data-src') ||
-            thumbImg.getAttribute('src') ||
-            '';
-          // Handle protocol-relative URLs
-          if (thumbnail && thumbnail.startsWith('//')) {
-            thumbnail = 'https:' + thumbnail;
-          }
-          // Remove data:image placeholders
-          if (thumbnail && thumbnail.startsWith('data:image')) {
-            thumbnail = '';
-          }
-        }
+        // Skip thumbnail extraction for now (lazy-loaded images cause timeouts)
+        const thumbnail = '';
 
         if (uploader && videoUrl && title) {
           videoData.push({
