@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import '../../App.css';
+import LoadingBar from '../../components/LoadingBar';
 import Header from '../../components/Header';
-import Result from '../../components/Result';
 
 type Video = {
   uploader: string;
@@ -14,9 +14,21 @@ type Video = {
 const WhatsNew = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<Video[]>(() => {
+    const stored = localStorage.getItem('tvass-whats-new-videos');
+    return stored ? JSON.parse(stored) : [];
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedUploader, setSelectedUploader] = useState<string>('');
+
+  // Get unique uploaders
+  const uniqueUploaders = Array.from(new Set(videos.map((video) => video.uploader))).sort();
+
+  // Filter videos by selected uploader
+  const filteredVideos = selectedUploader
+    ? videos.filter((video) => video.uploader === selectedUploader)
+    : videos;
 
   const fetchVideos = async () => {
     if (!username || !password) {
@@ -27,6 +39,8 @@ const WhatsNew = () => {
     setLoading(true);
     setError('');
     setVideos([]);
+    // Clear localStorage when starting a new fetch
+    localStorage.removeItem('tvass-whats-new-videos');
 
     try {
       const response = await fetch(
@@ -42,6 +56,10 @@ const WhatsNew = () => {
       }
 
       setVideos(data.videos || []);
+      // Save to localStorage
+      if (data.videos && data.videos.length > 0) {
+        localStorage.setItem('tvass-whats-new-videos', JSON.stringify(data.videos));
+      }
     } catch (err) {
       setError('An error occurred while fetching videos. Please try again.');
       console.error('Error fetching videos:', err);
@@ -50,13 +68,9 @@ const WhatsNew = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchVideos();
-  };
-
   return (
     <>
+      <LoadingBar loading={loading} />
       <Header backButtonUrl="/" />
       <div className="container">
         <div className="results-container">
@@ -65,36 +79,52 @@ const WhatsNew = () => {
               <div className="container-section-header">
                 <h2>What's New</h2>
               </div>
-              <form onSubmit={handleSubmit}>
+              <div>
                 <div className="form-columns" style={{ marginBottom: '12px' }}>
-                  <label htmlFor="username">Thisvid Username</label>
+                  <label htmlFor="tv-username">Thisvid Username</label>
                   <input
                     type="text"
-                    id="username"
+                    id="tv-username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        fetchVideos();
+                      }
+                    }}
                     placeholder="Enter your username"
                     disabled={loading}
+                    autoComplete="off"
+                    data-1p-ignore
                   />
                 </div>
                 <div className="form-columns" style={{ marginBottom: '12px' }}>
-                  <label htmlFor="password">Password</label>
+                  <label htmlFor="tv-credential">Credential</label>
                   <input
                     type="password"
-                    id="password"
+                    id="tv-credential"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        fetchVideos();
+                      }
+                    }}
+                    placeholder="Enter your credential"
                     disabled={loading}
+                    autoComplete="off"
+                    data-1p-ignore
                   />
                 </div>
                 <div className="form-columns">
                   <div></div>
-                  <button type="submit" disabled={loading}>
+                  <button type="button" onClick={fetchVideos} disabled={loading}>
                     {loading ? 'Fetching...' : 'Fetch Videos'}
                   </button>
                 </div>
-              </form>
+              </div>
               {error && (
                 <div style={{ marginTop: '12px', color: 'var(--accent-color)' }}>{error}</div>
               )}
@@ -102,22 +132,42 @@ const WhatsNew = () => {
             {videos.length > 0 && (
               <div className="container-section">
                 <div className="container-section-header">
-                  <h2>New Videos ({videos.length})</h2>
+                  <h2>Uploaders ({uniqueUploaders.length})</h2>
                 </div>
-                <div className="results">
-                  {videos.map((video, index) => (
-                    <Result
-                      key={`${video.url}-${index}`}
-                      title={video.title}
-                      url={video.url}
-                      duration=""
-                      views={0}
-                      date=""
-                      imageSrc={video.thumbnail}
-                      uploader={video.uploader}
-                      noDebug={true}
-                    />
-                  ))}
+                <div className="form-container-scroll" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  <div
+                    style={{
+                      padding: '8px',
+                      marginBottom: '4px',
+                      cursor: 'pointer',
+                      backgroundColor: selectedUploader === '' ? 'var(--accent-color)' : 'var(--input-background-color)',
+                      borderRadius: '4px',
+                      color: selectedUploader === '' ? 'white' : 'var(--text-color)',
+                    }}
+                    onClick={() => setSelectedUploader('')}
+                  >
+                    All ({videos.length})
+                  </div>
+                  {uniqueUploaders.map((uploader) => {
+                    const count = videos.filter((v) => v.uploader === uploader).length;
+                    return (
+                      <div
+                        key={uploader}
+                        style={{
+                          padding: '8px',
+                          marginBottom: '4px',
+                          cursor: 'pointer',
+                          backgroundColor:
+                            selectedUploader === uploader ? 'var(--accent-color)' : 'var(--input-background-color)',
+                          borderRadius: '4px',
+                          color: selectedUploader === uploader ? 'white' : 'var(--text-color)',
+                        }}
+                        onClick={() => setSelectedUploader(uploader)}
+                      >
+                        {uploader} ({count})
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -126,9 +176,9 @@ const WhatsNew = () => {
         <div className="form-container">
           {videos.length > 0 && (
             <div>
-              <h2>Videos by Uploader</h2>
+              <h2>Videos {selectedUploader && `- ${selectedUploader}`}</h2>
               <div className="form-container-scroll">
-                {videos.map((video, index) => (
+                {filteredVideos.map((video, index) => (
                   <div key={`${video.url}-${index}`} style={{ marginBottom: '12px' }}>
                     <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{video.uploader}</div>
                     <div
