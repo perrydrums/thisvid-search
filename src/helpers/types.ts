@@ -19,6 +19,7 @@ export type Category = {
   name: string;
   image: string;
   slug: string;
+  orientation: 'straight' | 'gay';
 };
 
 export type Preferences = {

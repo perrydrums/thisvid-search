@@ -282,9 +282,9 @@ const Search = () => {
     getCategories().then((categories: Category[]) => {
       const filteredCategories =
         categoryType === 'straight'
-          ? categories.slice(0, 40)
+          ? categories.filter((c) => c.orientation === 'straight')
           : categoryType === 'gay'
-            ? categories.slice(40)
+            ? categories.filter((c) => c.orientation === 'gay')
             : categories;
 
       setCategories(filteredCategories);
@@ -1194,79 +1194,81 @@ const Search = () => {
               <CategoriesContainer categories={categories} setCategory={setCategory} />
             </>
           )}
-          {mode === 'friend' && !friendId ? (
-            <>
-              <div className="results-header">
-                {errorMessage ? (
-                  <span className="error">{errorMessage}</span>
-                ) : (
+          {!(mode === 'category' && !category && categoryType !== '') && (
+            mode === 'friend' && !friendId ? (
+              <>
+                <div className="results-header">
+                  {errorMessage ? (
+                    <span className="error">{errorMessage}</span>
+                  ) : (
+                    <h2>
+                      {loading
+                        ? 'Collecting friends...'
+                        : finished
+                          ? `Found ${friends.length} friends`
+                          : ''}
+                    </h2>
+                  )}
+                  <div>
+                    <input
+                      type="text"
+                      id="friend-search"
+                      value={friendSearch}
+                      placeholder="Username"
+                      onChange={(e) => setFriendSearch(e.target.value)}
+                      disabled={friends.length === 0}
+                    />
+                  </div>
+                </div>
+                <FriendsContainer
+                  friends={friends}
+                  setFriendId={setFriendId}
+                  filterUsername={friendSearch}
+                />
+              </>
+            ) : (
+              <>
+                <div className="results-header">
                   <h2>
                     {loading
-                      ? 'Collecting friends...'
+                      ? 'Searching...'
                       : finished
-                        ? `Found ${friends.length} friends`
-                        : ''}
+                        ? `Found ${videos.length} videos`
+                        : 'Search for videos'}
                   </h2>
-                )}
-                <div>
-                  <input
-                    type="text"
-                    id="friend-search"
-                    value={friendSearch}
-                    placeholder="Username"
-                    onChange={(e) => setFriendSearch(e.target.value)}
-                    disabled={friends.length === 0}
-                  />
+                  {searchObject && (
+                    <>
+                      <Feedback search={searchObject} />
+                      <Share url={getShareUrl()} />
+                    </>
+                  )}
+                  <div>
+                    <label htmlFor="sort">Sort by</label>
+                    <select
+                      id="sort"
+                      value={sort}
+                      onChange={(e) => {
+                        setSort(e.target.value);
+                        setVideos(sortVideos(videos, e.target.value));
+                      }}
+                    >
+                      <option value="relevance">Relevance</option>
+                      <option value="views">Views</option>
+                      <option value="viewsAsc">Least views</option>
+                      <option value="newest">
+                        Newest
+                      </option>
+                      <option value="oldest">
+                        Oldest
+                      </option>
+                      <option value="longest">Longest</option>
+                      <option value="shortest">Shortest</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <FriendsContainer
-                friends={friends}
-                setFriendId={setFriendId}
-                filterUsername={friendSearch}
-              />
-            </>
-          ) : (
-            <>
-              <div className="results-header">
-                <h2>
-                  {loading
-                    ? 'Searching...'
-                    : finished
-                      ? `Found ${videos.length} videos`
-                      : 'Search for videos'}
-                </h2>
-                {searchObject && (
-                  <>
-                    <Feedback search={searchObject} />
-                    <Share url={getShareUrl()} />
-                  </>
-                )}
-                <div>
-                  <label htmlFor="sort">Sort by</label>
-                  <select
-                    id="sort"
-                    value={sort}
-                    onChange={(e) => {
-                      setSort(e.target.value);
-                      setVideos(sortVideos(videos, e.target.value));
-                    }}
-                  >
-                    <option value="relevance">Relevance</option>
-                    <option value="views">Views</option>
-                    <option value="viewsAsc">Least views</option>
-                    <option value="newest">
-                      Newest
-                    </option>
-                    <option value="oldest">
-                      Oldest
-                    </option>
-                    <option value="longest">Longest</option>
-                    <option value="shortest">Shortest</option>
-                  </select>
-                </div>
-              </div>
-              <ResultsContainer videos={videos} />
-            </>
+                <ResultsContainer videos={videos} />
+              </>
+            )
           )}
         </div>
       </div>

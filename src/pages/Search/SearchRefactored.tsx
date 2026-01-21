@@ -138,9 +138,9 @@ const SearchRefactored = () => {
     getCategories().then((categories) => {
       const filteredCategories =
         searchState.categoryType === 'straight'
-          ? categories.slice(0, 40)
+          ? categories.filter((c) => c.orientation === 'straight')
           : searchState.categoryType === 'gay'
-          ? categories.slice(40)
+          ? categories.filter((c) => c.orientation === 'gay')
           : categories;
 
       searchState.setCategories(filteredCategories);
