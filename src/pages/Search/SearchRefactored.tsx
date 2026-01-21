@@ -64,7 +64,10 @@ const types: Types = {
 const SearchRefactored = () => {
   // Custom hooks for state management
   const searchState = useSearchState();
-  const videoFiltering = useVideoFiltering({ params: searchState.params });
+  const videoFiltering = useVideoFiltering({
+    params: searchState.params,
+    searchObject: searchState.searchObject,
+  });
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();

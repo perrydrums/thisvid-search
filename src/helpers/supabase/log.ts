@@ -51,3 +51,16 @@ export const log = async ({
   // @ts-ignore.
   return data ? data[0] : null;
 };
+
+export const updateLogResultCount = async (searchId: number, resultCount: number) => {
+  const { data, error } = await supabase
+    .from('searches')
+    .update({ resultCount })
+    .eq('id', searchId)
+    .select();
+
+  if (error) {
+    console.error(error);
+  }
+  return data ? data[0] : null;
+};

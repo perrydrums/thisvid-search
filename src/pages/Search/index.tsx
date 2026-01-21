@@ -15,7 +15,7 @@ import InputTags from '../../components/input/Tags';
 import { getLocalFavourites } from '../../helpers/favourites';
 import { getFriends } from '../../helpers/friends';
 import { getCategories } from '../../helpers/getCategories';
-import { log } from '../../helpers/supabase/log';
+import { log, updateLogResultCount } from '../../helpers/supabase/log';
 import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../helpers/types';
 import { getUsername } from '../../helpers/users';
 import { getVideos, filterVideos, sortVideos } from '../../helpers/videos';
@@ -702,7 +702,14 @@ const Search = () => {
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, mode, friendsEventsCategory, enrichedVideosData]);
+
+    // Update log entry if searchObject exists and has an id
+    if (searchObject?.id) {
+      updateLogResultCount(searchObject.id, sortedVideos.length).catch((error) => {
+        console.error('Failed to update log result count:', error);
+      });
+    }
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, mode, friendsEventsCategory, enrichedVideosData, searchObject]);
 
   return (
     <>

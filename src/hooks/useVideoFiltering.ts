@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Video } from '../helpers/types';
+import { Video, LogParams } from '../helpers/types';
 import { filterVideos, sortVideos } from '../helpers/videos';
 import { getLocalFavourites } from '../helpers/favourites';
+import { updateLogResultCount } from '../helpers/supabase/log';
 
 interface UseVideoFilteringProps {
   params: { [key: string]: any };
+  searchObject?: LogParams | null;
 }
 
-export const useVideoFiltering = ({ params }: UseVideoFilteringProps) => {
+export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringProps) => {
   // Tag-related state
   const [includeTags, setIncludeTags] = useState<string[]>(
     params.tags ? params.tags.split(',') : []
@@ -64,7 +66,14 @@ export const useVideoFiltering = ({ params }: UseVideoFilteringProps) => {
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort]);
+
+    // Update log entry if searchObject exists and has an id
+    if (searchObject?.id) {
+      updateLogResultCount(searchObject.id, sortedVideos.length).catch((error) => {
+        console.error('Failed to update log result count:', error);
+      });
+    }
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, searchObject]);
 
   // Helper function to reset tags based on mood
   const applyMoodPreferences = (moodPreferences: any) => {
