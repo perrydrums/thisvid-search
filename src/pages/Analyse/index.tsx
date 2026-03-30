@@ -14,14 +14,6 @@ import {
   runAnalyseFavourites,
 } from '../../helpers/analyseFavourites';
 
-type User = {
-  username: string;
-  url: string;
-  avatar: string;
-  videos: Video[];
-  count: number;
-};
-
 type Users = AnalyseFavouriteUsers;
 
 type Categories = {
