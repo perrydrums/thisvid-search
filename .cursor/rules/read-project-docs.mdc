@@ -1,0 +1,14 @@
+---
+description: Read project docs before meaningful changes; keep docs in sync
+alwaysApply: true
+---
+
+# Project documentation
+
+Before implementing or refactoring **search behavior**, **Netlify functions**, **proxy/redirect paths**, or **Supabase logging**, open the relevant file under **`docs/`** (start with [`docs/README.md`](docs/README.md)).
+
+- If you change how search modes, filters, or URLs work, update [`docs/search-and-filtering.md`](docs/search-and-filtering.md).
+- If you change `setupProxy.js`, `netlify.toml`, or the split between client and functions, update [`docs/architecture.md`](docs/architecture.md) and [`docs/backend-functions.md`](docs/backend-functions.md).
+- If you change logging tables or env vars, update [`docs/supabase-and-analytics.md`](docs/supabase-and-analytics.md).
+
+Do not let docs drift: **small factual edits in the same PR/change** are part of the task when behavior changes.

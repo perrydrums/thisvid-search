@@ -1,0 +1,13 @@
+---
+description: Conventions for src/ (TypeScript React)
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# `src/` conventions
+
+- Prefer **functional components** and hooks. Match existing import style and colocation (components next to usage patterns in this repo).
+- **Types** live in `src/helpers/types.ts` — extend shared types there instead of duplicating inline shapes for `Video`, log params, etc.
+- **Data fetching**: listing JSON via `getVideos` in `helpers/videos.ts`; HTML scraping in the browser uses **Cheerio** on responses from **same-origin** proxied paths only.
+- Avoid widening scope: `Search/index.tsx` is large; prefer extracting hooks/helpers (see `useSearchLogic`, `useVideoFiltering`) rather than copy-pasting filter logic.
+- When adding query parameters for shareable search state, thread them through URL sync and document them in `docs/search-and-filtering.md`.

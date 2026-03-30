@@ -1,0 +1,12 @@
+---
+description: Netlify serverless functions and scraping
+globs: functions/**/*.js
+alwaysApply: false
+---
+
+# `functions/` (Netlify)
+
+- Handlers use **`exports.handler`** and CommonJS (`require`). Keep response JSON shapes stable for the React app (`success`, `videos`, etc.).
+- **Cheerio selectors** mirror ThisVid’s HTML — fragile. If you change selectors in `videos.js`, check **pagination / category parsing** in the client (`useSearchLogic`, `getCategories.ts`) for the same DOM changes.
+- New HTTP endpoints need **both** `netlify.toml` redirects and `src/setupProxy.js` proxy routes for local parity (see `docs/backend-functions.md`).
+- Do not log secrets. Fetch **only** what the feature needs; heavy parallel scraping belongs behind existing batch patterns (`Promise.all` in client, paginated logic in friends).
