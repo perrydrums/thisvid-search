@@ -11,6 +11,8 @@ type GetVideosOptions = {
 type FilterVideosOptions = {
   videos: Video[];
   includeTags?: string[];
+  /** Per-tag multiplier for include-tag relevance (e.g. favourite frequency). Keys match `includeTags` names; default weight is 1 when omitted. */
+  includeTagWeights?: Record<string, number>;
   excludeTags?: string[];
   termsOperator?: 'AND' | 'OR';
   boosterTags?: string[];
@@ -64,11 +66,23 @@ export const getVideos = async ({
 export const filterVideos = ({
   videos,
   includeTags = [],
+  includeTagWeights,
   excludeTags = [],
   termsOperator = 'OR',
   boosterTags = [],
   diminishingTags = [],
 }: FilterVideosOptions): Array<Video> => {
+  const tagWeightLookup = new Map<string, number>();
+  if (includeTagWeights) {
+    for (const [name, w] of Object.entries(includeTagWeights)) {
+      tagWeightLookup.set(name.toLowerCase(), w);
+    }
+  }
+  const weightForIncludeTag = (tag: string): number => {
+    if (!includeTagWeights) return 1;
+    return tagWeightLookup.get(tag.toLowerCase()) ?? 1;
+  };
+
   return videos
     .filter(video => {
       const title = video.title.toLowerCase();
@@ -92,10 +106,11 @@ export const filterVideos = ({
       return true;
     })
     .map(video => {
-      // Calculate relevance score
+      // Calculate relevance score (each include-tag match weighted by optional favourite frequency)
       const tagsRelevance = includeTags.reduce((score, tag) => {
         const regex = new RegExp(tag, 'gi');
-        return score + (video.title.match(regex) || []).length;
+        const matches = (video.title.match(regex) || []).length;
+        return score + matches * weightForIncludeTag(tag);
       }, 0);
 
       const boosterRelevance = boosterTags.reduce((score, tag) => {
@@ -122,10 +137,18 @@ export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<V
   switch (sortMode) {
     default:
     case 'newest':
-      sortedVideos.sort((a, b) => parseRelativeTime(b.date).getTime() - parseRelativeTime(a.date).getTime());
+      sortedVideos.sort(
+        (a, b) =>
+          parseRelativeTime(b.date).getTime() - parseRelativeTime(a.date).getTime() ||
+          b.views - a.views,
+      );
       break;
     case 'oldest':
-      sortedVideos.sort((a, b) => parseRelativeTime(a.date).getTime() - parseRelativeTime(b.date).getTime());
+      sortedVideos.sort(
+        (a, b) =>
+          parseRelativeTime(a.date).getTime() - parseRelativeTime(b.date).getTime() ||
+          b.views - a.views,
+      );
       break;
     case 'longest':
       sortedVideos.sort((a, b) => {
@@ -154,33 +177,48 @@ export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<V
   return sortedVideos;
 };
 
-const parseRelativeTime = (relativeTime: string): Date => {
-  const now = new Date();
-  const match = relativeTime.match(/(\d+)\s(\w+)/);
+/** Maps listing date text (e.g. from ThisVid `.date`) to an approximate absolute time for sorting. */
+export const parseRelativeTime = (relativeTime: string): Date => {
+  const raw = relativeTime.trim();
+  if (!raw) return new Date();
 
-  if (!match) return now; // If format is unexpected, return current date
+  const s = raw.toLowerCase();
+  const anchor = new Date();
 
-  const [, amount, unit] = match;
-  const value = parseInt(amount, 10);
-
-  switch (unit) {
-    case "day":
-    case "days":
-      now.setDate(now.getDate() - value);
-      break;
-    case "week":
-    case "weeks":
-      now.setDate(now.getDate() - value * 7);
-      break;
-    case "month":
-    case "months":
-      now.setMonth(now.getMonth() - value);
-      break;
-    case "year":
-    case "years":
-      now.setFullYear(now.getFullYear() - value);
-      break;
+  if (s === 'today' || s === 'just now' || s === 'now') {
+    return anchor;
+  }
+  if (s === 'yesterday') {
+    const d = new Date(anchor);
+    d.setDate(d.getDate() - 1);
+    return d;
   }
 
-  return now;
+  // "23 hours ago", "10 minutes ago", "5 days", "1 week ago", etc.
+  const match = s.match(/(\d+)\s*([a-z]+)/);
+  if (!match) return anchor;
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+  const d = new Date(anchor);
+
+  if (unit.startsWith('year')) {
+    d.setFullYear(d.getFullYear() - value);
+  } else if (unit.startsWith('month')) {
+    d.setMonth(d.getMonth() - value);
+  } else if (unit.startsWith('week')) {
+    d.setDate(d.getDate() - value * 7);
+  } else if (unit.startsWith('day')) {
+    d.setDate(d.getDate() - value);
+  } else if (unit.startsWith('hour') || unit === 'hr' || unit === 'hrs' || unit === 'h') {
+    d.setHours(d.getHours() - value);
+  } else if (unit.startsWith('minute') || unit === 'min' || unit === 'mins' || unit === 'm') {
+    d.setMinutes(d.getMinutes() - value);
+  } else if (unit.startsWith('second') || unit === 'sec' || unit === 'secs' || unit === 's') {
+    d.setSeconds(d.getSeconds() - value);
+  } else {
+    return anchor;
+  }
+
+  return d;
 };

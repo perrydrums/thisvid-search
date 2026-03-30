@@ -12,5 +12,6 @@ This folder holds deeper references. **Read the relevant file before changing be
 | [search-and-filtering.md](./search-and-filtering.md) | Search modes, multi-page fetch, tag filtering, sorting, URL parameters |
 | [backend-functions.md](./backend-functions.md) | Netlify functions, HTML parsing, proxied paths |
 | [supabase-and-analytics.md](./supabase-and-analytics.md) | Search logging, visitor IDs, feedback |
+| [recommendations.md](./recommendations.md) | Recommendation engine, taste profiles, scoring |
 
 When in doubt, search the codebase for `/getVideos`, `filterVideos`, or `useSearchLogic`.

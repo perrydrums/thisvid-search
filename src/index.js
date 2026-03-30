@@ -7,6 +7,7 @@ import './index.css';
 import Analyse from './pages/Analyse';
 import Home from './pages/Home';
 import Preferences from './pages/Preferences';
+import Recommendations from './pages/Recommendations';
 import Search from './pages/Search';
 import WhatsNew from './pages/WhatsNew';
 
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
   {
     path: '/whats-new',
     element: <WhatsNew />,
+  },
+  {
+    path: '/recommendations',
+    element: <Recommendations />,
   },
 ]);
 

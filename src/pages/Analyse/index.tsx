@@ -1,4 +1,3 @@
-import cheerio from 'cheerio';
 import React, { useEffect, useRef, useState } from 'react';
 
 import '../../App.css';
@@ -6,6 +5,14 @@ import { CirclePacking } from '../../components/CircularPacking';
 import { Node } from '../../components/CircularPacking/data';
 import Header from '../../components/Header';
 import Result from '../../components/Result';
+import {
+  type AnalyseFavouriteUsers,
+  ANALYSE_USERS_STORAGE_KEY,
+  TVASS_USER_ID_STORAGE_KEY,
+  analyseFavouritesListingPage,
+  getFavouriteListingPageLimit,
+  runAnalyseFavourites,
+} from '../../helpers/analyseFavourites';
 
 type User = {
   username: string;
@@ -15,9 +22,7 @@ type User = {
   count: number;
 };
 
-type Users = {
-  [username: string]: User;
-};
+type Users = AnalyseFavouriteUsers;
 
 type Categories = {
   [category: string]: number;
@@ -48,7 +53,7 @@ const Analyse = () => {
   const [show, setShow] = useState('users');
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
-  const localUid = localStorage.getItem('tvass-user-id');
+  const localUid = localStorage.getItem(TVASS_USER_ID_STORAGE_KEY);
   if (localUid && !uid) {
     setUid(localUid);
   }
@@ -56,9 +61,8 @@ const Analyse = () => {
   const resultsRef = useRef<HTMLDivElement>(null);
   const executeScroll = () => resultsRef.current?.scrollIntoView();
 
-  // Get users from local storage.
   useEffect(() => {
-    const storedUsers = localStorage.getItem('tvass-analyse-users');
+    const storedUsers = localStorage.getItem(ANALYSE_USERS_STORAGE_KEY);
     if (storedUsers) {
       try {
         const parsedUsers = JSON.parse(storedUsers);
@@ -71,19 +75,16 @@ const Analyse = () => {
     }
   }, []);
 
-  // Save users to local storage.
   useEffect(() => {
     if (Object.keys(users).length > 0) {
       try {
-        localStorage.setItem('tvass-analyse-users', JSON.stringify(users));
+        localStorage.setItem(ANALYSE_USERS_STORAGE_KEY, JSON.stringify(users));
       } catch (error) {
         console.error('Error saving users to localStorage:', error);
       }
     }
   }, [users]);
 
-  // Get container width on mount and on resize.
-  // Used to calculate number of tags to show in circular packing.
   useEffect(() => {
     const updateContainerWidth = () => {
       if (resultsRef.current) {
@@ -100,129 +101,53 @@ const Analyse = () => {
   }, []);
 
   useEffect(() => {
-    const getPageLimit = async () => {
-      const response = await fetch(`/members/${uid}/favourite_videos/`);
-
-      const body = await response.text();
-      const $ = cheerio.load(body);
-
-      const lastPage = parseInt(
-        $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-      );
-      setPageLimit(lastPage);
-    };
-
-    getPageLimit();
+    if (!uid) return;
+    (async () => {
+      const last = await getFavouriteListingPageLimit(uid);
+      setPageLimit(last);
+    })();
   }, [uid]);
-
-  const getAvatar = async (username: string, uid: number) => {
-    if (!users[username]) {
-      const userResponse = await fetch(`/members/${uid}/`);
-      const userBody = await userResponse.text();
-      const $ = cheerio.load(userBody);
-
-      return $('.avatar img').first().attr('src');
-    }
-    return users[username].avatar;
-  };
-
-  const analyseFavourites = async (page: number) => {
-    const url = `/members/${uid}/favourite_videos/${page}/`;
-    const response = await fetch(url);
-
-    const body = await response.text();
-    const $ = cheerio.load(body);
-
-    const urls = $('.tumbpu')
-      .map((i, el) => $(el).attr('href'))
-      .get();
-
-    // Fetch all videos
-    await Promise.all(
-      urls.map(async (url) => {
-        const proxyUrl = url.split('/').slice(3).join('/');
-        const response = await fetch(proxyUrl);
-        const body = await response.text();
-        const $ = cheerio.load(body);
-
-        const title = $('.headline h1').first().text();
-        const thumbnailElement = $('.video-holder img').first().attr('src');
-        const thumbnail = thumbnailElement
-          ? thumbnailElement.replace('//', 'https://')
-          : 'https://placehold.co/100x100/000000/b60707?text=Private+Video';
-        const videoInfo = $('.box ul.description').first();
-        // videoInfo contains 4 li elements
-        // first one contains description text
-        // second one contains category
-        // third one contains tags
-        // fourth one user who uploaded the video
-        const description = videoInfo.find('li').first().text();
-        const category = videoInfo.find('li:nth-child(2) a').first().text();
-        const tags = videoInfo
-          .find('li:nth-child(3)')
-          .find('a')
-          .map((i, el) => $(el).text())
-          .get();
-        const username = videoInfo.find('li:nth-child(4) a').first().text();
-        const userUrl = videoInfo.find('li:nth-child(4) a').first().attr('href');
-        // userID is last part of url
-        const userID = userUrl ? userUrl.split('/').slice(-2)[0] : '';
-        const avatar = await getAvatar(username, parseInt(userID));
-
-        const video = {
-          title,
-          thumbnail,
-          description,
-          category,
-          tags,
-          username,
-          userUrl,
-          url,
-        };
-
-        // Add or update the user object
-        // @ts-ignore
-        setUsers((users) => {
-          const newUser = {
-            ...users[username],
-            username,
-            url: userUrl,
-            avatar,
-            videos: [...(users[username] ? users[username].videos : []), video],
-            count: (users[username] ? users[username].count : 0) + 1,
-          };
-          return { ...users, [username]: newUser };
-        });
-      }),
-    );
-  };
 
   const run = async () => {
     setProgressCount(0);
     setUsers({});
-
-    // Fetch all pages
-    await Promise.all(
-      [...Array(pageLimit + 1).keys()].slice(1).map(async (page) => {
-        await analyseFavourites(page);
-        setProgressCount((progressCount) => progressCount + 1);
-      }),
-    );
-
-    setFinished(true);
-    executeScroll();
+    setFinished(false);
+    try {
+      const result = await runAnalyseFavourites(uid, {
+        onProgress: (done, total) => {
+          setProgressCount(done);
+          setPageLimit(total);
+        },
+      });
+      setUsers(result);
+    } catch (e) {
+      console.error(e);
+      setErrorMessage('Analysis failed. Check your User ID and try again.');
+    } finally {
+      setFinished(true);
+      executeScroll();
+    }
   };
 
   const next = async () => {
-    await analyseFavourites(progressCount + 1);
-    setProgressCount((progressCount) => progressCount + 1);
-    setFinished(true);
-    executeScroll();
+    setFinished(false);
+    try {
+      const draft = JSON.parse(JSON.stringify(users)) as AnalyseFavouriteUsers;
+      await analyseFavouritesListingPage(uid, progressCount + 1, draft);
+      setUsers(draft);
+      setProgressCount((c) => c + 1);
+    } catch (e) {
+      console.error(e);
+      setErrorMessage('Failed to analyse page.');
+    } finally {
+      setFinished(true);
+      executeScroll();
+    }
   };
 
   const submit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault();
-    localStorage.setItem('uid', uid);
+    localStorage.setItem(TVASS_USER_ID_STORAGE_KEY, uid);
     setErrorMessage('');
     setFinished(false);
     if ((e.nativeEvent as SubmitEvent).submitter?.id === 'next') {
@@ -231,7 +156,6 @@ const Analyse = () => {
     }
 
     if (pageLimit > 10) {
-      // show warning alert if page limit is greater than 10
       if (window.confirm(`This will take a while. Are you sure you want to continue?`)) {
         run();
       } else {
@@ -242,7 +166,6 @@ const Analyse = () => {
     }
   };
 
-  // returns array of category objects
   const getCategoriesAndCounts = () => {
     const categories: Categories = {};
     Object.values(users).forEach((user) => {
@@ -256,7 +179,6 @@ const Analyse = () => {
     return Object.entries(categories).sort((a, b) => b[1] - a[1]);
   };
 
-  // returns array of tag objects
   const getTagsAndCounts = () => {
     const tags: Tags = {};
     Object.values(users).forEach((user) => {
@@ -307,7 +229,8 @@ const Analyse = () => {
                 {!finished && <div className="small-loading-spinner"></div>}
               </div>
               <div>
-                {Object.keys(users).length > 0 && `Found ${Object.values(users).reduce((total, user) => total + user.videos.length, 0)} videos`}
+                {Object.keys(users).length > 0 &&
+                  `Found ${Object.values(users).reduce((total, user) => total + user.videos.length, 0)} videos`}
               </div>
               <p></p>
               <label htmlFor="id">Your User ID</label>

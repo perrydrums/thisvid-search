@@ -22,6 +22,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/recommendations"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/newest/*"
 to = "https://thisvid.com/newest/:splat"
 status = 200

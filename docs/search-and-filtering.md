@@ -42,14 +42,15 @@ Related code: `src/pages/Search/index.tsx` (`friendsEvents` branch, `enrichVideo
 ## Tag and text filtering (`filterVideos`)
 
 - **includeTags**: titles must match — **OR** (any tag) or **AND** (every tag), per `termsOperator`.
+- **includeTagWeights** (optional): map of tag name → multiplier. Each substring match for that tag adds `matches × weight` to relevance (default weight **1** when omitted). Recommendations use weights from **1** to **3** (`RECOMMENDATION_TAG_WEIGHT_MIN` / `RECOMMENDATION_TAG_WEIGHT_MAX` in `recommendations.ts`), linear in favourite count among the top tags.
 - **excludeTags**: title must not contain any excluded substring.
 - **boosterTags** / **diminishingTags**: adjust **relevance** (used with `orderBy=relevance`).
 
-Relevance blends tag frequency in the title with boost/diminish bonuses. Sorting is stable with a views tie-break for relevance (`sortVideos`).
+Relevance blends weighted tag frequency in the title with boost/diminish bonuses. Sorting is stable with a views tie-break for relevance (`sortVideos`).
 
 ## Sort modes (`sortVideos`)
 
-`orderBy` query param maps to: `newest`, `oldest`, `longest`, `shortest`, `views`, `viewsAsc`, `relevance`. Dates use **relative** strings from the site (e.g. “5 days ago”) parsed in `parseRelativeTime`.
+`orderBy` query param maps to: `newest`, `oldest`, `longest`, `shortest`, `views`, `viewsAsc`, `relevance`. Dates use **relative** strings from the site (e.g. “10 minutes ago”, “5 hours ago”, “5 days ago”, “yesterday”) parsed in `parseRelativeTime` in `helpers/videos.ts`. `newest` / `oldest` use a **views** tie-break when parsed times match.
 
 ## Other options
 
