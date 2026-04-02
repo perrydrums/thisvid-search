@@ -4,6 +4,8 @@
 
 Functions under `functions/` run on Netlify (Node). They fetch **ThisVid HTML or assets**, parse with **Cheerio** (or stream/binary for downloads), and return JSON or files. The SPA never calls ThisVid directly for these endpoints—it uses paths like `/getVideos` that Netlify routes to the deployed function (or to a sibling deployment per `netlify.toml`).
 
+The site build and function runtime follow **`NODE_VERSION` in `netlify.toml`** (currently Node 22), aligned with `.nvmrc` and `package.json` `engines`.
+
 ## `functions/videos.js` — listing scrape
 
 - **Input** (POST JSON): `url` (path only, e.g. `/newest/1/`), `page`, `omitPrivate`, `minDuration` (minutes), `quick`.

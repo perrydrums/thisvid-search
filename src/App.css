@@ -104,7 +104,10 @@ body {
 }
 
 .form-container-scroll {
-  overflow: scroll;
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .results-container {
@@ -128,7 +131,7 @@ body {
   min-height: 0;
   padding: 0 8px 20px 8px;
   margin: 0 -8px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .results-scroll-progress {

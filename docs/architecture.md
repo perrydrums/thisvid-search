@@ -48,4 +48,4 @@ Defined in `.env` (not committed). See [supabase-and-analytics.md](./supabase-an
 - `npm start` — CRA dev server with proxy (`BROWSER=none` in `package.json`).
 - `npm run build` — Production bundle to `build/`.
 
-Node **>= 20** and npm **>= 9** per `package.json` `engines`.
+Node **>= 22** (Netlify build uses `NODE_VERSION` in `netlify.toml`; local dev follows `.nvmrc`) and npm **>= 9** per `package.json` `engines`.
