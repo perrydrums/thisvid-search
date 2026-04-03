@@ -108,6 +108,35 @@ body {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@supports (justify-content: safe center) {
+  .form-container-scroll {
+    justify-content: safe center;
+  }
+}
+
+/* Hide scrollbars but keep scrolling (form, results, recommendations panels) */
+.form-container-scroll,
+.results-scroll-container,
+.mood-results-container,
+.recommendations-form-main,
+.recommendations-taste-details-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.form-container-scroll::-webkit-scrollbar,
+.results-scroll-container::-webkit-scrollbar,
+.mood-results-container::-webkit-scrollbar,
+.recommendations-form-main::-webkit-scrollbar,
+.recommendations-taste-details-body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .results-container {
