@@ -7,19 +7,44 @@ A search frontend for [ThisVid](https://thisvid.com) with stronger discovery too
 - **Node** >= 20  
 - **npm** >= 9  
 
-## Run locally
+## Ejecutar localmente / Run locally
+
+Para poder probar este proyecto en tu entorno local, primero necesitas instalar las dependencias. Notarás que el proyecto ya incluye todas las librerías necesarias para que el scraper funcione correctamente (como `cheerio`, `axios` y `node-fetch`) y que todo está configurado en el `package.json`.
 
 ```bash
+# 1. Instalar dependencias
 npm install
+```
+
+Puedes ejecutar el proyecto de dos formas:
+
+### Opción A: Usando React Scripts (Recomendado para UI)
+
+```bash
+# 2. Iniciar el servidor de desarrollo
 npm start
 ```
 
-Then open [http://localhost:3000](http://localhost:3000). Development uses `src/setupProxy.js` to proxy ThisVid paths and serverless routes (see [docs/architecture.md](docs/architecture.md)).
+Luego abre [http://localhost:3000](http://localhost:3000). Durante el desarrollo, la app utiliza `src/setupProxy.js` para redirigir (proxy) las rutas hacia las funciones serverless o al sitio original.
 
-Other scripts:
+### Opción B: Usando Netlify CLI (Recomendado para probar las Funciones / Scraper)
 
-- `npm run build` — production bundle in `build/`
-- `npm run eject` — irreversible CRA eject (rarely needed)
+Si deseas probar localmente las funciones de scraping ubicadas en `functions/` tal como correrían en producción, puedes usar Netlify CLI:
+
+```bash
+# Instalar netlify-cli globalmente si no lo tienes
+npm install -g netlify-cli
+
+# Iniciar entorno dev de netlify
+netlify dev
+```
+
+Netlify te indicará en qué puerto se está ejecutando (por ejemplo `http://localhost:8888`), y se encargará de levantar tanto el frontend de React como de emular las funciones serverless.
+
+### Otros scripts:
+
+- `npm run build` — compila el código de producción en `build/`
+- `npm run eject` — eject irreversible de CRA (rara vez se necesita)
 
 Optional analytics: set `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY` (see [docs/supabase-and-analytics.md](docs/supabase-and-analytics.md)).
 
