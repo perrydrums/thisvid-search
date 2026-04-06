@@ -8,13 +8,30 @@ const headers = {
 };
 
 exports.handler = async function (event, context) {
-  const {
-    url,
-    page = 1,
-    omitPrivate = false,
-    minDuration = 0,
-    quick = true,
-  } = JSON.parse(event.body);
+  let params = {};
+
+  if (event.httpMethod === 'POST' && event.body) {
+    try {
+      params = JSON.parse(event.body);
+    } catch (e) {
+      // Ignore parse error
+    }
+  } else if (event.httpMethod === 'GET') {
+    params = event.queryStringParameters || {};
+  }
+
+  // Permite recibir search y construir la URL o permite recibir directamente la url.
+  const searchParam = params.search || params.q;
+  let defaultUrl = '';
+  if (searchParam) {
+    defaultUrl = `/search/?q=${encodeURIComponent(searchParam)}`;
+  }
+
+  const url = params.url || defaultUrl;
+  const page = params.page ? parseInt(params.page, 10) : 1;
+  const omitPrivate = params.omitPrivate === true || params.omitPrivate === 'true';
+  const minDuration = params.minDuration ? parseInt(params.minDuration, 10) : 0;
+  const quick = params.quick !== false && params.quick !== 'false';
 
   if (!url) {
     return {

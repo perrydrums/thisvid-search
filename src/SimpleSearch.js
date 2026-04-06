@@ -14,7 +14,7 @@ const SimpleSearch = () => {
     try {
       // Usar query string para la búsqueda o pasar el payload necesario
       // Ajusta los parámetros según lo que la función /.netlify/functions/videos espere
-      const response = await fetch(`/.netlify/functions/videos?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`/.netlify/functions/videos?search=${encodeURIComponent(query)}`);
 
       if (!response.ok) {
         throw new Error('Error al buscar videos: ' + response.statusText);
