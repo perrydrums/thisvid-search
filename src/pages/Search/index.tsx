@@ -5,7 +5,6 @@ import { Tooltip } from 'react-tooltip';
 import LoadingBar from 'react-top-loading-bar';
 
 import '../../App.css';
-import Feedback from '../../components/Feedback';
 import Header from '../../components/Header';
 import ResultsContainer from '../../components/ResultsContainer';
 import CategoriesContainer from '../../components/ResultsContainer/CategoriesContainer';
@@ -1238,7 +1237,6 @@ const Search = () => {
                   </h2>
                   {searchObject && (
                     <>
-                      <Feedback search={searchObject} />
                       <Share url={getShareUrl()} />
                     </>
                   )}
