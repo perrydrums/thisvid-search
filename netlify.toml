@@ -4,6 +4,9 @@ functions = "functions"
 [build.environment]
 NODE_VERSION = "22"
 
+[dev]
+command = "npm run start --ignore-scripts"
+
 [[redirects]]
 from = "/search"
 to = "/index.html"
