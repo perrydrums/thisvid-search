@@ -8,9 +8,9 @@ const headers = {
 };
 
 exports.handler = async function (event, context) {
-  const videoUrl = event.queryStringParameters.url;
+  const rawVideoUrl = event.queryStringParameters.url;
 
-  if (!videoUrl) {
+  if (!rawVideoUrl) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -21,6 +21,11 @@ exports.handler = async function (event, context) {
       headers,
     };
   }
+
+  // Ensure absolute URL
+  const videoUrl = rawVideoUrl.startsWith('http')
+    ? rawVideoUrl
+    : 'https://thisvid.com' + (rawVideoUrl.startsWith('/') ? rawVideoUrl : '/' + rawVideoUrl);
 
   try {
     const response = await fetch(videoUrl);

@@ -54,8 +54,11 @@ exports.handler = async function (event, context) {
     };
   }
 
+  // Ensure url has leading slash so we can append cleanly
+  const finalPath = url.startsWith('/') ? url : '/' + url;
+
   try {
-    const response = await fetch('https://thisvid.com' + url);
+    const response = await fetch('https://thisvid.com' + finalPath);
 
     if (response.status === 404) {
       return {
