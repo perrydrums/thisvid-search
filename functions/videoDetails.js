@@ -45,6 +45,8 @@ exports.handler = async function (event, context) {
     const descriptionList = $('.box ul.description').first();
     let category = '';
 
+    let tags = [];
+
     // Try to find by span text first
     descriptionList.find('li').each((index, element) => {
       const $li = $(element);
@@ -54,6 +56,10 @@ exports.handler = async function (event, context) {
         // Extract category
         const categoryLink = $li.find('a').first();
         category = categoryLink.text().trim();
+      } else if (spanText === 'Tags:') {
+        $li.find('a').each((i, el) => {
+          tags.push($(el).text().trim());
+        });
       }
     });
 
@@ -62,11 +68,50 @@ exports.handler = async function (event, context) {
       category = descriptionList.find('li:nth-child(2) a').first().text().trim();
     }
 
+    const recommendedVideos = [];
+    $('.tumbpu').each((i, element) => {
+      const $el = $(element);
+      const isPrivate = $el.find('span').first().hasClass('private');
+
+      let avatar = '';
+      if (isPrivate) {
+        const style = $el.find('span').first().attr('style') || '';
+        const match = style.match(/url\(['"]?(.*?)['"]?\)/);
+        if (match) avatar = match[1].replace('//', 'https://');
+      } else {
+        avatar = $el.find('span .lazy-load').first().attr('data-original') || '';
+        avatar = avatar.replace('//', 'https://');
+      }
+
+      const viewsHtml = $el.find('.view').first().text();
+      const viewMatch = viewsHtml.match(/\d+/);
+      const views = viewMatch ? parseInt(viewMatch[0], 10) : 0;
+      const date = $el.find('.date').first().text().trim();
+      const duration = $el.find('span span.duration').first().text().trim();
+      const title = $el.attr('title') || '';
+      const url = $el.attr('href') || '';
+
+      if (url && title) {
+        recommendedVideos.push({
+          title,
+          url,
+          isPrivate,
+          duration,
+          avatar,
+          views,
+          date,
+          relevance: 0
+        });
+      }
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         category,
+        tags,
+        recommendedVideos
       }),
       headers,
     };
