@@ -10,6 +10,9 @@ const SimpleSearch = () => {
   const [progressMsg, setProgressMsg] = useState('');
   const [error, setError] = useState(null);
 
+  // Custom Toast Notification
+  const [toastMsg, setToastMsg] = useState('');
+
   // Filters
   const [hidePrivate, setHidePrivate] = useState(false);
   const [onlyHD, setOnlyHD] = useState(false);
@@ -30,6 +33,12 @@ const SimpleSearch = () => {
   const [smartRecommendations, setSmartRecommendations] = useState([]);
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilationProgress, setCompilationProgress] = useState(0);
+
+  // Show Toast Helper
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 4000);
+  };
 
   // Load selected videos from localStorage on mount
   useEffect(() => {
@@ -203,11 +212,11 @@ const SimpleSearch = () => {
           setGlobalTags(prev => [...prev, ...data.tags]);
         }
       } else {
-        alert("No se pudieron cargar las recomendaciones de este video.");
+        showToast("⚠️ No se pudieron cargar las recomendaciones de este video.");
         setExpandedVideo(null);
       }
     } catch (e) {
-      alert("Error al cargar la página del video.");
+      showToast("⚠️ Error al cargar la página del video.");
       setExpandedVideo(null);
     } finally {
       setExpandedLoading(false);
@@ -557,7 +566,7 @@ const SimpleSearch = () => {
               <button
                 onClick={() => {
                   if (selectedVideos.length < 2) {
-                    alert('Necesitas al menos 2 videos en tu galería para compilar.');
+                    showToast('⚠️ Necesitas al menos 2 videos en tu galería para compilar.');
                     return;
                   }
                   setIsCompiling(true);
@@ -568,7 +577,7 @@ const SimpleSearch = () => {
                         clearInterval(interval);
                         setTimeout(() => {
                           setIsCompiling(false);
-                          alert('¡Tu compilación (Beta) ha sido generada y exportada! (En el futuro, esto descargará un .mp4 directamente a tu disco local)');
+                          showToast('✅ ¡Tu compilación (Beta) ha sido generada y exportada!');
                         }, 500);
                         return 100;
                       }
