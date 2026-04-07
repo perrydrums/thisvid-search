@@ -72,6 +72,7 @@ exports.handler = async function (event, context) {
     $('.tumbpu').each((i, element) => {
       const $el = $(element);
       const isPrivate = $el.find('span').first().hasClass('private');
+      const isHD = $el.find('span').first().hasClass('hd');
 
       let avatar = '';
       if (isPrivate) {
@@ -89,13 +90,15 @@ exports.handler = async function (event, context) {
       const date = $el.find('.date').first().text().trim();
       const duration = $el.find('span span.duration').first().text().trim();
       const title = $el.attr('title') || '';
-      const url = $el.attr('href') || '';
+      let url = $el.attr('href') || '';
+      url = url.replace('https://thisvid.com', '');
 
       if (url && title) {
         recommendedVideos.push({
           title,
           url,
           isPrivate,
+          isHD,
           duration,
           avatar,
           views,
