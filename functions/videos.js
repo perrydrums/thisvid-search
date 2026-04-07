@@ -23,11 +23,20 @@ exports.handler = async function (event, context) {
   // Permite recibir search y construir la URL o permite recibir directamente la url.
   const searchParam = params.search || params.q;
   let defaultUrl = '';
-  if (searchParam) {
+
+  if (params.url) {
+    defaultUrl = params.url;
+    // Si pasaron una categoria (en url) pero tb hay termino de busqueda, lo agregamos
+    if (searchParam && !defaultUrl.includes('?')) {
+      defaultUrl += `?q=${encodeURIComponent(searchParam)}`;
+    } else if (searchParam && defaultUrl.includes('?')) {
+      defaultUrl += `&q=${encodeURIComponent(searchParam)}`;
+    }
+  } else if (searchParam) {
     defaultUrl = `/search/?q=${encodeURIComponent(searchParam)}`;
   }
 
-  const url = params.url || defaultUrl;
+  const url = defaultUrl;
   const page = params.page ? parseInt(params.page, 10) : 1;
   const omitPrivate = params.omitPrivate === true || params.omitPrivate === 'true';
   const minDuration = params.minDuration ? parseInt(params.minDuration, 10) : 0;
