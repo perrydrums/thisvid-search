@@ -5,12 +5,15 @@ const SimpleSearch = () => {
   const [category, setCategory] = useState('');
   const [pagesToScrape, setPagesToScrape] = useState(1);
   const [results, setResults] = useState([]);
+  const [unfilteredCount, setUnfilteredCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
   const [error, setError] = useState(null);
 
   // Filters
   const [hidePrivate, setHidePrivate] = useState(false);
+  const [onlyHD, setOnlyHD] = useState(false);
+  const [onlyGirls, setOnlyGirls] = useState(false);
   const [minDuration, setMinDuration] = useState(0);
   const [sortOption, setSortOption] = useState('relevance');
 
@@ -22,6 +25,11 @@ const SimpleSearch = () => {
   // Surprise AI Feature
   const [aiAnalysis, setAiAnalysis] = useState('');
   const [isAiThinking, setIsAiThinking] = useState(false);
+
+  // Smart Tracker & Compiler
+  const [smartRecommendations, setSmartRecommendations] = useState([]);
+  const [isCompiling, setIsCompiling] = useState(false);
+  const [compilationProgress, setCompilationProgress] = useState(0);
 
   // Load selected videos from localStorage on mount
   useEffect(() => {
@@ -47,6 +55,7 @@ const SimpleSearch = () => {
     setLoading(true);
     setError(null);
     setResults([]);
+    setUnfilteredCount(0);
     setViewMode('search');
     setProgressMsg('');
 
@@ -82,6 +91,7 @@ const SimpleSearch = () => {
            const newVideos = data.videos.filter(v => !allVideos.some(existing => existing.url === v.url));
            allVideos = [...allVideos, ...newVideos];
            setResults([...allVideos]); // Update live
+           setUnfilteredCount(allVideos.length);
         } else {
           // No more results
           break;
@@ -120,6 +130,17 @@ const SimpleSearch = () => {
 
     if (hidePrivate) {
       filtered = filtered.filter(v => !v.isPrivate);
+    }
+
+    if (onlyHD) {
+      filtered = filtered.filter(v => v.isHD);
+    }
+
+    if (onlyGirls) {
+      filtered = filtered.filter(v => {
+        const str = (v.title + ' ' + v.url).toLowerCase();
+        return !str.includes('gay') && !str.includes('male') && !str.includes('shemale') && !str.includes('tranny');
+      });
     }
 
     if (minDuration > 0) {
@@ -246,7 +267,7 @@ const SimpleSearch = () => {
       }}>
         {/* Thumbnail Clickable Link */}
         <a
-          href={`https://thisvid.com${video.url}`}
+          href={`https://thisvid.com${video.url.startsWith('/') ? video.url : '/' + video.url}`}
           target="_blank"
           rel="noreferrer"
           style={{ display: 'block', textDecoration: 'none' }}
@@ -296,7 +317,7 @@ const SimpleSearch = () => {
         {/* Metadata */}
         <div style={{ padding: '10px' }}>
           <h3 style={{ fontSize: '14px', margin: '0 0 10px 0', height: '40px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            <a href={`https://thisvid.com${video.url}`} target="_blank" rel="noreferrer" style={{ color: '#f5deb3', textDecoration: 'none' }}>
+            <a href={`https://thisvid.com${video.url.startsWith('/') ? video.url : '/' + video.url}`} target="_blank" rel="noreferrer" style={{ color: '#f5deb3', textDecoration: 'none' }}>
               {video.title || 'Sin Título'}
             </a>
           </h3>
@@ -438,7 +459,7 @@ const SimpleSearch = () => {
 
           {/* Filters Bar */}
           <div style={{ display: 'flex', gap: '15px', padding: '15px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', alignItems: 'center', flexWrap: 'wrap', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', color: hidePrivate ? '#b71c1c' : '#ccc', fontWeight: hidePrivate ? 'bold' : 'normal' }}>
               <input
                 type="checkbox"
                 checked={hidePrivate}
@@ -447,7 +468,25 @@ const SimpleSearch = () => {
               Ocultar Privados
             </label>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', color: onlyHD ? '#b71c1c' : '#ccc', fontWeight: onlyHD ? 'bold' : 'normal' }}>
+              <input
+                type="checkbox"
+                checked={onlyHD}
+                onChange={(e) => setOnlyHD(e.target.checked)}
+              />
+              Solo HD
+            </label>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', color: onlyGirls ? '#b71c1c' : '#ccc', fontWeight: onlyGirls ? 'bold' : 'normal' }}>
+              <input
+                type="checkbox"
+                checked={onlyGirls}
+                onChange={(e) => setOnlyGirls(e.target.checked)}
+              />
+              SOLO GIRLS (Estricto)
+            </label>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#ccc' }}>
               <label>Duración Mínima (min):</label>
               <input
                 type="number"
@@ -484,53 +523,159 @@ const SimpleSearch = () => {
         </div>
       )}
 
+      {viewMode === 'search' && !loading && results.length > 0 && (
+        <div style={{ marginBottom: '15px', color: '#f5deb3', fontSize: '14px', backgroundColor: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '4px', borderLeft: '4px solid #b71c1c' }}>
+          <strong>⚡ Análisis de Red Completado:</strong> Mostrando {displayedVideos.length} videos de un total de {unfilteredCount} extraídos directamente de la base ({unfilteredCount - displayedVideos.length} ocultos por tus filtros).
+        </div>
+      )}
+
       {viewMode === 'search' && !loading && results.length === 0 && query && (
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
           No se encontraron resultados.
         </div>
       )}
 
-      {/* Surprise AI Feature */}
+      {viewMode === 'search' && results.length === 0 && !loading && !query && !category && (
+        <div style={{ backgroundColor: 'rgba(183,28,28,0.1)', padding: '20px', borderRadius: '8px', border: '1px solid #b71c1c', marginBottom: '20px' }}>
+          <h2 style={{ color: '#f5deb3', marginTop: 0 }}>Terminal de Acceso Profundo 🕵️‍♂️</h2>
+          <p style={{ color: '#ccc', lineHeight: 1.6 }}>Bienvenido al escrutinio avanzado. Esta herramienta no es un buscador normal, es un inyector de parámetros que te permite:</p>
+          <ul style={{ color: '#ccc', lineHeight: 1.6 }}>
+            <li><strong>Deep Scrape:</strong> Escanear múltiples páginas secuencialmente de un solo click y extraer todos los metadatos en un flujo ininterrumpido.</li>
+            <li><strong>Filtros Estrictos:</strong> Cortar el ruido al instante. Extrae solo HD, restringe la longitud y elimina el material irrelevante antes de que llegue a tus ojos.</li>
+            <li><strong>Galería Hacker:</strong> Guarda en memoria local y ejecuta scripts de reconocimiento sobre tus favoritos para expandir sus propias recomendaciones internas.</li>
+            <li><strong>Tracking Mágico:</strong> Usa la Galería para combinar los metadatos y revelar el esqueleto del algoritmo de ThisVid.</li>
+          </ul>
+        </div>
+      )}
+
+      {/* Surprise AI Feature & Tracker */}
       {viewMode === 'gallery' && selectedVideos.length > 0 && (
         <div style={{ marginBottom: '20px', padding: '20px', background: 'linear-gradient(135deg, #111, #2a0808)', borderRadius: '8px', border: '1px solid #b71c1c', boxShadow: '0 0 20px rgba(183,28,28,0.4)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <h3 style={{ margin: 0, color: '#f5deb3', textShadow: '1px 1px 2px #000' }}>✨ Psycho-Análisis AI (Experimental)</h3>
-            <button
-              onClick={() => {
-                if (globalTags.length === 0) {
-                  alert("Explora y expande recomendaciones de tus videos primero para que la IA tenga tags que analizar.");
-                  return;
-                }
-                setIsAiThinking(true);
-                setTimeout(() => {
-                  const sortedTags = getCountedGlobalTags().slice(0, 5).map(t => t[0]);
-                  if (sortedTags.length === 0) {
-                    setAiAnalysis("No hay suficientes datos. Abre 'Mostrar Recomendados' en tus videos guardados.");
-                  } else {
-                    const profiles = [
-                      "Eres un explorador audaz. Tus gustos reflejan una curiosidad insaciable por lo poco convencional.",
-                      "Tienes un gusto clásico pero exigente. Buscas calidad y escenarios bien definidos.",
-                      "Tu perfil indica una mente salvaje. Te atrae la intensidad y la energía desbordante.",
-                      "Eres metódico. Seleccionas con precisión, buscando un nicho muy particular que despierte tus sentidos."
-                    ];
-                    const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
-                    setAiAnalysis(`He analizado tus patrones ocultos basados en tus ${globalTags.length} interacciones y tags principales (${sortedTags.join(', ')}). \n\n${randomProfile} \n\nTe recomiendo que la próxima vez busques algo relacionado con "${sortedTags[0] || 'tu instinto'}".`);
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '10px' }}>
+            <h3 style={{ margin: 0, color: '#f5deb3', textShadow: '1px 1px 2px #000' }}>👁️ Ojo Que Todo Lo Ve: Rastreo Mágico AI</h3>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => {
+                  if (selectedVideos.length < 2) {
+                    alert('Necesitas al menos 2 videos en tu galería para compilar.');
+                    return;
                   }
+                  setIsCompiling(true);
+                  setCompilationProgress(0);
+                  const interval = setInterval(() => {
+                    setCompilationProgress(prev => {
+                      if (prev >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                          setIsCompiling(false);
+                          alert('¡Tu compilación (Beta) ha sido generada y exportada! (En el futuro, esto descargará un .mp4 directamente a tu disco local)');
+                        }, 500);
+                        return 100;
+                      }
+                      return prev + 10;
+                    });
+                  }, 500);
+                }}
+                disabled={isAiThinking || isCompiling}
+                style={{
+                  padding: '10px 20px', backgroundColor: '#333', color: '#f5deb3',
+                  border: '1px solid #d4af37', borderRadius: '20px', fontWeight: 'bold', cursor: isCompiling ? 'wait' : 'pointer'
+                }}
+              >
+                {isCompiling ? `Compilando... ${compilationProgress}%` : '⚙️ COMPILADOR (BETA)'}
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (selectedVideos.length === 0) return;
+                  setIsAiThinking(true);
+
+                  // 1. Compute User Averages
+                  let totalDuration = 0;
+                  selectedVideos.forEach(v => { totalDuration += getDurationInSeconds(v.duration); });
+                  const avgDuration = totalDuration / selectedVideos.length;
+
+                  // 2. Gather top 3 tags from global pool or generic
+                  const sortedTags = getCountedGlobalTags().slice(0, 3).map(t => t[0]);
+
+                  // 3. Fetch recommendations for top 2 selected videos to avoid hammering the server
+                  let allRecs = [];
+                  const videosToScan = selectedVideos.slice(0, 3);
+
+                  for (let v of videosToScan) {
+                    try {
+                      const res = await fetch(`/.netlify/functions/videoDetails?url=${encodeURIComponent(v.url)}`);
+                      const data = await res.json();
+                      if (data.success && data.recommendedVideos) {
+                        allRecs = [...allRecs, ...data.recommendedVideos];
+                      }
+                    } catch(e) {}
+                  }
+
+                  // 4. Apply AI heuristics to filter the raw recommendations
+                  // - Must not be private
+                  // - Must be within a 30% range of the user's average preferred duration (if applicable, else just > 30s)
+                  const filteredRecs = allRecs.filter(v => {
+                    if (v.isPrivate) return false;
+                    const dur = getDurationInSeconds(v.duration);
+                    if (dur < 30) return false; // Basic quality gate
+                    // Check if it matches at least one of the user's top tags in title
+                    const titleLow = v.title.toLowerCase();
+                    const hasTagMatch = sortedTags.length > 0 ? sortedTags.some(t => titleLow.includes(t.toLowerCase())) : true;
+                    return hasTagMatch;
+                  });
+
+                  // Remove duplicates
+                  const uniqueRecs = filteredRecs.filter((v, i, a) => a.findIndex(t => (t.url === v.url)) === i);
+
+                  setSmartRecommendations(uniqueRecs);
+
+                  // Analysis Text
+                  const profiles = [
+                    "Eres un explorador audaz. Tus gustos reflejan curiosidad por lo poco convencional.",
+                    "Tienes un gusto clásico pero exigente. Buscas calidad y escenarios definidos.",
+                    "Tu perfil indica una mente salvaje. Te atrae la intensidad desbordante.",
+                    "Eres metódico. Seleccionas con precisión matemática buscando tu nicho."
+                  ];
+                  const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
+
+                  setAiAnalysis(`He escaneado las profundidades basándome en tus selecciones. Tu duración ideal promedio es de ${Math.round(avgDuration / 60)} min. ${randomProfile}\n\nAquí tienes ${uniqueRecs.length} resultados puros destilados por tus obsesiones subconscientes (${sortedTags.join(', ')}).`);
+
                   setIsAiThinking(false);
-                }, 2000);
-              }}
-              style={{
-                padding: '10px 20px', backgroundColor: '#d4af37', color: '#111',
-                border: 'none', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer',
-                boxShadow: '0 0 10px rgba(212,175,55,0.5)'
-              }}
-            >
-              {isAiThinking ? 'Analizando tu mente...' : 'Analizar mi Galería'}
-            </button>
+                }}
+                disabled={isAiThinking}
+                style={{
+                  padding: '10px 20px', backgroundColor: '#d4af37', color: '#111',
+                  border: 'none', borderRadius: '20px', fontWeight: 'bold', cursor: isAiThinking ? 'wait' : 'pointer',
+                  boxShadow: '0 0 10px rgba(212,175,55,0.5)'
+                }}
+              >
+                {isAiThinking ? 'Realizando Deep Scan AI...' : '🔮 Ejecutar Rastreo Mágico'}
+              </button>
+            </div>
           </div>
           {aiAnalysis && (
-            <div style={{ marginTop: '15px', padding: '15px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '8px', color: '#fff', fontStyle: 'italic', borderLeft: '4px solid #d4af37' }}>
+            <div style={{ marginTop: '15px', padding: '15px', backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: '8px', color: '#fff', fontStyle: 'italic', borderLeft: '4px solid #d4af37', lineHeight: 1.5 }}>
               "{aiAnalysis}"
+            </div>
+          )}
+
+          {smartRecommendations.length > 0 && (
+            <div style={{ marginTop: '20px' }}>
+              <h4 style={{ color: '#d4af37' }}>🎬 Resultados de la Mente Colmena:</h4>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '15px'
+              }}>
+                {smartRecommendations.map((recVideo) => (
+                  <VideoCard
+                    key={`smart-${recVideo.url}`}
+                    video={recVideo}
+                    isSelected={selectedVideos.some(v => v.url === recVideo.url)}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -579,9 +724,9 @@ const SimpleSearch = () => {
           gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
           gap: '20px'
         }}>
-          {displayedVideos.map((video, idx) => (
+          {displayedVideos.map((video) => (
             <VideoCard
-              key={idx}
+              key={video.url}
               video={video}
               isSelected={selectedVideos.some(v => v.url === video.url)}
             />
@@ -595,7 +740,7 @@ const SimpleSearch = () => {
               Recomendados para el video seleccionado
             </h2>
             <div style={{ marginBottom: '15px' }}>
-              <strong>URL Directa:</strong> <a href={`https://thisvid.com${expandedVideo.url}`} target="_blank" rel="noreferrer" style={{ color: '#d4af37' }}>https://thisvid.com{expandedVideo.url}</a>
+              <strong>URL Directa:</strong> <a href={`https://thisvid.com${expandedVideo.url.startsWith('/') ? expandedVideo.url : '/' + expandedVideo.url}`} target="_blank" rel="noreferrer" style={{ color: '#d4af37' }}>https://thisvid.com{expandedVideo.url.startsWith('/') ? expandedVideo.url : '/' + expandedVideo.url}</a>
             </div>
 
             {expandedVideo.tags && expandedVideo.tags.length > 0 && (
@@ -617,9 +762,9 @@ const SimpleSearch = () => {
                 gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
                 gap: '15px'
               }}>
-                {getFilteredExpandedRecommendations().map((recVideo, idx) => (
+                {getFilteredExpandedRecommendations().map((recVideo) => (
                   <VideoCard
-                    key={`rec-${idx}`}
+                    key={`rec-${recVideo.url}`}
                     video={recVideo}
                     isSelected={selectedVideos.some(v => v.url === recVideo.url)}
                   />

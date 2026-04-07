@@ -101,13 +101,19 @@ exports.handler = async function (event, context) {
 
       const title = $(element).attr('title') || '';
 
+      // Check if HD
+      const isHD = $('span', element).first().hasClass('hd');
+
       // Only filter by basic criteria (duration), tags will be filtered client-side
       if (time >= minDuration * 60) {
         if (quick) {
+          let urlStr = $(element).attr('href') || '';
+          urlStr = urlStr.replace('https://thisvid.com', '');
           videos.push({
             title,
-            url: $(element).attr('href') || '',
+            url: urlStr,
             isPrivate,
+            isHD,
             duration,
             avatar,
             views: parseInt(views),
@@ -116,10 +122,13 @@ exports.handler = async function (event, context) {
             page,
           });
         } else {
+          let urlStr = $(element).attr('href') || '';
+          urlStr = urlStr.replace('https://thisvid.com', '');
           urls.push({
             title,
-            url: $(element).attr('href') || '',
+            url: urlStr,
             isPrivate,
+            isHD,
             duration,
             avatar,
             views: parseInt(views),
@@ -145,6 +154,7 @@ exports.handler = async function (event, context) {
             title: video.title,
             url: video.url,
             isPrivate: video.isPrivate,
+            isHD: video.isHD,
             duration: video.duration,
             avatar: video.avatar,
             views: video.views,
