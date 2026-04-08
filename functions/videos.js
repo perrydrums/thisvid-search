@@ -58,7 +58,6 @@ exports.handler = async function (event, context) {
   const finalPath = url.startsWith('/') ? url : '/' + url;
 
   try {
-    const response = await fetch('https://thisvid.com' + finalPath);
     let fetchUrl;
     try {
       fetchUrl = new URL(url, 'https://thisvid.com');
