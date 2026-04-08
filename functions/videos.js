@@ -55,7 +55,25 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const response = await fetch('https://thisvid.com' + url);
+    let fetchUrl;
+    try {
+      fetchUrl = new URL(url, 'https://thisvid.com');
+      if (fetchUrl.hostname !== 'thisvid.com' && fetchUrl.hostname !== 'www.thisvid.com') {
+        throw new Error('Invalid hostname');
+      }
+    } catch (err) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          status: 'Bad Request',
+          message: 'Invalid URL parameter',
+          success: false,
+          videos: [],
+        }),
+      };
+    }
+
+    const response = await fetch(fetchUrl.href);
 
     if (response.status === 404) {
       return {
