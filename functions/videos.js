@@ -59,6 +59,25 @@ exports.handler = async function (event, context) {
 
   try {
     const response = await fetch('https://thisvid.com' + finalPath);
+    let fetchUrl;
+    try {
+      fetchUrl = new URL(url, 'https://thisvid.com');
+      if (fetchUrl.hostname !== 'thisvid.com' && fetchUrl.hostname !== 'www.thisvid.com') {
+        throw new Error('Invalid hostname');
+      }
+    } catch (err) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          status: 'Bad Request',
+          message: 'Invalid URL parameter',
+          success: false,
+          videos: [],
+        }),
+      };
+    }
+
+    const response = await fetch(fetchUrl.href);
 
     if (response.status === 404) {
       return {
@@ -83,19 +102,19 @@ exports.handler = async function (event, context) {
         return;
       }
 
-      const avatar = isPrivate
-        ? // @ts-ignore
-        $('span', element)
-          .first()
-          .attr('style')
-          .match(/url\((.*?)\)/)[1]
-          .replace('//', 'https://')
-        : // @ts-ignore
-        $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
+      let avatar = '';
+      if (isPrivate) {
+        const style = $('span', element).first().attr('style') || '';
+        const match = style.match(/url\(['"]?(.*?)['"]?\)/);
+        if (match) avatar = match[1].replace('//', 'https://');
+      } else {
+        avatar = $('span .lazy-load', element).first().attr('data-original') || '';
+        avatar = avatar.replace('//', 'https://');
+      }
 
       const viewsHtml = $('.view', element).first().text();
-      // @ts-ignore
-      const views = viewsHtml.match(/\d+/)[0];
+      const viewMatch = viewsHtml.match(/\d+/);
+      const views = viewMatch ? parseInt(viewMatch[0], 10) : 0;
       const date = $('.date', element).first().text();
 
       const duration = $('span span.duration', element).text();
@@ -144,15 +163,15 @@ exports.handler = async function (event, context) {
     });
 
     if (!quick) {
-      for (const video of urls) {
+      const promises = urls.map(async (video) => {
         try {
-          const videoUrl = video.url;
+          const videoUrl = new URL(video.url, 'https://thisvid.com').href;
           const response = await fetch(videoUrl);
           const body = await response.text();
           const $ = cheerio.load(body);
 
           // Just add the video, tags will be filtered client-side
-          videos.push({
+          return {
             relevance: video.relevance,
             title: video.title,
             url: video.url,
@@ -163,11 +182,15 @@ exports.handler = async function (event, context) {
             views: video.views,
             date: video.date,
             page: video.page,
-          });
+          };
         } catch (error) {
           console.log(error);
+          return null;
         }
-      }
+      });
+
+      const results = await Promise.all(promises);
+      videos.push(...results.filter((v) => v !== null));
     }
 
     return {
@@ -179,6 +202,13 @@ exports.handler = async function (event, context) {
       }),
     };
   } catch (error) {
-    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        status: 'Internal Server Error',
+        message: error.message || 'An error occurred while fetching videos',
+        success: false,
+      }),
+    };
   }
-}
+};

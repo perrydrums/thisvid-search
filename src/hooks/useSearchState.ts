@@ -43,6 +43,14 @@ export const useSearchState = () => {
   const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
 
+  // friendsEvents state
+  const [friendsEventsUsername, setFriendsEventsUsername] = useState(params.friendsEventsUsername || '');
+  const [friendsEventsPassword, setFriendsEventsPassword] = useState('');
+  const [friendsEventsCategory, setFriendsEventsCategory] = useState(params.friendsEventsCategory || '');
+  const [enrichedVideosData, setEnrichedVideosData] = useState<Map<string, { category?: string }>>(new Map());
+  const [enriching, setEnriching] = useState(false);
+  const [enrichmentProgress, setEnrichmentProgress] = useState(0);
+
   return {
     // Search parameters
     mode, setMode,
@@ -76,6 +84,14 @@ export const useSearchState = () => {
     // Friend search UI
     friendIdFieldHover, setFriendIdFieldHover,
     friendSearch, setFriendSearch,
+
+    // friendsEvents
+    friendsEventsUsername, setFriendsEventsUsername,
+    friendsEventsPassword, setFriendsEventsPassword,
+    friendsEventsCategory, setFriendsEventsCategory,
+    enrichedVideosData, setEnrichedVideosData,
+    enriching, setEnriching,
+    enrichmentProgress, setEnrichmentProgress,
 
     // URL params for easy access
     params,

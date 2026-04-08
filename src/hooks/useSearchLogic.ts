@@ -124,7 +124,8 @@ export const useSearchLogic = ({
     let response;
     if (
       (mode === 'extreme' && (!type || !primaryTag)) ||
-      (mode === 'newest' && !type)
+      (mode === 'newest' && !type) ||
+      mode === 'friendsEvents'
     ) {
       return;
     } else {
@@ -197,13 +198,71 @@ export const useSearchLogic = ({
     setSearchObject(s);
   };
 
-  const run = async (offset: number) => {
+  const run = async (offset: number, friendsEventsUsername?: string, friendsEventsPassword?: string) => {
     setLoading(true);
     setProgressCount(0);
 
     if (!preserveResults) {
       setRawVideos([]);
     }
+
+    // Handle friendsEvents mode differently
+    if (mode === 'friendsEvents') {
+      if (!friendsEventsUsername || !friendsEventsPassword) {
+        setErrorMessage('Please enter both username and password');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch('/friendsEvents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: friendsEventsUsername,
+            password: friendsEventsPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setErrorMessage(data.message || 'Failed to fetch videos');
+          setLoading(false);
+          return;
+        }
+
+        // Map friendsEvents videos to Search Video format
+        const mappedVideos: Video[] = (data.videos || []).map((video: any, index: number) => ({
+          title: video.title,
+          url: video.url,
+          isPrivate: false,
+          duration: '',
+          avatar: video.thumbnail || '',
+          views: 0,
+          date: '',
+          relevance: 0,
+          page: 1,
+        }));
+
+        localStorage.setItem('tvass-whats-new-videos', JSON.stringify(data.videos || []));
+
+        setRawVideos(preserveResults ? [...rawVideos, ...mappedVideos] : mappedVideos);
+        setFinished(true);
+        executeScroll();
+        logSearch();
+
+        return { videos: data.videos, mappedVideos };
+      } catch (error) {
+        console.error('Error fetching friends events:', error);
+        setErrorMessage('Failed to fetch friends events. Please try again.');
+      }
+      setLoading(false);
+      return;
+    }
+
     const promises = [];
 
     const urlFirstPage = getUrl(offset);

@@ -111,9 +111,13 @@ const WhatsNew = () => {
     localStorage.removeItem('tvass-whats-new-videos');
 
     try {
-      const response = await fetch(
-        `/friendsEvents?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-      );
+      const response = await fetch('/friendsEvents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await response.json();
 
