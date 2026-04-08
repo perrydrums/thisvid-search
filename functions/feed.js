@@ -20,6 +20,7 @@ exports.handler = async function (event, context) {
 
   let username, password;
   try {
+    if (!event.body) throw new Error('Missing body');
     const body = JSON.parse(event.body);
     username = body.username;
     password = body.password;
@@ -46,7 +47,14 @@ exports.handler = async function (event, context) {
   }
 
   const result = await fetch(
-    `https://main-bvxea6i-stzzsy25tku52.de-2.platformsh.site/feed?username=${username}&password=${password}`,
+    'https://main-bvxea6i-stzzsy25tku52.de-2.platformsh.site/feed',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    }
   );
   const videos = await result.json();
 
