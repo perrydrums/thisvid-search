@@ -7,9 +7,12 @@ import { updateLogResultCount } from '../helpers/supabase/log';
 interface UseVideoFilteringProps {
   params: { [key: string]: any };
   searchObject?: LogParams | null;
+  mode?: string;
+  friendsEventsCategory?: string;
+  enrichedVideosData?: Map<string, { category?: string }>;
 }
 
-export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringProps) => {
+export const useVideoFiltering = ({ params, searchObject, mode, friendsEventsCategory, enrichedVideosData }: UseVideoFilteringProps) => {
   // Tag-related state
   const [includeTags, setIncludeTags] = useState<string[]>(
     params.tags ? params.tags.split(',') : []
@@ -63,6 +66,14 @@ export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringPro
       filteredVideos = filteredVideos.filter((video) => !favourites.includes(video.url));
     }
 
+    // Apply category filter for friendsEvents mode
+    if (mode === 'friendsEvents' && friendsEventsCategory && enrichedVideosData) {
+      filteredVideos = filteredVideos.filter((video) => {
+        const enriched = enrichedVideosData.get(video.url);
+        return enriched?.category === friendsEventsCategory;
+      });
+    }
+
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
@@ -73,7 +84,7 @@ export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringPro
         console.error('Failed to update log result count:', error);
       });
     }
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, searchObject]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, mode, friendsEventsCategory, enrichedVideosData, searchObject]);
 
   // Helper function to reset tags based on mood
   const applyMoodPreferences = (moodPreferences: any) => {
