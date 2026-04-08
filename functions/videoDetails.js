@@ -22,8 +22,26 @@ exports.handler = async function (event, context) {
     };
   }
 
+  let fetchUrl;
   try {
-    const response = await fetch(videoUrl);
+    fetchUrl = new URL(videoUrl, 'https://thisvid.com');
+    if (fetchUrl.hostname !== 'thisvid.com' && fetchUrl.hostname !== 'www.thisvid.com') {
+      throw new Error('Invalid hostname');
+    }
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid url parameter',
+        success: false,
+      }),
+      headers,
+    };
+  }
+
+  try {
+    const response = await fetch(fetchUrl.href);
 
     if (response.status === 404) {
       return {
