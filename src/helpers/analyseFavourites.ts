@@ -161,9 +161,21 @@ export async function runAnalyseFavourites(
   const pageLimit = await getFavouriteListingPageLimit(uid);
   const users: AnalyseFavouriteUsers = {};
 
-  for (let page = 1; page <= pageLimit; page++) {
+  const CHUNK_SIZE = 5;
+  let completedPages = 0;
+
+  const processPage = async (page: number) => {
     await analyseFavouritesListingPage(uid, page, users);
-    options?.onProgress?.(page, pageLimit);
+    completedPages++;
+    options?.onProgress?.(completedPages, pageLimit);
+  };
+
+  for (let i = 1; i <= pageLimit; i += CHUNK_SIZE) {
+    const chunk = [];
+    for (let j = i; j < i + CHUNK_SIZE && j <= pageLimit; j++) {
+      chunk.push(processPage(j));
+    }
+    await Promise.all(chunk);
   }
 
   return users;
