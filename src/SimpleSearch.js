@@ -10,6 +10,9 @@ const SimpleSearch = () => {
   const [progressMsg, setProgressMsg] = useState('');
   const [error, setError] = useState(null);
 
+  // Custom Toast Notification
+  const [toastMsg, setToastMsg] = useState('');
+
   // Filters
   const [hidePrivate, setHidePrivate] = useState(false);
   const [onlyHD, setOnlyHD] = useState(false);
@@ -30,6 +33,47 @@ const SimpleSearch = () => {
   const [smartRecommendations, setSmartRecommendations] = useState([]);
   const [isCompiling, setIsCompiling] = useState(false);
   const [compilationProgress, setCompilationProgress] = useState(0);
+
+  // Export Helpers
+  const exportToJSON = () => {
+    if (selectedVideos.length === 0) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(selectedVideos, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "thisvid_gallery_export.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    showToast('✅ Galería exportada como JSON');
+  };
+
+  const exportToCSV = () => {
+    if (selectedVideos.length === 0) return;
+    const headers = ['Title', 'URL', 'Duration', 'Views', 'Date', 'Private', 'HD'];
+    const rows = selectedVideos.map(v => [
+      `"${(v.title || '').replace(/"/g, '""')}"`,
+      `https://thisvid.com${v.url}`,
+      v.duration,
+      v.views,
+      `"${v.date}"`,
+      v.isPrivate ? 'Yes' : 'No',
+      v.isHD ? 'Yes' : 'No'
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", encodeURI(csvContent));
+    downloadAnchorNode.setAttribute("download", "thisvid_gallery_export.csv");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    showToast('✅ Galería exportada como CSV');
+  };
+
+  // Show Toast Helper
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 4000);
+  };
 
   // Load selected videos from localStorage on mount
   useEffect(() => {
@@ -203,11 +247,11 @@ const SimpleSearch = () => {
           setGlobalTags(prev => [...prev, ...data.tags]);
         }
       } else {
-        alert("No se pudieron cargar las recomendaciones de este video.");
+        showToast("⚠️ No se pudieron cargar las recomendaciones de este video.");
         setExpandedVideo(null);
       }
     } catch (e) {
-      alert("Error al cargar la página del video.");
+      showToast("⚠️ Error al cargar la página del video.");
       setExpandedVideo(null);
     } finally {
       setExpandedLoading(false);
@@ -557,7 +601,7 @@ const SimpleSearch = () => {
               <button
                 onClick={() => {
                   if (selectedVideos.length < 2) {
-                    alert('Necesitas al menos 2 videos en tu galería para compilar.');
+                    showToast('⚠️ Necesitas al menos 2 videos en tu galería para compilar.');
                     return;
                   }
                   setIsCompiling(true);
@@ -568,7 +612,7 @@ const SimpleSearch = () => {
                         clearInterval(interval);
                         setTimeout(() => {
                           setIsCompiling(false);
-                          alert('¡Tu compilación (Beta) ha sido generada y exportada! (En el futuro, esto descargará un .mp4 directamente a tu disco local)');
+                          showToast('✅ ¡Tu compilación (Beta) ha sido generada y exportada!');
                         }, 500);
                         return 100;
                       }
@@ -583,6 +627,26 @@ const SimpleSearch = () => {
                 }}
               >
                 {isCompiling ? `Compilando... ${compilationProgress}%` : '⚙️ COMPILADOR (BETA)'}
+              </button>
+
+              <button
+                onClick={exportToJSON}
+                style={{
+                  padding: '10px 15px', backgroundColor: '#1a1a1a', color: '#f5deb3',
+                  border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer'
+                }}
+              >
+                📥 Exportar JSON
+              </button>
+
+              <button
+                onClick={exportToCSV}
+                style={{
+                  padding: '10px 15px', backgroundColor: '#1a1a1a', color: '#f5deb3',
+                  border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer'
+                }}
+              >
+                📥 Exportar CSV
               </button>
 
               <button

@@ -54,7 +54,11 @@ exports.handler = async function (event, context) {
     };
   }
 
+  // Ensure url has leading slash so we can append cleanly
+  const finalPath = url.startsWith('/') ? url : '/' + url;
+
   try {
+    const response = await fetch('https://thisvid.com' + finalPath);
     let fetchUrl;
     try {
       fetchUrl = new URL(url, 'https://thisvid.com');
@@ -98,19 +102,19 @@ exports.handler = async function (event, context) {
         return;
       }
 
-      const avatar = isPrivate
-        ? // @ts-ignore
-        $('span', element)
-          .first()
-          .attr('style')
-          .match(/url\((.*?)\)/)[1]
-          .replace('//', 'https://')
-        : // @ts-ignore
-        $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
+      let avatar = '';
+      if (isPrivate) {
+        const style = $('span', element).first().attr('style') || '';
+        const match = style.match(/url\(['"]?(.*?)['"]?\)/);
+        if (match) avatar = match[1].replace('//', 'https://');
+      } else {
+        avatar = $('span .lazy-load', element).first().attr('data-original') || '';
+        avatar = avatar.replace('//', 'https://');
+      }
 
       const viewsHtml = $('.view', element).first().text();
-      // @ts-ignore
-      const views = viewsHtml.match(/\d+/)[0];
+      const viewMatch = viewsHtml.match(/\d+/);
+      const views = viewMatch ? parseInt(viewMatch[0], 10) : 0;
       const date = $('.date', element).first().text();
 
       const duration = $('span span.duration', element).text();
