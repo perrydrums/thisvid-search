@@ -126,7 +126,7 @@ exports.handler = async function (event, context) {
             page: video.page,
           });
         } catch (error) {
-          console.log(error);
+          // Ignore individual video fetch errors to keep the list populated
         }
       }
     }
@@ -140,6 +140,13 @@ exports.handler = async function (event, context) {
       }),
     };
   } catch (error) {
-    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        status: 'Internal Server Error',
+        message: error.message || 'An error occurred while fetching videos',
+        success: false,
+      }),
+    };
   }
-}
+};
