@@ -13,15 +13,41 @@ const headers = {
 };
 
 exports.handler = async function (event, context) {
-  const username = event.queryStringParameters.username;
-  const password = event.queryStringParameters.password;
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({
+        status: 'Method Not Allowed',
+        message: 'Only POST requests are allowed',
+        success: false,
+      }),
+      headers,
+    };
+  }
+
+  let username, password;
+  try {
+    const body = JSON.parse(event.body);
+    username = body.username;
+    password = body.password;
+  } catch (e) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid JSON in request body',
+        success: false,
+      }),
+      headers,
+    };
+  }
 
   if (!username || !password) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         status: 'Bad Request',
-        message: 'Missing username or password query parameters',
+        message: 'Missing username or password in request body',
         success: false,
       }),
       headers,

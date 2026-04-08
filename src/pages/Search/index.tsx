@@ -445,9 +445,16 @@ const Search = () => {
       }
 
       try {
-        const response = await fetch(
-          `/friendsEvents?username=${encodeURIComponent(friendsEventsUsername)}&password=${encodeURIComponent(friendsEventsPassword)}`,
-        );
+        const response = await fetch('/friendsEvents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: friendsEventsUsername,
+            password: friendsEventsPassword,
+          }),
+        });
 
         const data = await response.json();
 
