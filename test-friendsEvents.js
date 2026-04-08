@@ -19,10 +19,11 @@ if (!username || !password) {
 
 // Create a mock event object similar to what Netlify Functions receive
 const event = {
-  queryStringParameters: {
+  httpMethod: 'POST',
+  body: JSON.stringify({
     username: username,
     password: password,
-  },
+  }),
 };
 
 const context = {};
