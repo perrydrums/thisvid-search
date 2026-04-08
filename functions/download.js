@@ -25,6 +25,23 @@ exports.handler = async function (event, context) {
     };
   }
 
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url, 'https://thisvid.com');
+    if (parsedUrl.hostname !== 'thisvid.com' && parsedUrl.hostname !== 'www.thisvid.com') {
+      throw new Error('Invalid hostname');
+    }
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid url query parameter',
+      }),
+    };
+  }
+  const safeUrl = parsedUrl.href;
+
   const options = {
     executablePath: process.env.CHROME_EXECUTABLE_PATH || (await chromium.executablePath()),
   };
@@ -39,7 +56,7 @@ exports.handler = async function (event, context) {
   const browser = await puppeteer.launch(options);
 
   const page = await browser.newPage();
-  await page.goto(url);
+  await page.goto(safeUrl);
 
   // Play the video.
   await page.click('.video-holder');
