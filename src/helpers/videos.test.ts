@@ -38,7 +38,6 @@ describe('getVideos', () => {
     expect(result).toEqual([]);
   });
 });
-import { parseRelativeTime } from './videos';
 
 describe('parseRelativeTime', () => {
   beforeAll(() => {
