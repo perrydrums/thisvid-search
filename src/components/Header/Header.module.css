@@ -1,13 +1,28 @@
 .header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  text-align: center;
+  gap: 12px;
+  padding: 12px 12px;
 }
 
-.header span {
-  min-width: 50px;
+.headerLeft {
+  justify-self: start;
+  min-width: 0;
+}
+
+.headerCenter {
+  justify-self: center;
+  text-align: center;
+  max-width: min(100vw - 240px, 100%);
+}
+
+.headerRight {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .title {
@@ -20,6 +35,10 @@
   transition: color 0.2s ease;
 }
 
+.title a:visited {
+  color: var(--text-color);
+}
+
 .title a:hover {
   color: var(--accent-color);
 }
@@ -27,11 +46,69 @@
 .backButton {
   font-size: 28px;
   line-height: 24px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.backButton:visited {
+  color: var(--text-color);
+}
+
+.backButton:hover {
+  color: var(--accent-color);
+}
+
+.followButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  box-shadow: inset 0 0 0 2px transparent;
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s ease;
+}
+
+.followButton:visited {
+  color: white;
+}
+
+.followButton:hover {
+  background-color: var(--accent-color);
+  box-shadow: inset 0 0 0 2px var(--button-hover-inset-ring);
+  color: white;
 }
 
 .preferences {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 32px;
-  line-height: 24px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  /* Gear emoji (⚙) often sits low in the line box; nudge up for even vertical whitespace */
+  transform: translateY(-0.07em);
+}
+
+.preferences:visited {
+  color: var(--text-color);
+}
+
+.preferences:hover {
+  color: var(--accent-color);
 }
 
 .infoIcon {
@@ -42,4 +119,41 @@
 
 .infoIcon:hover {
   color: var(--accent-color);
+}
+
+@media (max-width: 680px) {
+  .header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 10px 8px;
+  }
+
+  .headerLeft {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .headerCenter {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    max-width: 100%;
+    padding-inline: 4px;
+  }
+
+  .headerRight {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .title {
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .followButton {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }

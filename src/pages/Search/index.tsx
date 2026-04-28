@@ -719,7 +719,11 @@ const Search = () => {
         height={10}
         onLoaderFinished={() => setProgressCount(0)}
       />
-      <Header backButtonUrl="/" showPreferences={true} />
+      <Header
+        backButtonUrl="/"
+        showPreferences={true}
+        linktreeUrl="https://linktr.ee/sdaynoam"
+      />
       <div className="container">
         <form onSubmit={submit} className="form-container">
           <div className="button-columns-3">
