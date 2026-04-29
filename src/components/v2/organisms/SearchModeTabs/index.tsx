@@ -4,7 +4,7 @@ import { Icon } from '../../atoms/Icon';
 
 import styles from './SearchModeTabs.module.css';
 
-import type { SearchMode } from '../Sidebar';
+import type { SearchMode } from '../../searchMode';
 
 export type SearchModeTabsProps = {
   mode: SearchMode;

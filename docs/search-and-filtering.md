@@ -8,9 +8,15 @@
 4. Results are merged and deduped by **video URL** where applicable (`useSearchLogic.run` for listing modes).
 5. **`filterVideos`** and **`sortVideos`** in `helpers/videos.ts` refine the merged list **entirely on the client** (title substring matching, exclude tags, relevance scoring). `friendsEvents` adds optional **category** filtering after enrichment (`videoDetails`-style metadata).
 
-## Alternate UI (`/search-v2`)
+## Alternate UI (VideoScraper shell: `/search-v2`, `/settings`, `/moods`, `/history`)
 
-The **`/search-v2`** route (`src/pages/SearchV2/`) is a **dashboard-style** search UI (atomic-design components under `src/components/v2/`). It reuses **`useSearchState`**, **`useSearchLogic`**, and **`useVideoFiltering`** and focuses on **`user` / `category` / `tags` / `extreme`** modes with the same query-string share fields as **`/search`**. Deep links reload like other SPA routes; Netlify **`/search-v2`** → **`/index.html`**. The **Sort by** control (same options as classic **`/search`**) lives in the **results** header; **page count** is shown read-only next to **Run search** (still driven by state, `getPageLimit`, and URL params—no start/pages inputs in the v2 toolbar).
+The redesigned **VideoScraper** shell wraps **`/search-v2`** plus **`/settings`** (ThisVid integration, favourites sync, moods export/import, mock **Live Scraping Logs**), **`/moods`** (moods CRUD backed by **`tvass-moods`** in `localStorage`), and **`/history`** (search replay listing — **mock data** until persisted history exists).
+
+Desktop uses the fixed **320px sidebar** (`AppSidebar`) and shared top bar (`TopNav`) with the same **logo / nav / “Who made this?”** chrome on **`/search-v2`**, **`/settings`**, **`/moods`**, and **`/history`** (History adds a center **search history** filter field). Main content is offset via **`V2Chrome`**; the sidebar is hidden on small viewports (`min-width: 1024px`).
+
+The **`/search-v2`** dashboard (`SearchV2/` + `src/components/v2/`) drives **`useSearchState`**, **`useSearchLogic`**, and **`useVideoFiltering`** for **`user` / `category` / `tags` / `extreme`**. Sharable URLs and Netlify SPA fallbacks behave like **`/search`**. **Sort by** (same values as classic search) stays in the **results** header; **page counts** beside **Run search** are read-only (state / `getPageLimit` / URL). Mode tabs live in the form; **`AppSidebar`** links jump between app sections.
+
+The legacy **`/preferences`** page remains for classic workflows.
 ## Search modes (high level)
 
 Defined in UI constants (e.g. `src/pages/Search/index.tsx` — `modes` / `types`). URL paths are built in `useSearchLogic.getUrl`:

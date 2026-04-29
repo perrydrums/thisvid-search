@@ -1,35 +1,3 @@
-.page {
-  min-height: 100vh;
-  padding-top: 64px;
-}
-
-.main {
-  margin-left: 0;
-  min-height: calc(100vh - 64px);
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-}
-
-.main::-webkit-scrollbar {
-  width: 6px;
-}
-
-.main::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.main::-webkit-scrollbar-thumb {
-  background: var(--v2-border);
-  border-radius: 10px;
-}
-
-@media (min-width: 1024px) {
-  .main {
-    margin-left: 320px;
-  }
-}
-
 .inner {
   max-width: 72rem;
   margin: 0 auto;
@@ -48,35 +16,8 @@
   padding: var(--v2-space-sm) var(--v2-space-lg) var(--v2-space-xl);
 }
 
-.titleRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--v2-space-md);
-  flex-wrap: wrap;
-  margin-bottom: var(--v2-space-lg);
-}
-
-.heroTitle {
-  margin: 0;
-  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  font-family: var(--v2-font-display);
-}
-
 .tabsBlock {
   margin-bottom: var(--v2-space-xl);
-}
-
-.hiddenSm {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .hiddenSm {
-    display: block;
-  }
 }
 
 .grid12 {

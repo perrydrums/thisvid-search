@@ -7,7 +7,7 @@ import { RangeSlider } from '../../atoms/RangeSlider';
 import { ChipInput } from '../../molecules/ChipInput';
 import { ToggleGroup } from '../../molecules/ToggleGroup';
 
-import type { SearchMode } from '../Sidebar';
+import type { SearchMode } from '../../searchMode';
 
 import styles from './PrimaryParametersCard.module.css';
 

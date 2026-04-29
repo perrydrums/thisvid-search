@@ -19,9 +19,9 @@
   color: var(--v2-on-primary);
 }
 
-.neutral {
-  background: var(--v2-border);
-  color: var(--v2-on-surface);
+.tertiary {
+  background: #007f9c;
+  color: var(--v2-on-primary);
 }
 
 .remove {

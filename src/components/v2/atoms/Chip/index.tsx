@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from './Chip.module.css';
 
-export type ChipVariant = 'primary' | 'neutral';
+export type ChipVariant = 'primary' | 'neutral' | 'tertiary';
 
 export type ChipProps = {
   label: string;

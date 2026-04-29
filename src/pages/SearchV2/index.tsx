@@ -3,14 +3,15 @@ import LoadingBar from 'react-top-loading-bar';
 
 import '../../components/v2/tokens.css';
 import { Button } from '../../components/v2/atoms/Button';
-import { Badge } from '../../components/v2/atoms/Badge';
 import { AdvancedScoringSection } from '../../components/v2/organisms/AdvancedScoringSection';
+import { AppSidebar } from '../../components/v2/organisms/AppSidebar';
 import { MoodTermsCard } from '../../components/v2/organisms/MoodTermsCard';
 import { PrimaryParametersCard } from '../../components/v2/organisms/PrimaryParametersCard';
 import { ResultsPreviewGrid } from '../../components/v2/organisms/ResultsPreviewGrid';
 import { SearchModeTabs } from '../../components/v2/organisms/SearchModeTabs';
-import { Sidebar, SearchMode } from '../../components/v2/organisms/Sidebar';
 import { TopNav } from '../../components/v2/organisms/TopNav';
+import chrome from '../../components/v2/V2Chrome.module.css';
+import type { SearchMode } from '../../components/v2/searchMode';
 import { getCategories } from '../../helpers/getCategories';
 import { Modes, Types } from '../../helpers/types';
 import { getUsername } from '../../helpers/users';
@@ -278,7 +279,7 @@ const SearchV2 = () => {
   const isV2Mode = ['user', 'category', 'tags', 'extreme'].includes(searchState.mode);
 
   return (
-    <div className={`v2-root ${styles.page}`}>
+    <div className={`v2-root ${chrome.page}`}>
       <LoadingBar
         progress={
           searchState.progressCount
@@ -290,19 +291,10 @@ const SearchV2 = () => {
         onLoaderFinished={() => setProgressCount(0)}
       />
       <TopNav />
-      {isV2Mode && (
-        <div className={styles.hiddenSm}>
-          <Sidebar mode={v2Mode} onModeChange={handleV2Mode} />
-        </div>
-      )}
+      {isV2Mode && <AppSidebar activePage="search" />}
 
-      <main className={styles.main}>
+      <main className={chrome.main}>
         <form className={styles.formBlock} onSubmit={submit}>
-          <div className={styles.titleRow}>
-            <h1 className={styles.heroTitle}>Advanced Search Engine</h1>
-            <Badge>Pro Status</Badge>
-          </div>
-
           {isV2Mode && (
             <div className={styles.tabsBlock}>
               <SearchModeTabs mode={v2Mode} onModeChange={handleV2Mode} />

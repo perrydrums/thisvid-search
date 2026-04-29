@@ -13,7 +13,7 @@ export type ChipInputProps = {
   /** If set, shown on chips instead of the raw tag text (still keyed/removable by raw tag value). */
   resolveChipDisplay?: (tag: string) => string;
   placeholder?: string;
-  chipVariant?: 'primary' | 'neutral';
+  chipVariant?: 'primary' | 'neutral' | 'tertiary';
   helperText?: string;
   className?: string;
   tone?: 'default' | 'inverse';

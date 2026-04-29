@@ -1,0 +1,229 @@
+.wrap {
+  background: var(--v2-bg);
+  padding: var(--v2-space-xl) var(--v2-space-lg) var(--v2-space-2xl, 56px);
+}
+
+.hdr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--v2-space-lg);
+  margin-bottom: var(--v2-space-xl);
+}
+
+.hero {
+  margin: 0 0 var(--v2-space-sm);
+  font-family: var(--v2-font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  margin: 0;
+  font-size: 15px;
+  color: var(--v2-on-surface-muted);
+}
+
+.hdrBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-sm);
+}
+
+.clearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  padding: 10px 16px;
+  border-radius: var(--v2-radius);
+  border: 1px solid var(--v2-border);
+  background: var(--v2-surface);
+  color: var(--v2-warning);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-lg);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--v2-surface);
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--v2-shadow-1);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.media {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 140px;
+  background:
+    radial-gradient(circle at 30% 20%, hsla(var(--hue, 200deg), 70%, 50%, 0.35), transparent 65%),
+    linear-gradient(160deg, #1a1a1e 0%, #2d2d34 60%, #1a1620 100%);
+}
+
+@media (min-width: 768px) {
+  .media {
+    width: 200px;
+    min-height: 180px;
+  }
+}
+
+.thumbTint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.35));
+}
+
+.modePill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.mode_extreme {
+  background: rgba(224, 0, 50, 0.95);
+}
+
+.mode_user {
+  background: rgba(0, 127, 156, 0.95);
+}
+
+.mode_category {
+  background: rgba(95, 94, 98, 0.95);
+}
+
+.mode_tag {
+  background: rgba(148, 110, 109, 0.95);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  padding: var(--v2-space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v2-space-xl);
+}
+
+.centerStack {
+  flex: 1;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--v2-space-sm);
+}
+
+.entryTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.idChip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--v2-radius-sm);
+  background: var(--v2-surface-muted);
+  color: var(--v2-on-surface-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-sm);
+  margin: var(--v2-space-sm) 0;
+}
+
+.chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--v2-radius-full);
+  background: #e4e1e7;
+  color: var(--v2-on-secondary-container, #656468);
+}
+
+.meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--v2-on-surface-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-md);
+  flex-shrink: 0;
+}
+
+.heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--v2-radius-full);
+  background: transparent;
+  color: var(--v2-on-surface-muted);
+  cursor: not-allowed;
+}
+
+.moreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--v2-space-xl);
+}
+
+.showMore {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  padding: 14px 28px;
+  border-radius: var(--v2-radius-full);
+  border: none;
+  background: var(--v2-surface-muted);
+  color: var(--v2-on-surface);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: not-allowed;
+}
+
+.showMore span {
+  font-size: 22px !important;
+}
