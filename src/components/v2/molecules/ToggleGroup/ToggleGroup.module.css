@@ -1,0 +1,52 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-sm);
+  min-width: 0;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--v2-on-surface-subtle);
+}
+
+.track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  background: var(--v2-surface-low);
+  border-radius: var(--v2-radius);
+}
+
+.segment {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: none;
+  border-radius: calc(var(--v2-radius) - 2px);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--v2-font-sans);
+  color: var(--v2-on-surface-subtle);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease;
+}
+
+.active {
+  background: var(--v2-surface);
+  color: var(--v2-on-surface);
+  font-weight: 800;
+  box-shadow: var(--v2-shadow-1);
+}
+
+.segment:hover:not(.active) {
+  color: var(--v2-on-surface);
+}

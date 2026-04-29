@@ -10,6 +10,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/search-v2"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/analyse"
 to = "/index.html"
 status = 200

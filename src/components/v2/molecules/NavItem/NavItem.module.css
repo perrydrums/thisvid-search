@@ -1,0 +1,35 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-md);
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: var(--v2-radius);
+  background: transparent;
+  color: var(--v2-on-surface-subtle);
+  font-family: var(--v2-font-display);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--v2-on-surface);
+}
+
+.active {
+  background: var(--v2-surface);
+  color: var(--v2-accent);
+  font-weight: 700;
+  box-shadow: var(--v2-shadow-1);
+}
+
+.label {
+  flex: 1;
+}

@@ -11,7 +11,7 @@
 
 ```
 src/
-  pages/           Route-level screens (Search, Preferences, Analyse, etc.)
+  pages/           Route-level screens (Search, SearchV2 `/search-v2`, Preferences, Analyse, etc.)
   components/      Reusable UI (forms, results, header, feedback)
   hooks/           useSearchLogic, useSearchState, useVideoFiltering (partial refactor)
   helpers/         videos.ts, types.ts, Supabase, favourites, categories, users, recommendations, analyseFavourites

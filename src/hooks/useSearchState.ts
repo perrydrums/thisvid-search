@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Video, Friend, Category, Mood, LogParams } from '../helpers/types';
+import { Friend, Category, Mood, LogParams } from '../helpers/types';
 
-export const useSearchState = () => {
+type UseSearchStateOptions = {
+  /** Overrides default mode when URL has no `mode` query param */
+  defaultMode?: string;
+};
+
+export const useSearchState = (options?: UseSearchStateOptions) => {
   const [searchParams] = useSearchParams();
   const params: { [key: string]: any } = {};
 
@@ -10,8 +15,10 @@ export const useSearchState = () => {
     params[key] = value;
   });
 
+  const fallbackMode = options?.defaultMode ?? 'category';
+
   // Core search parameters
-  const [mode, setMode] = useState(params.mode || 'category');
+  const [mode, setMode] = useState(params.mode || fallbackMode);
   const [id, setId] = useState(params.id || '');
   const [type, setType] = useState(params.type || '');
   const [category, setCategory] = useState(params.category || '');

@@ -1,0 +1,26 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--v2-radius-full);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-family: var(--v2-font-sans);
+}
+
+.default {
+  background: var(--v2-primary-container);
+  color: var(--v2-on-primary);
+}
+
+.success {
+  background: var(--v2-success-bg);
+  color: var(--v2-success-fg);
+}
+
+.muted {
+  background: var(--v2-surface-low);
+  color: var(--v2-on-surface-subtle);
+}

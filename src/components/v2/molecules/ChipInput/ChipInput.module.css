@@ -1,0 +1,66 @@
+.root {
+  width: 100%;
+}
+
+.label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--v2-on-surface-subtle);
+  margin-bottom: var(--v2-space-sm);
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-sm);
+  align-items: center;
+  align-content: flex-start;
+  min-height: 50px;
+  padding: var(--v2-space-sm) var(--v2-space-md);
+  background: var(--v2-surface-low);
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius);
+  overflow-x: auto;
+}
+
+/* ~2 rows of single-line chips + row gap + vertical padding (field) */
+.fieldMaxRows2 {
+  max-height: 5.5rem;
+  min-height: 2.75rem;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-gutter: stable;
+}
+
+.input {
+  flex: 1 1 120px;
+  min-width: 80px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+}
+
+.helper {
+  margin: var(--v2-space-sm) 0 0;
+  font-size: 10px;
+  font-style: italic;
+  color: var(--v2-on-surface-subtle);
+}
+
+.inverse .field {
+  background: #27272a;
+  border-color: #3f3f46;
+}
+
+.inverse .input {
+  color: #fafafa;
+}
+
+.inverse .label,
+.inverse .helper {
+  color: #a1a1aa;
+}

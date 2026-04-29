@@ -1,0 +1,64 @@
+/**
+ * V2 design tokens — scoped by wrapping v2 route in .v2-root
+ * See redesign/DESIGN.md
+ */
+.v2-root {
+  /* Surfaces */
+  --v2-bg: #f9f9fc;
+  --v2-surface: #ffffff;
+  --v2-surface-low: #f3f3f6;
+  --v2-surface-muted: #edeef1;
+  --v2-border: #e2e2e5;
+  --v2-border-strong: #d9dadd;
+
+  /* Text */
+  --v2-on-surface: #1a1c1e;
+  --v2-on-surface-muted: #5f3e3e;
+  --v2-on-surface-subtle: #71717a;
+
+  /* Brand */
+  --v2-primary: #ba0029;
+  --v2-primary-container: #e90036;
+  --v2-accent: #ff003c;
+  --v2-on-primary: #ffffff;
+
+  /* Functional */
+  --v2-success-bg: #d1fae5;
+  --v2-success-fg: #047857;
+  --v2-warning: #d97706;
+
+  /* Elevation */
+  --v2-shadow-1: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --v2-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Radii */
+  --v2-radius-sm: 0.25rem;
+  --v2-radius: 0.5rem;
+  --v2-radius-md: 0.75rem;
+  --v2-radius-lg: 1rem;
+  --v2-radius-xl: 1.5rem;
+  --v2-radius-full: 9999px;
+
+  /* Spacing (4px grid) */
+  --v2-space-xs: 4px;
+  --v2-space-sm: 8px;
+  --v2-space-md: 16px;
+  --v2-space-lg: 24px;
+  --v2-space-xl: 40px;
+  --v2-gutter: 20px;
+
+  /* Typography */
+  --v2-font-sans: 'Inter', system-ui, sans-serif;
+  --v2-font-display: 'Manrope', var(--v2-font-sans);
+
+  font-family: var(--v2-font-sans);
+  color: var(--v2-on-surface);
+  background: var(--v2-bg);
+}
+
+.v2-root h1,
+.v2-root h2,
+.v2-root h3,
+.v2-root .v2-font-display {
+  font-family: var(--v2-font-display);
+}

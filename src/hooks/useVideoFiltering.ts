@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Video, LogParams } from '../helpers/types';
 import { filterVideos, sortVideos } from '../helpers/videos';
 import { getLocalFavourites } from '../helpers/favourites';

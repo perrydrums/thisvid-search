@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Preferences from './pages/Preferences';
 import Recommendations from './pages/Recommendations';
 import Search from './pages/Search';
+import SearchV2 from './pages/SearchV2';
 import WhatsNew from './pages/WhatsNew';
 
 // Generate random visitor ID if not already set in local storage.
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
   {
     path: '/search',
     element: <Search />,
+  },
+  {
+    path: '/search-v2',
+    element: <SearchV2 />,
   },
   {
     path: '/analyse',

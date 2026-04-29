@@ -205,6 +205,8 @@ export const useSearchLogic = ({
       setRawVideos([]);
     }
     const promises = [];
+    let progress = 0;
+    let tempPageLimit = 0;
 
     const urlFirstPage = getUrl(offset);
     const firstPageExists = await urlExists(urlFirstPage);
@@ -226,13 +228,23 @@ export const useSearchLogic = ({
           quick,
           page: currentPage,
           omitPrivate,
+        // eslint-disable-next-line no-loop-func -- callback runs when each page settles; shared progress/tempPageLimit (see Search/index.tsx)
         }).then((s) => {
-          // Return both the result and page info for later processing
+          // @ts-ignore
+          if (s && s.error === 404) {
+            if (tempPageLimit === 0 || tempPageLimit > currentPage) {
+              tempPageLimit = currentPage - 1;
+              setPageLimit(tempPageLimit);
+            }
+          }
+          progress++;
+          setProgressCount(progress);
+
           return {
             videos: s,
             page: currentPage,
             // @ts-ignore
-            hasError: s && s.error === 404
+            hasError: s && s.error === 404,
           };
         }),
       );
@@ -240,16 +252,6 @@ export const useSearchLogic = ({
 
     try {
       const results = await Promise.all(promises);
-
-      // Update progress
-      setProgressCount(results.length);
-
-      // Handle page limits
-      const errorPages = results.filter(r => r.hasError).map(r => r.page);
-      if (errorPages.length > 0) {
-        const minErrorPage = Math.min(...errorPages);
-        setPageLimit(minErrorPage - 1);
-      }
 
       // Extract videos
       const videos = results.flatMap(r => r.videos).filter(

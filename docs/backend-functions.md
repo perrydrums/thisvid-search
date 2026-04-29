@@ -44,4 +44,4 @@ So local CRA can mimic production without running Netlify CLI—**but** you depe
 
 ## Production redirects
 
-`netlify.toml` defines SPA fallbacks for client routes and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. If you add a new API path, add matching **redirect** and **dev proxy** entries.
+`netlify.toml` defines SPA fallbacks for client routes (`/search`, `/search-v2`, `/analyse`, `/preferences`, `/whats-new`, `/recommendations`, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. If you add a new API path, add matching **redirect** and **dev proxy** entries.

@@ -8,6 +8,9 @@
 4. Results are merged and deduped by **video URL** where applicable (`useSearchLogic.run` for listing modes).
 5. **`filterVideos`** and **`sortVideos`** in `helpers/videos.ts` refine the merged list **entirely on the client** (title substring matching, exclude tags, relevance scoring). `friendsEvents` adds optional **category** filtering after enrichment (`videoDetails`-style metadata).
 
+## Alternate UI (`/search-v2`)
+
+The **`/search-v2`** route (`src/pages/SearchV2/`) is a **dashboard-style** search UI (atomic-design components under `src/components/v2/`). It reuses **`useSearchState`**, **`useSearchLogic`**, and **`useVideoFiltering`** and focuses on **`user` / `category` / `tags` / `extreme`** modes with the same query-string share fields as **`/search`**. Deep links reload like other SPA routes; Netlify **`/search-v2`** → **`/index.html`**. The **Sort by** control (same options as classic **`/search`**) lives in the **results** header; **page count** is shown read-only next to **Run search** (still driven by state, `getPageLimit`, and URL params—no start/pages inputs in the v2 toolbar).
 ## Search modes (high level)
 
 Defined in UI constants (e.g. `src/pages/Search/index.tsx` — `modes` / `types`). URL paths are built in `useSearchLogic.getUrl`:

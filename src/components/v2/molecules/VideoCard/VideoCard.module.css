@@ -1,0 +1,92 @@
+.card {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.thumbWrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--v2-radius);
+  overflow: hidden;
+  margin-bottom: var(--v2-space-sm);
+  box-shadow: var(--v2-shadow-1);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.card:hover .thumbWrap {
+  box-shadow: var(--v2-shadow-2);
+}
+
+.thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.card:hover .thumb {
+  transform: scale(1.03);
+}
+
+.duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.playOverlay span {
+  font-size: 48px !important;
+  color: #fff;
+}
+
+.card:hover .playOverlay {
+  opacity: 1;
+}
+
+.videoTitle {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--v2-on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--v2-font-display);
+}
+
+.card:hover .videoTitle {
+  color: var(--v2-accent);
+}
+
+.meta {
+  margin: 0;
+  font-size: 11px;
+  color: var(--v2-on-surface-subtle);
+}
