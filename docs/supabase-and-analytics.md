@@ -9,9 +9,9 @@
 
 If unset, URLs/keys are empty strings; inserts may fail silently in the console—acceptable for local UI-only work.
 
-Make sure **Email** auth is enabled in the Supabase project (OTP / magic link) so the v2 **`AuthWidget`** flow can send and verify codes.
+Make sure **Email** auth with **magic link** (Magic link template) is enabled in the Supabase project so **`AuthWidget`** can email sign-in and signup links (`signInWithOtp` + `emailRedirectTo` in `useAuth.tsx`).
 
-In **Authentication → URL configuration**, add these to **Redirect URLs** (magic links use `emailRedirectTo` → `/search-v2`):
+In **Authentication → URL configuration**, add these to **Redirect URLs** (`useAuth.tsx` sets `emailRedirectTo` to **`http://localhost:3000/search-v2`** in development and **`{origin}/search-v2`** in production builds):
 
 - `http://localhost:3000/search-v2` (dev)
 - Your production origin with `/search-v2`, e.g. `https://your-domain.example/search-v2`
@@ -22,7 +22,7 @@ If the site **Site URL** is only the origin (e.g. `http://localhost:3000`), the 
 
 ## Auth-linked user data (v2)
 
-When a user completes email OTP sign-in (`src/hooks/useAuth.tsx`), the app can sync prefs to Supabase:
+When a user completes email magic-link sign-in (`src/hooks/useAuth.tsx`), the app can sync prefs to Supabase:
 
 - **`profiles`** — one row per `auth.users` user (`id` FK). Holds ThisVid-related scalars mirrored from legacy local keys: `thisvid_user_id`, `default_mood`, `favourites` (text array), `last_sync_date`. Rows are created from an `on_auth_user_created` trigger.
 - **`moods`** — curated mood definitions per user (`user_id` → `profiles.id`). Replaces ad-hoc `tvass-moods` when logged in via `helpers/supabase/userProfile.ts`.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../../../../hooks/useAuth';
 
@@ -7,7 +7,7 @@ import styles from './AuthWidget.module.css';
 export type AuthWidgetProps = {
   /** Mobile drawer pins auth block at bottom — uses slightly looser spacing. */
   placement?: 'sidebar' | 'drawer';
-  /** Close parent sheet after OTP success on mobile */
+  /** Close parent sheet after sign-in completes on mobile (magic link return). */
   onAuthSuccessClose?: () => void;
 };
 
@@ -15,25 +15,34 @@ type Phase =
   | 'browse'
   | 'email_login'
   | 'email_then_register_hint'
-  | 'otp_verify'
-  /** User chose register flow after hint. */
-  | 'otp_after_register_otp_sent';
+  /** Magic link sent; user finishes in their email client. */
+  | 'magic_link_sent';
 
 export const AuthWidget: React.FC<AuthWidgetProps> = ({ placement = 'sidebar', onAuthSuccessClose }) => {
-  const { user, loading, sendLoginOtp, sendRegisterOtp, verifyOtp, signOut } = useAuth();
+  const { user, loading, sendLoginOtp, sendRegisterOtp, signOut } = useAuth();
 
   const [phase, setPhase] = useState<Phase>('browse');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
   const [busy, setBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
 
   const wrapClass = placement === 'drawer' ? styles.drawer : styles.wrapper;
+  const didCloseDrawerAfterMagicRef = useRef(false);
+
+  /** Close mobile nav once when the session appears after following the magic link in the same tab. */
+  useEffect(() => {
+    if (!user) {
+      didCloseDrawerAfterMagicRef.current = false;
+      return;
+    }
+    if (phase !== 'magic_link_sent' || didCloseDrawerAfterMagicRef.current) return;
+    didCloseDrawerAfterMagicRef.current = true;
+    onAuthSuccessClose?.();
+  }, [user, phase, onAuthSuccessClose]);
 
   const resetFlow = () => {
     setPhase('browse');
-    setOtp('');
     setErrorMsg(null);
     setHint(null);
   };
@@ -76,13 +85,15 @@ export const AuthWidget: React.FC<AuthWidgetProps> = ({ placement = 'sidebar', o
       setErrorMsg(benignSignup ? null : error);
       setHint(
         benignSignup
-          ? 'No account yet for this email. Use Register below to get a sign-up code.'
+          ? 'No account yet for this email. Use Register below and we\'ll send a confirmation link.'
           : 'No account with this email, or sign-in is not available. Register to create one.',
       );
       return;
     }
-    setPhase('otp_verify');
-    setHint('Check your email for a one-time code.');
+    setPhase('magic_link_sent');
+    setHint(
+      "We've sent a sign-in link to your email. Open your mail app, find the message from us, and tap the link to log in. You can leave this page — the same tab will update when you're signed in.",
+    );
   };
 
   const onSendRegisterOtp = async () => {
@@ -95,21 +106,10 @@ export const AuthWidget: React.FC<AuthWidgetProps> = ({ placement = 'sidebar', o
       setErrorMsg(error);
       return;
     }
-    setPhase('otp_after_register_otp_sent');
-    setHint('Registration code sent. Enter it below.');
-  };
-
-  const onVerify = async () => {
-    setBusy(true);
-    setErrorMsg(null);
-    const { error } = await verifyOtp(email, otp);
-    setBusy(false);
-    if (error) {
-      setErrorMsg(error);
-      return;
-    }
-    resetFlow();
-    onAuthSuccessClose?.();
+    setPhase('magic_link_sent');
+    setHint(
+      "We've sent a confirmation link to your email. Open your mail app, tap the link to verify your address, and finish creating your account.",
+    );
   };
 
   return (
@@ -139,7 +139,7 @@ export const AuthWidget: React.FC<AuthWidgetProps> = ({ placement = 'sidebar', o
               disabled={busy || !email.trim()}
               onClick={() => void onSendLoginOtp()}
             >
-              Send code
+              Send magic link
             </button>
             <button type="button" className={styles.secondaryBtn} onClick={resetFlow} disabled={busy}>
               Cancel
@@ -164,25 +164,13 @@ export const AuthWidget: React.FC<AuthWidgetProps> = ({ placement = 'sidebar', o
         </>
       )}
 
-      {(phase === 'otp_verify' || phase === 'otp_after_register_otp_sent') && (
+      {phase === 'magic_link_sent' && (
         <>
           {hint && <p className={styles.success}>{hint}</p>}
-          <input
-            className={styles.field}
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="One-time code"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
           {errorMsg && <p className={styles.error}>{errorMsg}</p>}
           <div className={styles.rowBtns}>
-            <button type="button" className={styles.primaryBtn} disabled={busy || !otp.trim()} onClick={() => void onVerify()}>
-              Verify
-            </button>
             <button type="button" className={styles.secondaryBtn} onClick={resetFlow} disabled={busy}>
-              Cancel
+              Use another email
             </button>
           </div>
         </>

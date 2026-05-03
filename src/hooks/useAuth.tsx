@@ -23,15 +23,28 @@ type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  /** Login: OTP only if account already exists (shouldCreateUser: false). */
+  /** Login: email magic link; existing users only (`shouldCreateUser: false`). */
   sendLoginOtp: (email: string) => Promise<SendOtpResult>;
-  /** Register: create user if needed and send OTP (shouldCreateUser: true). */
+  /** Register / sign-up: sends confirmation magic link (`shouldCreateUser: true`). */
   sendRegisterOtp: (email: string) => Promise<SendOtpResult>;
+  /** Optional fallback if you serve a code entry elsewhere (not used by AuthWidget magic-link UX). */
   verifyOtp: (email: string, token: string) => Promise<VerifyOtpResult>;
   signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+/**
+ * Landing URL after the user taps the emailed magic link.
+ * Development uses an explicit CRA origin so the link matches Supabase **Redirect URLs** (`http://localhost:3000/search-v2`).
+ */
+function getMagicLinkRedirectUrl(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000/search-v2';
+  }
+  return `${window.location.origin}/search-v2`;
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -63,8 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendLoginOtp = useCallback(async (email: string) => {
     const trimmed = email.trim().toLowerCase();
-    const redirectTo =
-      typeof window !== 'undefined' ? `${window.location.origin}/search-v2` : undefined;
+    const redirectTo = getMagicLinkRedirectUrl();
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
       options: {
@@ -77,8 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendRegisterOtp = useCallback(async (email: string) => {
     const trimmed = email.trim().toLowerCase();
-    const redirectTo =
-      typeof window !== 'undefined' ? `${window.location.origin}/search-v2` : undefined;
+    const redirectTo = getMagicLinkRedirectUrl();
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
       options: {
