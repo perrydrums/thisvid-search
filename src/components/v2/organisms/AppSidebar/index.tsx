@@ -1,20 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import type { AppSidebarActivePage } from '../../appNavigation';
+import { APP_NAV_ITEMS } from '../../appNavigation';
+
+import { AuthWidget } from '../AuthWidget';
+
 import styles from './AppSidebar.module.css';
 
-export type AppSidebarActivePage = 'search' | 'moods' | 'history' | 'settings';
+export type { AppSidebarActivePage };
 
 export type AppSidebarProps = {
   activePage: AppSidebarActivePage;
 };
-
-const NAV: { page: AppSidebarActivePage; to: string; icon: string; label: string }[] = [
-  { page: 'search', to: '/search-v2', icon: 'search', label: 'Search' },
-  { page: 'moods', to: '/moods', icon: 'mood', label: 'Moods' },
-  { page: 'history', to: '/history', icon: 'history', label: 'History' },
-  { page: 'settings', to: '/settings', icon: 'settings', label: 'Settings' },
-];
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({ activePage }) => {
   return (
@@ -27,7 +25,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ activePage }) => {
 
       <nav className={styles.nav} aria-label="App">
         <ul className={styles.ul}>
-          {NAV.map((item) => (
+          {APP_NAV_ITEMS.map((item) => (
             <li key={item.page}>
               <Link
                 to={item.to}
@@ -43,6 +41,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ activePage }) => {
           ))}
         </ul>
       </nav>
+
+      <div className={styles.sidebarFooter}>
+        <AuthWidget placement="sidebar" />
+      </div>
     </aside>
   );
 };

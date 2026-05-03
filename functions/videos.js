@@ -1,27 +1,72 @@
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 
-const headers = {
+/** Browser: avoid stale JSON in bfcache; Edge/Durable: cache by full query string. */
+const successHeaders = {
   'Content-Type': 'application/json',
-  'Cache-Control': 'public, max-age=3600',
+  'Cache-Control': 'public, max-age=0, must-revalidate',
+  'Netlify-CDN-Cache-Control': 'public, durable, max-age=3600, stale-while-revalidate=7200',
   'Netlify-Vary': 'query',
 };
 
+const errorHeaders = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store',
+};
+
+function readVideosInput(event) {
+  const method = (event.httpMethod || 'POST').toUpperCase();
+
+  if (method === 'GET') {
+    const q = event.queryStringParameters || {};
+    return {
+      url: typeof q.url === 'string' ? q.url.trim() : '',
+      page: q.page !== undefined ? parseInt(String(q.page), 10) || 1 : 1,
+      omitPrivate: q.omitPrivate === 'true',
+      minDuration:
+        q.minDuration !== undefined && q.minDuration !== null && String(q.minDuration).trim() !== ''
+          ? parseFloat(String(q.minDuration)) || 0
+          : 0,
+      quick: q.quick !== 'false',
+    };
+  }
+
+  const raw = event.body && String(event.body).trim() ? JSON.parse(event.body) : {};
+  return {
+    url: raw.url ?? '',
+    page: raw.page ?? 1,
+    omitPrivate: Boolean(raw.omitPrivate),
+    minDuration: Number(raw.minDuration) || 0,
+    quick: raw.quick !== false,
+  };
+}
+
 exports.handler = async function (event, context) {
-  const {
-    url,
-    page = 1,
-    omitPrivate = false,
-    minDuration = 0,
-    quick = true,
-  } = JSON.parse(event.body);
+  let input;
+  try {
+    input = readVideosInput(event);
+  } catch (e) {
+    return {
+      statusCode: 400,
+      headers: errorHeaders,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid JSON body',
+        success: false,
+        videos: [],
+      }),
+    };
+  }
+
+  const { url, page = 1, omitPrivate = false, minDuration = 0, quick = true } = input;
 
   if (!url) {
     return {
       statusCode: 400,
+      headers: errorHeaders,
       body: JSON.stringify({
         status: 'Bad Request',
-        message: 'Missing post data: "url"',
+        message: 'Missing parameter: url (query string or JSON body)',
         success: false,
         videos: [],
       }),
@@ -34,6 +79,7 @@ exports.handler = async function (event, context) {
     if (response.status === 404) {
       return {
         statusCode: 400,
+        headers: errorHeaders,
         body: JSON.stringify({
           status: 'Bad Request',
           message: 'Url not found',
@@ -133,7 +179,7 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      headers,
+      headers: successHeaders,
       body: JSON.stringify({
         success: true,
         videos: videos,
@@ -141,5 +187,15 @@ exports.handler = async function (event, context) {
     };
   } catch (error) {
     console.log(error);
+    return {
+      statusCode: 500,
+      headers: errorHeaders,
+      body: JSON.stringify({
+        status: 'Error',
+        message: error instanceof Error ? error.message : 'Unexpected error',
+        success: false,
+        videos: [],
+      }),
+    };
   }
-}
+};

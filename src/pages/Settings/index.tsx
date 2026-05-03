@@ -1,5 +1,5 @@
 import cheerio from 'cheerio';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import LoadingBar from 'react-top-loading-bar';
 
 import '../../components/v2/tokens.css';
@@ -9,7 +9,10 @@ import { TopNav } from '../../components/v2/organisms/TopNav';
 import chrome from '../../components/v2/V2Chrome.module.css';
 
 import styles from './Settings.module.css';
+import type { Mood } from '../../helpers/types';
 import { getVideos } from '../../helpers/videos';
+import { useAuth } from '../../hooks/useAuth';
+import { useUserData } from '../../hooks/useUserData';
 
 const LOG_LINES = [
   { ts: '[10:42:01]', line: 'INITIALIZING HANDSHAKE WITH THISVID.COM...', tone: 'ok' as const },
@@ -21,9 +24,14 @@ const LOG_LINES = [
 ];
 
 const Settings = () => {
-  const [userId, setUserId] = useState(localStorage.getItem('tvass-user-id') || '');
-  const [favourites, setFavourites] = useState(localStorage.getItem('tvass-favourites') || '');
-  const [lastSyncDate, setLastSyncDate] = useState(localStorage.getItem('tvass-last-sync-date') || '');
+  const { loading: authLoading } = useAuth();
+  const userData = useUserData();
+  const {
+    isCloud,
+    loading: userDataLoading,
+    refreshProfileFromCloud,
+  } = userData;
+
   const [loading, setLoading] = useState(false);
   const [favDone, setFavDone] = useState(0);
   const [favTotal, setFavTotal] = useState(0);
@@ -31,20 +39,29 @@ const Settings = () => {
   const [showImport, setShowImport] = useState(false);
   const [importError, setImportError] = useState('');
 
+  const lastSyncDate = userData.lastSyncDate;
+
+  const userId = userData.thisvidUserId;
+  const favourites = userData.favourites;
+
   const favouritesCount =
     favourites.length === 0 ? 0 : favourites.split(',').filter((x) => x.trim()).length;
 
-  React.useEffect(() => {
-    localStorage.setItem('tvass-user-id', userId);
-  }, [userId]);
+  /** react-top-loading-bar only finishes when progress hits 100; then it fades out and fires this callback. */
+  const resetFetchFavsBar = useCallback(() => {
+    setLoading(false);
+    setFavDone(0);
+    setFavTotal(0);
+  }, []);
 
-  React.useEffect(() => {
-    localStorage.setItem('tvass-favourites', favourites);
-  }, [favourites]);
-
-  React.useEffect(() => {
-    localStorage.setItem('tvass-last-sync-date', lastSyncDate);
-  }, [lastSyncDate]);
+  /**
+   * `useUserData` is per-component state: opening Settings mounts a fresh hook instance. Always pull profile+moods
+   * from Supabase once session + initial load have settled so empty localStorage still shows cloud prefs.
+   */
+  useEffect(() => {
+    if (!isCloud || authLoading || userDataLoading) return;
+    void refreshProfileFromCloud({ quiet: true });
+  }, [isCloud, authLoading, userDataLoading, refreshProfileFromCloud]);
 
   const fetchFavorites = async () => {
     if (!userId.trim()) return;
@@ -84,33 +101,30 @@ const Settings = () => {
         (value, index, self) => index === self.findIndex((v) => v.url === value.url),
       );
 
+      setFavDone(lastPage);
+
       const videoUrls = videos.map((v) => v.url);
-      setFavourites(videoUrls.join(','));
-      setLastSyncDate(new Date().toLocaleString());
+      await userData.setFavouritesAndLastSync(videoUrls.join(','), new Date().toLocaleString());
     } catch (e) {
       console.error(e);
       alert('Failed to fetch favourites. Check console.');
-    } finally {
-      setLoading(false);
-      setFavDone(0);
-      setFavTotal(0);
+      resetFetchFavsBar();
     }
   };
 
   const exportMoods = () => {
-    const moodsData = localStorage.getItem('tvass-moods') || '[]';
-    navigator.clipboard.writeText(moodsData);
+    navigator.clipboard.writeText(JSON.stringify(userData.moods));
     alert('Moods data copied to clipboard!');
   };
 
-  const importMoods = () => {
+  const importMoods = async () => {
     try {
       setImportError('');
-      const parsedMoods = JSON.parse(importText);
+      const parsedMoods = JSON.parse(importText) as unknown;
       if (!Array.isArray(parsedMoods)) {
         throw new Error('Invalid moods data format');
       }
-      localStorage.setItem('tvass-moods', importText);
+      await userData.persistMoods(parsedMoods as Mood[]);
       setImportText('');
       setShowImport(false);
       alert('Moods imported successfully!');
@@ -122,13 +136,14 @@ const Settings = () => {
   return (
     <div className={`v2-root ${chrome.page}`}>
       <LoadingBar
-        progress={loading && favTotal > 0 ? Math.round((favDone / favTotal) * 100) : 0}
+        progress={
+          loading && favTotal > 0
+            ? Math.min(100, Math.round((Math.min(favDone, favTotal) / favTotal) * 100))
+            : 0
+        }
         color="var(--v2-accent, #ff003c)"
         height={8}
-        onLoaderFinished={() => {
-          setFavDone(0);
-          setFavTotal(0);
-        }}
+        onLoaderFinished={resetFetchFavsBar}
       />
       <TopNav />
       <AppSidebar activePage="settings" />
@@ -154,7 +169,7 @@ const Settings = () => {
                     className={styles.field}
                     placeholder="Enter your ThisVid profile ID"
                     value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
+                    onChange={(e) => void userData.setThisvidUserId(e.target.value)}
                     autoComplete="off"
                   />
                 </div>

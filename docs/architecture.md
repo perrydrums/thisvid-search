@@ -25,8 +25,8 @@ public/            Static assets, PWA manifest
    In **development**, `src/setupProxy.js` forwards these to `https://thisvid.com`.  
    In **production**, `netlify.toml` uses **redirects** so the browser still requests your domain; Netlify proxies to ThisVid. That avoids CORS when the React app fetches listing or profile HTML and parses it with Cheerio.
 
-2. **Serverless scraping** (`POST /getVideos`)  
-   The browser calls your app’s `/getVideos`, which redirects (Netlify) or proxies (dev) to a **Netlify function** that fetches `https://thisvid.com` + path server-side, parses thumbnails with Cheerio, and returns JSON (`Video[]`). This keeps listing markup parsing centralized and allows options like `omitPrivate`, `minDuration`, and `quick`.
+2. **Serverless scraping** (`GET /getVideos` with query params; **POST** JSON still works)  
+   The browser calls your app’s `/getVideos?url=…`, which redirects (Netlify) or proxies (dev) to a **Netlify function** that fetches `https://thisvid.com` + path server-side, parses thumbnails with Cheerio, and returns JSON (`Video[]`). This keeps listing markup parsing centralized and allows options like `omitPrivate`, `minDuration`, and `quick`. **GET** carries all options in the URL so Netlify’s Edge/Durable cache can key on `Netlify-Vary: query` (`Netlify-CDN-Cache-Control` is set in `functions/videos.js`).
 
 Production also routes `/friends`, `/download`, `/videoDetails`, etc. to the **tvass.netlify.app** deployment (see `netlify.toml`). Local dev mirrors that via `setupProxy.js`.
 

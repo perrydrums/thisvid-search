@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
+import { AuthEmailReturnHandler } from './components/AuthEmailReturnHandler';
+import { AuthProvider } from './hooks/useAuth';
 import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Analyse from './pages/Analyse';
@@ -31,7 +33,19 @@ if (!localStorage.getItem('visitorName')) {
   });
 }
 
+function AppShell() {
+  return (
+    <AuthProvider>
+      <AuthEmailReturnHandler />
+      <Outlet />
+    </AuthProvider>
+  );
+}
+
 const router = createBrowserRouter([
+  {
+    element: <AppShell />,
+    children: [
   {
     path: '/',
     element: <Home />,
@@ -71,6 +85,8 @@ const router = createBrowserRouter([
   {
     path: '/recommendations',
     element: <Recommendations />,
+  },
+    ],
   },
 ]);
 

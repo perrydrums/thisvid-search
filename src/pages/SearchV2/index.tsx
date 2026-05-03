@@ -10,10 +10,11 @@ import { TopNav } from '../../components/v2/organisms/TopNav';
 import chrome from '../../components/v2/V2Chrome.module.css';
 import type { SearchMode } from '../../components/v2/searchMode';
 import { getCategories } from '../../helpers/getCategories';
-import { Modes, Types } from '../../helpers/types';
+import { Modes, Types, type Mood } from '../../helpers/types';
 import { getUsername } from '../../helpers/users';
 import { useSearchLogic } from '../../hooks/useSearchLogic';
 import { useSearchState } from '../../hooks/useSearchState';
+import { useUserData } from '../../hooks/useUserData';
 import { useVideoFiltering } from '../../hooks/useVideoFiltering';
 
 import styles from './SearchV2.module.css';
@@ -59,11 +60,24 @@ const types: Types = {
   ],
 };
 
+const SELECT_MOOD_PLACEHOLDER: Mood = {
+  name: 'Select a mood',
+  preferences: {
+    tags: [],
+    excludeTags: [],
+    boosterTags: [],
+    diminishingTags: [],
+    minDuration: 0,
+  },
+};
+
 const SearchV2 = () => {
   const searchState = useSearchState({ defaultMode: 'user' });
+  const userData = useUserData();
   const videoFiltering = useVideoFiltering({
     params: searchState.params,
     searchObject: searchState.searchObject,
+    syncedDefaultMood: userData.defaultMood,
   });
 
   const {
@@ -185,10 +199,17 @@ const SearchV2 = () => {
             : categories;
       setCategories(filtered);
     });
+  }, [searchState.categoryType, setCategories]);
 
-    const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));
-    setMoods([{ name: 'Select a mood' }, ...m]);
-  }, [searchState.categoryType, setCategories, setMoods]);
+  useEffect(() => {
+    setMoods([SELECT_MOOD_PLACEHOLDER, ...userData.moods]);
+  }, [userData.moods, setMoods]);
+
+  useEffect(() => {
+    if (userIds.length > 0 || searchState.params.id) return;
+    const tv = userData.thisvidUserId?.trim();
+    if (tv) setUserIds([tv]);
+  }, [userData.thisvidUserId, userIds.length, searchState.params.id]);
 
   useEffect(() => {
     if (searchState.moods.length === 0) return;
@@ -337,7 +358,10 @@ const SearchV2 = () => {
                 <MoodTermsCard
                   moods={searchState.moods}
                   activeMood={videoFiltering.activeMood}
-                  onActiveMoodChange={videoFiltering.setActiveMood}
+                  onActiveMoodChange={(name) => {
+                    videoFiltering.setActiveMood(name);
+                    void userData.setDefaultMood(name);
+                  }}
                   includeTags={videoFiltering.includeTags}
                   onIncludeTagsChange={videoFiltering.setIncludeTags}
                 />

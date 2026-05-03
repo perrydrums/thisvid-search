@@ -11,6 +11,7 @@ import chrome from '../../components/v2/V2Chrome.module.css';
 
 import styles from './Moods.module.css';
 import type { Mood, Preferences as PreferencesType } from '../../helpers/types';
+import { useUserData } from '../../hooks/useUserData';
 
 const emptyPrefs = (): PreferencesType => ({
   tags: [],
@@ -20,21 +21,9 @@ const emptyPrefs = (): PreferencesType => ({
   minDuration: 0,
 });
 
-function loadStoredMoods(): Mood[] {
-  try {
-    const raw = localStorage.getItem('tvass-moods');
-    return raw ? (JSON.parse(raw) as Mood[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveMoods(moods: Mood[]) {
-  localStorage.setItem('tvass-moods', JSON.stringify(moods));
-}
-
 const MoodsPage = () => {
-  const [moods, setMoods] = useState<Mood[]>(() => loadStoredMoods());
+  const userData = useUserData();
+  const moods = userData.moods;
   const [activeName, setActiveName] = useState('');
   const [preferences, setPreferences] = useState<PreferencesType>(emptyPrefs());
   const [newMoodName, setNewMoodName] = useState('');
@@ -91,8 +80,7 @@ const MoodsPage = () => {
           }
         : mo,
     );
-    setMoods(next);
-    saveMoods(next);
+    void userData.persistMoods(next);
   };
 
   const addMood = () => {
@@ -100,8 +88,7 @@ const MoodsPage = () => {
     if (!name || moods.some((m) => m.name === name)) return;
     const mood: Mood = { name, preferences: emptyPrefs() };
     const next = [...moods, mood];
-    setMoods(next);
-    saveMoods(next);
+    void userData.persistMoods(next);
     setNewMoodName('');
     setActiveName(name);
   };
@@ -110,8 +97,7 @@ const MoodsPage = () => {
     if (!activeName) return;
     if (!window.confirm(`Delete mood “${activeName}”?`)) return;
     const next = moods.filter((m) => m.name !== activeName);
-    setMoods(next);
-    saveMoods(next);
+    void userData.persistMoods(next);
     setActiveName('');
   };
 

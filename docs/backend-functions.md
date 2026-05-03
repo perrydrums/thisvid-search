@@ -8,10 +8,11 @@ The site build and function runtime follow **`NODE_VERSION` in `netlify.toml`** 
 
 ## `functions/videos.js` — listing scrape
 
-- **Input** (POST JSON): `url` (path only, e.g. `/newest/1/`), `page`, `omitPrivate`, `minDuration` (minutes), `quick`.
+- **Input** (**GET** query string, preferred for Netlify CDN caching): `url` (path only, e.g. `/newest/1/`), `page`, `omitPrivate` (`true`/`false`), `minDuration` (minutes), `quick` (`true`/`false`). **POST** JSON with the same keys is still accepted for backward compatibility.
 - **Behavior**: `fetch('https://thisvid.com' + url)`, load HTML, select thumbnails (`.tumbpu`), extract title, href, private flag, avatar, views, date, duration.
 - **Duration filter**: compares parsed mm:ss to `minDuration * 60` seconds.
 - **404**: returns JSON error shape with `success: false` (client expects empty or failed response handling).
+- **Caching**: successful responses set `Netlify-CDN-Cache-Control` with the `durable` directive and `Netlify-Vary: query` so repeat **GET** requests with the same query can hit Edge/Durable caches. Errors use `Cache-Control: no-store`.
 
 Selectors and DOM structure are **coupled to ThisVid’s markup**. If the site changes class names or layout, this file (and possibly `getCategories.ts` / pagination parsing in `useSearchLogic`) must be updated together.
 

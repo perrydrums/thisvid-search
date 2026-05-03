@@ -1,0 +1,139 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-md, 12px);
+  padding: var(--v2-space-sm, 8px) 0;
+  margin-bottom: var(--v2-space-lg, 20px);
+  padding-bottom: max(var(--v2-space-md, 12px), env(safe-area-inset-bottom, 0px));
+}
+
+.drawer {
+  composes: wrapper;
+  padding: var(--v2-space-xs, 6px) 0 var(--v2-space-lg, 20px);
+  margin-bottom: 0;
+  gap: calc(var(--v2-space-md, 12px) + 2px);
+  padding-bottom: max(var(--v2-space-lg, 20px), env(safe-area-inset-bottom, 0px));
+}
+
+/** Extra clearance for the lone LOGIN button so it does not hug the viewport edge. */
+.browseSpacer {
+  padding-bottom: max(28px, var(--v2-space-xl, 28px), env(safe-area-inset-bottom, 0px));
+}
+
+.title {
+  margin: 0;
+  font-family: var(--v2-font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--v2-on-surface-muted);
+}
+
+.field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius);
+  background: var(--v2-surface-low);
+  color: var(--v2-on-surface);
+  font-size: 14px;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--v2-accent);
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--v2-radius);
+  background: var(--v2-accent);
+  color: var(--v2-on-primary);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.primaryBtn:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+.primaryBtn:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius);
+  background: transparent;
+  color: var(--v2-on-surface-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  background: var(--v2-surface-low);
+  color: var(--v2-accent);
+  border-color: var(--v2-accent);
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rowBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-sm, 8px);
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: #c62828;
+  line-height: 1.4;
+}
+
+.success {
+  margin: 0;
+  font-size: 13px;
+  color: var(--v2-on-surface-muted);
+  line-height: 1.4;
+}
+
+.signedRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--v2-space-sm, 8px);
+}
+
+.emailMuted {
+  font-size: 13px;
+  word-break: break-all;
+  color: var(--v2-on-surface-muted);
+}
