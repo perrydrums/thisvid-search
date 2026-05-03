@@ -38,16 +38,18 @@ export const getVideos = async ({
   quick = true,
 }: GetVideosOptions): Promise<Array<Video>> => {
   try {
-    const response = await fetch(`/getVideos/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        url,
-        page,
-        omitPrivate,
-        minDuration,
-        quick,
-      }),
+    /** GET keeps params in the URL so Netlify Edge/Durable cache keys match `Netlify-Vary: query`. */
+    const qs = new URLSearchParams({
+      url,
+      page: String(page),
+      omitPrivate: omitPrivate ? 'true' : 'false',
+      minDuration: String(minDuration),
+      quick: quick ? 'true' : 'false',
+    });
+
+    const response = await fetch(`/getVideos/?${qs.toString()}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
     });
 
     const body: VideoResponse = await response.json();
