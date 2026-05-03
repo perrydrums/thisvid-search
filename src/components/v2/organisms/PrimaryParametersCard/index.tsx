@@ -27,7 +27,7 @@ export type PrimaryParametersCardProps = {
   categories: Category[];
   category: string;
   categoryType: string;
-  onPickCategoryType: (v: 'straight' | 'gay') => void;
+  onPickCategoryType: (v: string) => void;
   onCategorySlugChange: (slug: string) => void;
   /** User mode — chip shows resolved profile name + ID (tags still raw IDs). */
   resolveUserChipDisplay?: (userId: string) => string;
@@ -110,31 +110,67 @@ export const PrimaryParametersCard: React.FC<PrimaryParametersCardProps> = ({
                 className={styles.nativeSelect}
                 value={categoryType}
                 required
-                onChange={(e) => onPickCategoryType(e.target.value as 'straight' | 'gay')}
+                onChange={(e) => onPickCategoryType(e.target.value)}
               >
                 <option value="">— Orientation —</option>
                 <option value="straight">Straight</option>
                 <option value="gay">Gay</option>
               </select>
-              {categoryType && (
-                <div className={styles.categoryList}>
-                  {categories.map((c) => (
-                    <button
-                      key={c.slug}
-                      type="button"
-                      className={styles.categoryBtn}
-                      onClick={() => onCategorySlugChange(c.slug)}
-                    >
-                      {c.name}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {categoryType ? (
+                <>
+                  <p className={styles.categoryPickerHint}>Select a category</p>
+                  <div className={styles.categoryScroll}>
+                    <div className={styles.categoryGrid}>
+                      {categories.map((c) => (
+                        <button
+                          key={c.slug}
+                          type="button"
+                          className={styles.categoryTile}
+                          onClick={() => onCategorySlugChange(c.slug)}
+                        >
+                          <div className={styles.categoryThumbWrap}>
+                            {c.image ? (
+                              <img
+                                className={styles.categoryThumb}
+                                src={c.image}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : (
+                              <div className={styles.categoryThumbPlaceholder} aria-hidden />
+                            )}
+                          </div>
+                          <span className={styles.categoryTileTitle}>{c.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
           ) : (
             <button type="button" className={styles.chosenCat} onClick={() => onCategorySlugChange('')}>
-              {categories.find((x) => x.slug === category)?.name || category}{' '}
-              <span className={styles.changeHint}>Change</span>
+              {(() => {
+                const sel = categories.find((x) => x.slug === category);
+                return (
+                  <>
+                    {sel?.image ? (
+                      <span
+                        className={styles.chosenThumb}
+                        style={{ backgroundImage: `url(${sel.image})` }}
+                        role="presentation"
+                      />
+                    ) : (
+                      <span className={[styles.chosenThumb, styles.chosenThumbFallback].join(' ')} role="presentation" />
+                    )}
+                    <span className={styles.chosenCatLabel}>
+                      <span className={styles.chosenCatTitle}>{sel?.name || category}</span>
+                      <span className={styles.changeHint}>CHANGE</span>
+                    </span>
+                  </>
+                );
+              })()}
             </button>
           )}
         </div>
