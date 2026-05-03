@@ -104,9 +104,10 @@ const SearchV2 = () => {
       const el = resultsRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const viewportTopInset = Math.round(window.innerHeight * 0.14);
-      const intoBlock = Math.min(Math.round(rect.height * 0.38), 280);
-      const y = window.scrollY + rect.top + intoBlock - viewportTopInset;
+      /** Clear sticky TopNav (~14vh) without jumping deep into the results grid. */
+      const headerClearance = Math.round(window.innerHeight * 0.12);
+      const gap = 8;
+      const y = window.scrollY + rect.top - headerClearance - gap;
       window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     });
   };
