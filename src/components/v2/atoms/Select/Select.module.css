@@ -1,0 +1,35 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.select {
+  width: 100%;
+  appearance: none;
+  font-family: var(--v2-font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--v2-on-surface);
+  background: var(--v2-surface-low);
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius);
+  padding: 10px 40px 10px 14px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.select:focus {
+  border-color: var(--v2-accent);
+  box-shadow: 0 0 0 2px rgba(255, 0, 60, 0.12);
+}
+
+.wrap :global(.v2-select-chevron) {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--v2-on-surface-subtle);
+  font-size: 22px !important;
+}

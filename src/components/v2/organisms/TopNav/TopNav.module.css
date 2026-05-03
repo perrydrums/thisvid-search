@@ -1,0 +1,131 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 64px;
+  background: var(--v2-surface);
+  border-bottom: 1px solid var(--v2-border);
+  box-shadow: var(--v2-shadow-1);
+}
+
+.bar {
+  height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--v2-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--v2-space-md);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: min(100%, 22rem);
+}
+
+.logo {
+  font-family: var(--v2-font-display);
+  font-size: clamp(14px, 2.2vw, 18px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--v2-accent);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+@media (min-width: 1024px) {
+  .left {
+    max-width: none;
+    flex-shrink: 1;
+  }
+}
+
+.logo:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.searchWrap {
+  display: none;
+  flex: 1;
+  max-width: 28rem;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  padding: 6px 12px;
+  border-radius: var(--v2-radius);
+  background: var(--v2-surface-low);
+  border: 1px solid transparent;
+}
+
+.searchWrap:focus-within {
+  border-color: var(--v2-accent);
+}
+
+@media (min-width: 768px) {
+  .header[data-variant='historySearch'] .searchWrap {
+    display: flex;
+  }
+}
+
+.searchIcon {
+  font-size: 22px !important;
+  color: var(--v2-on-surface-muted);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--v2-on-surface);
+  min-width: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--v2-on-surface-subtle);
+}
+
+.searchInput:focus {
+  outline: none;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  flex-shrink: 0;
+}
+
+.creatorBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--v2-radius);
+  background: var(--v2-accent);
+  color: var(--v2-on-primary);
+  font-family: var(--v2-font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
+}
+
+.creatorBtn:hover {
+  filter: brightness(1.06);
+}
+
+.creatorBtn:active {
+  transform: scale(0.98);
+}

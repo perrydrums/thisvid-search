@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>V-Search Pro | Scraper Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface-bright": "#f9f9fc",
+                "on-tertiary-fixed": "#001f28",
+                "error": "#ba1a1a",
+                "tertiary-fixed": "#b7eaff",
+                "secondary-container": "#e4e1e7",
+                "on-error": "#ffffff",
+                "primary-fixed": "#ffdad8",
+                "on-background": "#1a1c1e",
+                "outline-variant": "#e9bcba",
+                "on-secondary": "#ffffff",
+                "inverse-surface": "#2f3133",
+                "error-container": "#ffdad6",
+                "secondary-fixed": "#e4e1e7",
+                "on-surface": "#1a1c1e",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-highest": "#e2e2e5",
+                "background": "#f9f9fc",
+                "surface-container-low": "#f3f3f6",
+                "on-tertiary-fixed-variant": "#004e60",
+                "surface-dim": "#d9dadd",
+                "on-error-container": "#93000a",
+                "tertiary-container": "#007f9c",
+                "on-secondary-fixed": "#1b1b1f",
+                "primary-fixed-dim": "#ffb3b2",
+                "on-primary-container": "#fffbff",
+                "surface-tint": "#bf002a",
+                "tertiary": "#00647c",
+                "on-secondary-fixed-variant": "#47464b",
+                "tertiary-fixed-dim": "#4cd6ff",
+                "surface-variant": "#e2e2e5",
+                "on-primary-fixed": "#410008",
+                "on-primary": "#ffffff",
+                "outline": "#946e6d",
+                "inverse-on-surface": "#f0f0f3",
+                "on-surface-variant": "#5f3e3e",
+                "surface-container": "#edeef1",
+                "secondary": "#5f5e62",
+                "secondary-fixed-dim": "#c8c5cb",
+                "primary": "#ba0029",
+                "primary-container": "#e90036",
+                "on-tertiary": "#ffffff",
+                "surface": "#f9f9fc",
+                "on-secondary-container": "#656468",
+                "on-primary-fixed-variant": "#92001e",
+                "surface-container-high": "#e8e8eb",
+                "on-tertiary-container": "#fafdff",
+                "inverse-primary": "#ffb3b2"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "gutter": "20px",
+                "xl": "40px",
+                "base": "4px",
+                "sm": "8px",
+                "margin": "32px",
+                "xs": "4px",
+                "md": "16px",
+                "lg": "24px"
+            },
+            "fontFamily": {
+                "label-sm": ["Inter"],
+                "body-lg": ["Inter"],
+                "body-md": ["Inter"],
+                "headline-xl": ["Manrope"],
+                "headline-md": ["Manrope"],
+                "headline-lg": ["Manrope"],
+                "body-sm": ["Inter"],
+                "label-md": ["Inter"]
+            },
+            "fontSize": {
+                "label-sm": ["12px", {"lineHeight": "1", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "headline-xl": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                "headline-lg": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9fc;
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e2e5;
+            border-radius: 10px;
+        }
+        /* Add CSS for collapsible section */
+        #advanced-scoring-content {
+            display: none;
+        }
+        #advanced-scoring-toggle:checked ~ #advanced-scoring-content {
+            display: grid;
+        }
+        #advanced-scoring-toggle:checked ~ label .expand-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-on-background">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black text-[#FF003C] tracking-tighter font-manrope">V-Search Pro</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-[#FF003C] border-b-2 border-[#FF003C] font-bold font-manrope text-sm h-16 flex items-center" href="#">Dashboard</a>
+<a class="text-zinc-500 dark:text-zinc-400 font-manrope text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors h-16 flex items-center px-2" href="#">History</a>
+<a class="text-zinc-500 dark:text-zinc-400 font-manrope text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors h-16 flex items-center px-2" href="#">Library</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-zinc-500 hover:bg-zinc-50 rounded-full transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-zinc-500 hover:bg-zinc-50 rounded-full transition-all active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-zinc-200">
+<img alt="User profile" data-alt="professional headshot of a developer in a modern office environment with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD196p_VhGFF-duzFHsiS7hO1pb8pmbIaVZ6HFEK654pxg7B5cvzg-pRUG9vKRS9N_VLXtiym3b_v9xTAl8Hncr9OPsarjlJTUgnOyasYs9iupFMefs87-KLIEKYJWfKj8a-waPhftDryTW1xDO_QxcluO-TyptReumvJykf3plXTMBF_d7NTowbCOJfZFns76dos2ZkmFzrtxqH5Rs3j1ZcfO_JQh17yRxKkusR15ZnouUv0g3NFzo_ydy9UCVgxjix20OTWVjKx0"/>
+</div>
+</div>
+</header>
+<div class="pt-16 flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-80 bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col p-4 gap-2 z-40">
+<div class="mb-6 p-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="text-label-md font-label-md text-on-surface">Scraper Dashboard</span>
+</div>
+<p class="text-xs text-zinc-500 font-medium uppercase tracking-wider">High Performance Mode</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 p-3 bg-white dark:bg-zinc-900 text-[#FF003C] font-bold shadow-sm rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person_search">person_search</span>
+<span class="font-manrope text-sm">User Search</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-manrope text-sm">Categories</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="sell">sell</span>
+<span class="font-manrope text-sm">Tags</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="font-manrope text-sm">Extreme</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-zinc-200 pt-4 space-y-4">
+<div class="px-2">
+<span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 block">Quick Actions</span>
+<div class="flex flex-col gap-1">
+<button class="flex items-center gap-3 p-2 text-zinc-600 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-xs font-medium">Mood Presets</span>
+</button>
+<button class="flex items-center gap-3 p-2 text-zinc-600 hover:text-zinc-900 transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+<span class="text-xs font-medium">History</span>
+</button>
+</div>
+</div>
+<button class="w-full py-3 bg-[#FF003C] text-white font-bold rounded-lg text-sm shadow-lg shadow-[#FF003C]/20 active:scale-95 transition-all">
+                    Save Preset
+                </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-80 flex-1 overflow-y-auto custom-scrollbar bg-surface">
+<div class="p-8 max-w-6xl mx-auto">
+<!-- Search Mode Selector -->
+<div class="mb-8">
+<div class="flex items-center justify-between mb-4">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Advanced Search Engine</h1>
+<span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-sm font-label-sm rounded-full">Pro Status</span>
+</div>
+<div class="bg-surface-container-low p-1.5 rounded-xl flex gap-1 shadow-inner">
+<button class="flex-1 py-2.5 px-4 bg-white shadow-sm rounded-lg text-[#FF003C] font-bold font-manrope text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span> User ID
+                        </button>
+<button class="flex-1 py-2.5 px-4 text-zinc-500 hover:text-zinc-800 font-medium font-manrope text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="category">category</span> Category
+                        </button>
+<button class="flex-1 py-2.5 px-4 text-zinc-500 hover:text-zinc-800 font-medium font-manrope text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="tag">tag</span> Tag
+                        </button>
+<button class="flex-1 py-2.5 px-4 text-zinc-500 hover:text-zinc-800 font-medium font-manrope text-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="bolt">bolt</span> Extreme
+                        </button>
+</div>
+</div>
+<!-- Bento Search Grid -->
+<div class="grid grid-cols-12 gap-6 mb-8">
+<!-- Primary Filters -->
+<div class="col-span-8 bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+<h2 class="text-label-md font-label-md mb-4 text-zinc-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="search">search</span> PRIMARY PARAMETERS
+                        </h2>
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Target User IDs</label>
+<div class="flex flex-wrap gap-2 p-3 bg-zinc-50 rounded-lg border border-zinc-100 min-h-[50px]">
+<span class="bg-[#FF003C] text-white px-3 py-1 rounded-md text-xs font-bold flex items-center gap-2">
+                                        USR_9921 <span class="material-symbols-outlined text-xs cursor-pointer" data-icon="close">close</span>
+</span>
+<span class="bg-[#FF003C] text-white px-3 py-1 rounded-md text-xs font-bold flex items-center gap-2">
+                                        USR_4402 <span class="material-symbols-outlined text-xs cursor-pointer" data-icon="close">close</span>
+</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm flex-1 outline-none" placeholder="Add ID..." type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Minimal Duration (min)</label>
+<div class="flex items-center gap-4">
+<input class="flex-1 accent-[#FF003C]" type="range"/>
+<span class="text-sm font-bold text-[#FF003C] bg-[#FF003C]/10 px-3 py-1 rounded">12m</span>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="flex-1">
+<label class="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Type</label>
+<div class="flex bg-zinc-100 p-1 rounded-lg">
+<button class="flex-1 py-1 text-[10px] font-bold bg-white shadow-sm rounded-md">Public</button>
+<button class="flex-1 py-1 text-[10px] font-medium text-zinc-500">Private</button>
+<button class="flex-1 py-1 text-[10px] font-medium text-zinc-500">Favorite</button>
+</div>
+</div>
+<div class="flex-1">
+<label class="block text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">Sorting</label>
+<div class="flex bg-zinc-100 p-1 rounded-lg">
+<button class="flex-1 py-1 text-xs font-bold bg-white shadow-sm rounded-md">Newest</button>
+<button class="flex-1 py-1 text-xs font-medium text-zinc-500">Popular</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Mood & Search Terms -->
+<div class="col-span-4 bg-white p-6 rounded-2xl shadow-sm border border-zinc-100">
+<div class="space-y-6">
+<div>
+<h2 class="text-label-md font-label-md mb-3 text-zinc-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="auto_awesome">auto_awesome</span> MOOD
+                                </h2>
+<div class="relative">
+<select class="w-full bg-zinc-50 border border-zinc-100 rounded-lg py-2.5 px-4 text-sm appearance-none focus:ring-1 focus:ring-[#FF003C] outline-none text-zinc-700 font-medium">
+<option>Vibrant (Default)</option>
+<option>Cinematic</option>
+<option>Deep Blue</option>
+<option>Action</option>
+<option>Minimal</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<h2 class="text-label-md font-label-md mb-3 text-zinc-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="tag">tag</span> SEARCH TERMS
+                                </h2>
+<div class="flex flex-wrap gap-2 p-3 bg-zinc-50 rounded-lg border border-zinc-100 min-h-[100px] align-top">
+<span class="bg-zinc-200 text-zinc-700 px-3 py-1 rounded-md text-xs font-bold flex items-center gap-2">
+                                        4k <span class="material-symbols-outlined text-xs cursor-pointer text-zinc-500" data-icon="close">close</span>
+</span>
+<span class="bg-zinc-200 text-zinc-700 px-3 py-1 rounded-md text-xs font-bold flex items-center gap-2">
+                                        slow-mo <span class="material-symbols-outlined text-xs cursor-pointer text-zinc-500" data-icon="close">close</span>
+</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm flex-1 outline-none min-w-[60px]" placeholder="Add term..." type="text"/>
+</div>
+<p class="text-[10px] text-zinc-400 mt-2 italic">Unlimited descriptive tags for precision</p>
+</div>
+</div>
+</div>
+<!-- Advanced Filtering Section (Collapsible) -->
+<div class="col-span-12 bg-zinc-900 text-white rounded-2xl shadow-xl overflow-hidden relative">
+<input class="hidden" id="advanced-scoring-toggle" type="checkbox"/>
+<label class="w-full p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-800/50 transition-colors" for="advanced-scoring-toggle">
+<h2 class="text-label-md font-label-md text-[#FF003C] flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="psychology">psychology</span> ADVANCED RELEVANCE SCORING
+                            </h2>
+<span class="material-symbols-outlined expand-icon transition-transform duration-300" data-icon="expand_more">expand_more</span>
+</label>
+<div class="p-8 pt-0 grid grid-cols-3 gap-8 relative" id="advanced-scoring-content">
+<div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-9xl" data-icon="tune">tune</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-emerald-400" data-icon="add_circle">add_circle</span>
+<span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Booster Terms (+)</span>
+</div>
+<div class="space-y-2">
+<input class="w-full bg-zinc-800 border-none rounded-lg py-2 px-4 text-sm focus:ring-1 focus:ring-[#FF003C]" placeholder="Add keyword to boost..." type="text"/>
+<div class="flex flex-wrap gap-2">
+<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded border border-emerald-500/20">high-bitrate</span>
+<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded border border-emerald-500/20">master</span>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-amber-400" data-icon="remove_circle">remove_circle</span>
+<span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Diminishing Terms (-)</span>
+</div>
+<div class="space-y-2">
+<input class="w-full bg-zinc-800 border-none rounded-lg py-2 px-4 text-sm focus:ring-1 focus:ring-[#FF003C]" placeholder="Add keyword to lower rank..." type="text"/>
+<div class="flex flex-wrap gap-2">
+<span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-1 rounded border border-amber-500/20">low-res</span>
+<span class="text-[10px] bg-amber-500/10 text-amber-400 px-2 py-1 rounded border border-amber-500/20">watermark</span>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-rose-500" data-icon="cancel">cancel</span>
+<span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Exclusion Terms (x)</span>
+</div>
+<div class="space-y-2">
+<input class="w-full bg-zinc-800 border-none rounded-lg py-2 px-4 text-sm focus:ring-1 focus:ring-[#FF003C]" placeholder="Do not contain..." type="text"/>
+<div class="flex flex-wrap gap-2">
+<span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-1 rounded border border-rose-500/20">promo</span>
+<span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-1 rounded border border-rose-500/20">ad</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Results Preview -->
+<div>
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-label-md font-label-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="preview">preview</span> RESULTS PREVIEW <span class="text-zinc-400 font-normal ml-2">Showing predicted hits based on filters</span>
+</h2>
+<button class="text-[#FF003C] text-sm font-bold hover:underline">View All Results</button>
+</div>
+<div class="grid grid-cols-4 gap-6">
+<!-- Preview Card 1 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all">
+<img alt="Video preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="vibrant abstract colors swirling in a high-speed motion shot with cinematic lighting and deep contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiTbDDaoHTAa2426O-qV1PMjT6ZNFcr19EXYAI4nv_fpVcvW66qKp_JXCVuYBJxb-WWyVYk76NOYQKreAhumRCuxI-bdH66VMqhNnkwdPLxRp9AFmlGKWhuGoGx-6qLZY4wGH_Njwq2NpteL1iGZ-mPyXYcPghvIY24fN-VXRAtGE6bITYag_2jR1__IzKjMaNchsB85IaMRfuWEKdM21VvXYYtowVysRQriu34PTOsWLkT6vYqxy65SBN1--OkpcongKUKWMp-C8"/>
+<div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">15:24</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<h3 class="text-sm font-bold text-zinc-800 line-clamp-1 mb-1 group-hover:text-[#FF003C] transition-colors">Premium Cinematic Motion Capture 4K</h3>
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-zinc-500">USR_9921 • 1.2M views</span>
+<span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded">98% MATCH</span>
+</div>
+</div>
+<!-- Preview Card 2 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all">
+<img alt="Video preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="retro technology aesthetic with neon glowing components and sleek metallic textures in a futuristic workshop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAL5COvRaj-IsaFf7QnZIIKqJXJvCVHpztQ7SHQst-JM1OyR3-L8fp8ZkviijWexR2nZC9ZVrQVMrwzwoyypV904EHobcGzWctjtFDTE8MZRCr0zaLOQe5oxfXBuedxPlU9O1i0BwAuSvWhiYAgDwGmfR50u49PgS4-pWf0Jy-ktrDBPxv5iJAzls3kmhhv8kSwQREL5C1HSSkWpRJCFNyxTeNHEylGW2CN-lT2FNq9fqzcbTu-MMwimeSToY7Jdm2jskPsPekDcM"/>
+<div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">08:45</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<h3 class="text-sm font-bold text-zinc-800 line-clamp-1 mb-1 group-hover:text-[#FF003C] transition-colors">Future Tech Synthesis Deep Dive</h3>
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-zinc-500">USR_4402 • 850K views</span>
+<span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded">92% MATCH</span>
+</div>
+</div>
+<!-- Preview Card 3 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all">
+<img alt="Video preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="ethereal nebula clouds with deep purples and pinks sparkling with distant stars and cosmic energy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQLm1ltnI-dyqSiip4AgFRKkBjHrDYZJxkfzgTf_c_MH1HTDtANAmT9imVrvBkXyw-KzSlPQ2yxQ6glX83xiJpcz0FuyU2_m5bBcc7SXMN7dy2fY8JFpbnHBwBLIxdJ9Yz2jikfHG32WIubrNilmPhNWrZROtVsiWadfX1lNRx_BQEascgXco5vhdHEkXjskUvaNIKh9_SchpKrCbwlAfOuIFZ-DQgr5ihW0frmS_Pm9big_QfrAnF5wLtHiqzr6k9WuyMtDfz5Ic"/>
+<div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">22:10</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<h3 class="text-sm font-bold text-zinc-800 line-clamp-1 mb-1 group-hover:text-[#FF003C] transition-colors">Cosmic Flow Visualization Experiment</h3>
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-zinc-500">USR_9921 • 2.1M views</span>
+<span class="px-1.5 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded">85% MATCH</span>
+</div>
+</div>
+<!-- Preview Card 4 -->
+<div class="group cursor-pointer">
+<div class="relative aspect-video rounded-lg overflow-hidden mb-3 shadow-sm group-hover:shadow-md transition-all">
+<img alt="Video preview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="dramatic mountain peaks at dawn with mist rolling through the valley and cold blue morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbZVB-eqD-kbp0aH1285kvJgzm73_k_U_dyXQcFW7IX_3aRBrp9V81VAnOXxKEaz8ev8oJzCvhZvh5pmOp-KVGy8UFCnLy5rRD4Zb8djl1rIfGQVGeNlEstbZvbOY8cQmjhrqtE3t_1-gis91XJjiuhPBzq5Dn7SpbdlroTMaFLsa9cML977PGXoB3_fokK4PLAq_kxHlsgz3p9o2t4BLRqydsmSSj8DIe8Ul-62LMrfMqrP1RDZjkyPYNkrQQc_pT6s0k8abxzP8"/>
+<div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">18:02</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<h3 class="text-sm font-bold text-zinc-800 line-clamp-1 mb-1 group-hover:text-[#FF003C] transition-colors">Natural Vistas: High Latitude Series</h3>
+<div class="flex items-center justify-between">
+<span class="text-[11px] text-zinc-500">USR_2105 • 430K views</span>
+<span class="px-1.5 py-0.5 bg-zinc-100 text-zinc-500 text-[9px] font-black rounded">79% MATCH</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Floating Action Button for initiating search -->
+<button class="fixed bottom-8 right-8 h-16 w-16 bg-[#FF003C] text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60] group">
+<span class="material-symbols-outlined text-3xl" data-icon="rocket_launch">rocket_launch</span>
+<span class="absolute right-full mr-4 px-4 py-2 bg-zinc-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">START SCRAPING</span>
+</button>
+</body></html>

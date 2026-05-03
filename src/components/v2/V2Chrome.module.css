@@ -1,0 +1,32 @@
+/** Shared shell for dashboard routes (+ optional mobile bottom safe area). */
+.page {
+  min-height: 100vh;
+  padding-top: 64px;
+}
+
+.main {
+  margin-left: 0;
+  min-height: calc(100vh - 64px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.main::-webkit-scrollbar-thumb {
+  background: var(--v2-border);
+  border-radius: 10px;
+}
+
+@media (min-width: 1024px) {
+  .main {
+    margin-left: 320px;
+  }
+}

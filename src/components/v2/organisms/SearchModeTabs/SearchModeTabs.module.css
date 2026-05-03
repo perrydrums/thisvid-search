@@ -1,0 +1,41 @@
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+  background: var(--v2-surface-low);
+  border-radius: var(--v2-radius-lg);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tab {
+  flex: 1 1 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--v2-space-sm);
+  padding: 10px var(--v2-space-md);
+  border: none;
+  border-radius: var(--v2-radius);
+  background: transparent;
+  font-family: var(--v2-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--v2-on-surface-subtle);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.active {
+  background: var(--v2-surface);
+  color: var(--v2-accent);
+  font-weight: 800;
+  box-shadow: var(--v2-shadow-1);
+}
+
+.tab:hover:not(.active) {
+  color: var(--v2-on-surface);
+}

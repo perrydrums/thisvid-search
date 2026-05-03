@@ -1,0 +1,40 @@
+.card {
+  grid-column: span 4;
+  background: var(--v2-surface);
+  padding: var(--v2-space-lg);
+  border-radius: var(--v2-radius-xl);
+  border: 1px solid var(--v2-border);
+  box-shadow: var(--v2-shadow-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-xl);
+}
+
+@media (max-width: 900px) {
+  .card {
+    grid-column: 1 / -1;
+  }
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-md);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--v2-on-surface-subtle);
+  font-family: var(--v2-font-sans);
+}
+
+.cardTitle span {
+  font-size: 18px !important;
+}

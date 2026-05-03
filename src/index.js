@@ -5,10 +5,14 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Analyse from './pages/Analyse';
+import History from './pages/History';
 import Home from './pages/Home';
+import Moods from './pages/Moods';
 import Preferences from './pages/Preferences';
 import Recommendations from './pages/Recommendations';
 import Search from './pages/Search';
+import SearchV2 from './pages/SearchV2';
+import Settings from './pages/Settings';
 import WhatsNew from './pages/WhatsNew';
 
 // Generate random visitor ID if not already set in local storage.
@@ -35,6 +39,22 @@ const router = createBrowserRouter([
   {
     path: '/search',
     element: <Search />,
+  },
+  {
+    path: '/search-v2',
+    element: <SearchV2 />,
+  },
+  {
+    path: '/settings',
+    element: <Settings />,
+  },
+  {
+    path: '/moods',
+    element: <Moods />,
+  },
+  {
+    path: '/history',
+    element: <History />,
   },
   {
     path: '/analyse',

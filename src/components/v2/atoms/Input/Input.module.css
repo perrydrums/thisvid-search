@@ -1,0 +1,31 @@
+.input {
+  width: 100%;
+  font-family: var(--v2-font-sans);
+  font-size: 14px;
+  color: var(--v2-on-surface);
+  background: var(--v2-surface-low);
+  border: 1px solid transparent;
+  border-radius: var(--v2-radius);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: var(--v2-on-surface-subtle);
+}
+
+.input:focus {
+  border-color: var(--v2-accent);
+  box-shadow: 0 0 0 2px rgba(255, 0, 60, 0.15);
+}
+
+.medium {
+  padding: 10px 12px;
+}
+
+.large {
+  padding: 12px 14px;
+  font-size: 16px;
+}

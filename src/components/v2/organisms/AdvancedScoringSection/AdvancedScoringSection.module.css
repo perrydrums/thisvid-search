@@ -1,0 +1,112 @@
+.shell {
+  margin-top: var(--v2-space-lg);
+  width: 100%;
+  background: #18181b;
+  color: #fafafa;
+  border-radius: var(--v2-radius-xl);
+  overflow: hidden;
+  box-shadow: var(--v2-shadow-2);
+}
+
+.head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--v2-space-lg);
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.head:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.headLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--v2-accent);
+  font-family: var(--v2-font-sans);
+}
+
+.headLabel span {
+  font-size: 20px !important;
+}
+
+.chev {
+  font-family: 'Material Symbols Outlined';
+  font-size: 28px !important;
+  transition: transform 0.25s ease;
+  color: #a1a1aa;
+}
+
+.chevOpen {
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: relative;
+  padding: 0 var(--v2-space-lg) var(--v2-space-xl);
+}
+
+.decor {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.decor span {
+  font-size: 120px !important;
+  color: #fff;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--v2-space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1000px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.colTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  margin-bottom: var(--v2-space-sm);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a1a1aa;
+}
+
+.boostIcon {
+  color: #34d399 !important;
+  font-size: 22px !important;
+}
+
+.dimIcon {
+  color: #fbbf24 !important;
+  font-size: 22px !important;
+}
+
+.exIcon {
+  color: #fb7185 !important;
+  font-size: 22px !important;
+}

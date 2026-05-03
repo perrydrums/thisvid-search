@@ -1,0 +1,17 @@
+.icon {
+  display: inline-flex;
+  line-height: 1;
+  user-select: none;
+}
+
+.sm {
+  font-size: 18px !important;
+}
+
+.md {
+  font-size: 22px !important;
+}
+
+.lg {
+  font-size: 28px !important;
+}

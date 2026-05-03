@@ -1,0 +1,47 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--v2-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  flex: 0 0 auto;
+  width: max-content;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+.primary {
+  background: var(--v2-accent);
+  color: var(--v2-on-primary);
+}
+
+.tertiary {
+  background: #007f9c;
+  color: var(--v2-on-primary);
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+.remove span {
+  font-size: 14px !important;
+  line-height: 1;
+}
+
+.remove:hover {
+  opacity: 1;
+}

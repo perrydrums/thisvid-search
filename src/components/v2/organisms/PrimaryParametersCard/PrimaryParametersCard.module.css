@@ -1,0 +1,137 @@
+.card {
+  grid-column: span 8;
+  background: var(--v2-surface);
+  padding: var(--v2-space-lg);
+  border-radius: var(--v2-radius-xl);
+  border: 1px solid var(--v2-border);
+  box-shadow: var(--v2-shadow-1);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-sm);
+  margin: 0 0 var(--v2-space-lg);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--v2-on-surface-subtle);
+  font-family: var(--v2-font-sans);
+}
+
+.cardTitle span {
+  font-size: 18px !important;
+}
+
+.field {
+  margin-bottom: var(--v2-space-lg);
+}
+
+.lbl {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--v2-on-surface-subtle);
+  margin-bottom: var(--v2-space-sm);
+}
+
+.row2 {
+  margin-bottom: var(--v2-space-lg);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: var(--v2-space-md);
+}
+
+.durationBlock {
+  min-width: 0;
+}
+
+.durBadge {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--v2-radius);
+  background: rgba(255, 0, 60, 0.1);
+  color: var(--v2-accent);
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.togglesRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--v2-space-md);
+}
+
+@media (max-width: 900px) {
+  .card {
+    grid-column: 1 / -1;
+  }
+
+  .togglesRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.categoryPick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-sm);
+}
+
+.nativeSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--v2-radius);
+  border: 1px solid var(--v2-border);
+  background: var(--v2-surface-low);
+  font-size: 14px;
+}
+
+.categoryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-sm);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.categoryBtn {
+  padding: 6px 10px;
+  border-radius: var(--v2-radius-sm);
+  border: 1px solid var(--v2-border);
+  background: var(--v2-surface);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.categoryBtn:hover {
+  border-color: var(--v2-accent);
+  color: var(--v2-accent);
+}
+
+.chosenCat {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: var(--v2-radius);
+  border: 1px dashed var(--v2-border);
+  background: var(--v2-surface-low);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.changeHint {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--v2-accent);
+}
