@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { logFeedback } from '../../helpers/supabase/feedback';
-import { LogParams } from '../../helpers/types';
+import { logFeedback } from '../../../helpers/supabase/feedback';
+import { LogParams } from '../../../helpers/types';
 import './style.css';
 
 type FeedbackProps = {

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-import '../../App.css';
-import LoadingBar from '../../components/LoadingBar';
-import Header from '../../components/Header';
+import '../../../App.css';
+import LoadingBar from '../../../components/legacy/LoadingBar';
+import Header from '../../../components/legacy/Header';
 
 type Video = {
   uploader: string;

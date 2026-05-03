@@ -1,21 +1,40 @@
 .row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--v2-space-md);
   margin-bottom: var(--v2-space-lg);
 }
 
+.rowThreeCols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.rowThreeCols .left {
+  justify-self: start;
+}
+
+.center {
+  justify-self: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.rowThreeCols .action {
+  justify-self: end;
+}
+
 .left {
   display: flex;
   gap: var(--v2-space-sm);
-  align-items: flex-start;
+  align-items: center;
   min-width: 0;
 }
 
 .icon {
   color: var(--v2-on-surface-subtle);
-  margin-top: 2px;
 }
 
 .title {

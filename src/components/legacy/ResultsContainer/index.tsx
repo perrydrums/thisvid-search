@@ -1,8 +1,8 @@
 import React from 'react';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
-import { getLocalFavourites } from '../../helpers/favourites';
-import { Video } from '../../helpers/types';
+import { getLocalFavourites } from '../../../helpers/favourites';
+import { Video } from '../../../helpers/types';
 import Result from '../Result';
 
 type ResultsContainerProps = {

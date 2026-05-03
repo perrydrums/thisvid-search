@@ -11,9 +11,9 @@
 
 ```
 src/
-  pages/           Route-level screens (Search, SearchV2 `/search-v2`, redesigned shell pages `/settings`, `/moods`, `/history`, Preferences, Analyse, etc.)
-  components/      Reusable UI (forms, results, header, feedback)
-  hooks/           useSearchLogic, useSearchState, useVideoFiltering (partial refactor)
+  pages/           Primary shell: `Search` (`/` + `/search`), `Settings`, `Moods`, `History`; legacy screens under `pages/legacy/` (`SearchLegacy`, Analyse, Recommendations, WhatsNew, Preferences, Home)
+  components/      `components/v2/` (primary UI); `components/legacy/` (classic search/header/results); shared `AuthEmailReturnHandler.tsx` at top level
+  hooks/           useSearchLogic, useSearchState, useVideoFiltering (partial refactor), useAuth
   helpers/         videos.ts, types.ts, Supabase, favourites, categories, users, recommendations, analyseFavourites
 functions/         Netlify handlers (videos, friends, download, …)
 public/            Static assets, PWA manifest

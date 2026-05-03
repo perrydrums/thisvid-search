@@ -36,14 +36,14 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 /**
  * Landing URL after the user taps the emailed magic link.
- * Development uses an explicit CRA origin so the link matches Supabase **Redirect URLs** (`http://localhost:3000/search-v2`).
+ * Development uses an explicit CRA origin so the link matches Supabase **Redirect URLs** (`http://localhost:3000/search`).
  */
 function getMagicLinkRedirectUrl(): string | undefined {
   if (typeof window === 'undefined') return undefined;
   if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3000/search-v2';
+    return 'http://localhost:3000/search';
   }
-  return `${window.location.origin}/search-v2`;
+  return `${window.location.origin}/search`;
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -55,4 +55,4 @@ So local CRA can mimic production without running Netlify CLI—**but** you depe
 
 ## Production redirects
 
-`netlify.toml` defines SPA fallbacks for client routes (`/search`, `/search-v2`, `/settings`, `/moods`, `/history`, `/analyse`, `/preferences`, `/whats-new`, `/recommendations`, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. Global **security headers** (CSP, HSTS, clickjacking protection, etc.) ship via **`[[headers]] for = "/*"`**. If you add a new API path, add matching **redirect**, **`rate_limit`** (if proxied externally), dev **proxy**, and CSP **`connect-src`** entries when needed.
+`netlify.toml` defines SPA fallbacks for client routes (`/`, `/search`, `/settings`, `/moods`, `/history`, **`/legacy/*`**, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. Global **security headers** (CSP, HSTS, clickjacking protection, etc.) ship via **`[[headers]] for = "/*"`**. If you add a new API path, add matching **redirect**, **`rate_limit`** (if proxied externally), dev **proxy**, and CSP **`connect-src`** entries when needed.

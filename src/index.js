@@ -6,16 +6,14 @@ import { AuthEmailReturnHandler } from './components/AuthEmailReturnHandler';
 import { AuthProvider } from './hooks/useAuth';
 import { getNameWithSeed } from './helpers/users';
 import './index.css';
-import Analyse from './pages/Analyse';
-import History from './pages/History';
-import Home from './pages/Home';
-import Moods from './pages/Moods';
-import Preferences from './pages/Preferences';
-import Recommendations from './pages/Recommendations';
 import Search from './pages/Search';
-import SearchV2 from './pages/SearchV2';
+import History from './pages/History';
+import Moods from './pages/Moods';
 import Settings from './pages/Settings';
-import WhatsNew from './pages/WhatsNew';
+import SearchLegacy from './pages/legacy/SearchLegacy';
+import Analyse from './pages/legacy/Analyse';
+import Recommendations from './pages/legacy/Recommendations';
+import WhatsNew from './pages/legacy/WhatsNew';
 
 // Generate random visitor ID if not already set in local storage.
 if (!localStorage.getItem('visitorId')) {
@@ -46,46 +44,42 @@ const router = createBrowserRouter([
   {
     element: <AppShell />,
     children: [
-  {
-    path: '/',
-    element: <Home />,
-  },
-  {
-    path: '/search',
-    element: <Search />,
-  },
-  {
-    path: '/search-v2',
-    element: <SearchV2 />,
-  },
-  {
-    path: '/settings',
-    element: <Settings />,
-  },
-  {
-    path: '/moods',
-    element: <Moods />,
-  },
-  {
-    path: '/history',
-    element: <History />,
-  },
-  {
-    path: '/analyse',
-    element: <Analyse />,
-  },
-  {
-    path: '/preferences',
-    element: <Preferences />,
-  },
-  {
-    path: '/whats-new',
-    element: <WhatsNew />,
-  },
-  {
-    path: '/recommendations',
-    element: <Recommendations />,
-  },
+      {
+        path: '/',
+        element: <Search />,
+      },
+      {
+        path: '/search',
+        element: <Search />,
+      },
+      {
+        path: '/settings',
+        element: <Settings />,
+      },
+      {
+        path: '/moods',
+        element: <Moods />,
+      },
+      {
+        path: '/history',
+        element: <History />,
+      },
+      {
+        path: '/legacy/search',
+        element: <SearchLegacy />,
+      },
+      {
+        path: '/legacy/analyse',
+        element: <Analyse />,
+      },
+      {
+        path: '/legacy/recommendations',
+        element: <Recommendations />,
+      },
+      {
+        path: '/legacy/whats-new',
+        element: <WhatsNew />,
+      },
     ],
   },
 ]);

@@ -53,7 +53,7 @@ const Header = ({ backButtonUrl, showPreferences = false, linktreeUrl }: HeaderP
           </>
         )}
         {showPreferences && (
-          <a className={styles.preferences} href="/preferences">
+          <a className={styles.preferences} href="/settings">
             ⚙
           </a>
         )}

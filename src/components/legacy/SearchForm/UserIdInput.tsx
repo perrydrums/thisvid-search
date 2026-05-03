@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'react-tooltip';
-import { Friend } from '../../helpers/types';
+import { Friend } from '../../../helpers/types';
 
 interface UserIdInputProps {
   mode: string;

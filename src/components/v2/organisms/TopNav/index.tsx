@@ -13,7 +13,7 @@ import styles from './TopNav.module.css';
 const CREATOR_LINKTREE_URL = 'https://linktr.ee/sdaynoam';
 
 function activePageFromPath(pathname: string): AppSidebarActivePage | null {
-  if (pathname.startsWith('/search-v2')) return 'search';
+  if (pathname === '/' || pathname.startsWith('/search')) return 'search';
   if (pathname.startsWith('/moods')) return 'moods';
   if (pathname.startsWith('/history')) return 'history';
   if (pathname.startsWith('/settings')) return 'settings';
@@ -77,7 +77,7 @@ export const TopNav: React.FC<TopNavProps> = ({
     <header className={styles.header} data-variant={variant}>
       <div className={styles.bar}>
         <div className={styles.left}>
-          <Link className={styles.logo} to="/search-v2">
+          <Link className={styles.logo} to="/search">
             ThisVid Advanced Search Site
           </Link>
         </div>

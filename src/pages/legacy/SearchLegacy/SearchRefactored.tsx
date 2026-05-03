@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import LoadingBar from 'react-top-loading-bar';
 
-import '../../App.css';
-import Header from '../../components/Header';
-import { SearchResults } from '../../components/SearchResults';
+import '../../../App.css';
+import Header from '../../../components/legacy/Header';
+import { SearchResults } from '../../../components/legacy/SearchResults';
 import {
   ModeSelector,
   MoodSelector,
@@ -12,14 +12,14 @@ import {
   CategoryInput,
   SearchFilters,
   SearchOptions,
-} from '../../components/SearchForm';
+} from '../../../components/legacy/SearchForm';
 
-import { useSearchState } from '../../hooks/useSearchState';
-import { useVideoFiltering } from '../../hooks/useVideoFiltering';
-import { useSearchLogic } from '../../hooks/useSearchLogic';
+import { useSearchState } from '../../../hooks/useSearchState';
+import { useVideoFiltering } from '../../../hooks/useVideoFiltering';
+import { useSearchLogic } from '../../../hooks/useSearchLogic';
 
-import { getCategories } from '../../helpers/getCategories';
-import { Modes, Types } from '../../helpers/types';
+import { getCategories } from '../../../helpers/getCategories';
+import { Modes, Types } from '../../../helpers/types';
 
 const modes: Modes = {
   newest: 'Newest videos',
@@ -236,7 +236,7 @@ const SearchRefactored = () => {
       start: searchState.start.toString(),
       run: 'true',
     });
-    return `${window.location.origin}/search?${params.toString()}`;
+    return `${window.location.origin}/legacy/search?${params.toString()}`;
   };
 
   return (

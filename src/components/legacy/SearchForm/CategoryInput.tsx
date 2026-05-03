@@ -1,5 +1,5 @@
 import React from 'react';
-import { Category } from '../../helpers/types';
+import { Category } from '../../../helpers/types';
 
 interface CategoryInputProps {
   mode: string;

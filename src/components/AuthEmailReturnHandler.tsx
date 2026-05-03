@@ -20,7 +20,7 @@ export function hashLooksLikeAuthCallback(hash: string): boolean {
 const SNAP_LOOKS_LIKE_EMAIL_AUTH = hashLooksLikeAuthCallback(supabaseCallbackHashSnapshot);
 
 /**
- * Sends users to `/search-v2` after email magic-link sign-in when tokens arrive on another path (e.g. Site URL is `/`).
+ * Sends users to `/search` after email magic-link sign-in when tokens arrive on another path (e.g. Site URL is `/`).
  * Also add `AUTH_REDIRECT`/Site URL redirects in Supabase (see docs).
  */
 export function AuthEmailReturnHandler(): null {
@@ -33,10 +33,10 @@ export function AuthEmailReturnHandler(): null {
     const finish = () => {
       if (done) return;
       done = true;
-      navigate('/search-v2', { replace: true });
+      navigate('/search', { replace: true });
       requestAnimationFrame(() => {
         if (typeof window.history?.replaceState === 'function') {
-          window.history.replaceState(null, '', '/search-v2');
+          window.history.replaceState(null, '', '/search');
         }
       });
     };

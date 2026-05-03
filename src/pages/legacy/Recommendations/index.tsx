@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
-import '../../App.css';
-import Header from '../../components/Header';
-import Result from '../../components/Result';
+import '../../../App.css';
+import Header from '../../../components/legacy/Header';
+import Result from '../../../components/legacy/Result';
 import {
   ANALYSE_USERS_STORAGE_KEY,
   TVASS_USER_ID_STORAGE_KEY,
   getFavouriteListingPageLimit,
   runAnalyseFavourites,
-} from '../../helpers/analyseFavourites';
-import { getLocalFavourites } from '../../helpers/favourites';
+} from '../../../helpers/analyseFavourites';
+import { getLocalFavourites } from '../../../helpers/favourites';
 import {
   RecommendationsBundle,
   ScoredVideo,
@@ -22,8 +22,8 @@ import {
   extractProfileFromAnalyseData,
   generateRecommendations,
   getCachedRecommendations,
-} from '../../helpers/recommendations';
-import { sortVideos } from '../../helpers/videos';
+} from '../../../helpers/recommendations';
+import { sortVideos } from '../../../helpers/videos';
 
 type ResultsTab = 'categories' | 'uploaders';
 type SortMode = 'relevance' | 'newest';
@@ -214,7 +214,7 @@ const Recommendations = () => {
                 </button>
                 <p style={{ color: '#666', fontSize: '0.85em', marginTop: '12px' }}>
                   You can also use the{' '}
-                  <a href="/analyse" style={{ color: 'var(--accent-color)' }}>
+                  <a href="/legacy/analyse" style={{ color: 'var(--accent-color)' }}>
                     Analyse
                   </a>{' '}
                   page for the same analysis with per-page controls.

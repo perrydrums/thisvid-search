@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modes } from '../../helpers/types';
+import { Modes } from '../../../helpers/types';
 
 interface ModeSelectorProps {
   mode: string;

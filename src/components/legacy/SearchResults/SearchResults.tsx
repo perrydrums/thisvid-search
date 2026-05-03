@@ -1,6 +1,6 @@
 import React from 'react';
-import { Video, Friend, Category, LogParams } from '../../helpers/types';
-import { sortVideos } from '../../helpers/videos';
+import { Video, Friend, Category, LogParams } from '../../../helpers/types';
+import { sortVideos } from '../../../helpers/videos';
 import ResultsContainer from '../ResultsContainer';
 import CategoriesContainer from '../ResultsContainer/CategoriesContainer';
 import FriendsContainer from '../ResultsContainer/FriendsContainer';

@@ -6,9 +6,10 @@
 
 .sortBy {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .sortLabel {
@@ -17,6 +18,20 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--v2-on-surface-subtle);
+  white-space: nowrap;
+}
+
+.copyShareBtn {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.copyShareBtn:hover:not(:disabled) {
+  color: #fff !important;
+}
+
+.copyShareBtn:focus-visible:not(:disabled) {
+  color: #fff !important;
 }
 
 .sortSelect {

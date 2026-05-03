@@ -2,13 +2,13 @@ import cheerio from 'cheerio';
 import React, { useEffect, useState } from 'react';
 import { Tooltip } from 'react-tooltip';
 
-import '../../App.css';
-import Header from '../../components/Header';
-import MoodResult from '../../components/Result/MoodResult';
-import InputTags from '../../components/input/Tags';
-import { Mood, Preferences as PreferencesType } from '../../helpers/types';
-import { getNameWithSeed, getUsername } from '../../helpers/users';
-import { getVideos } from '../../helpers/videos';
+import '../../../App.css';
+import Header from '../../../components/legacy/Header';
+import MoodResult from '../../../components/legacy/Result/MoodResult';
+import InputTags from '../../../components/legacy/input/Tags';
+import { Mood, Preferences as PreferencesType } from '../../../helpers/types';
+import { getNameWithSeed, getUsername } from '../../../helpers/users';
+import { getVideos } from '../../../helpers/videos';
 
 const Preferences = () => {
   const m = ((p) => (p ? JSON.parse(p) : []))(localStorage.getItem('tvass-moods'));

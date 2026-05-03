@@ -5,12 +5,12 @@ functions = "functions"
 NODE_VERSION = "22"
 
 [[redirects]]
-from = "/search"
+from = "/"
 to = "/index.html"
 status = 200
 
 [[redirects]]
-from = "/search-v2"
+from = "/search"
 to = "/index.html"
 status = 200
 
@@ -30,22 +30,27 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
-from = "/analyse"
-to = "/index.html"
-status = 200
+from = "/legacy-search"
+to = "/legacy/search"
+status = 301
 
 [[redirects]]
-from = "/preferences"
-to = "/index.html"
-status = 200
+from = "/legacy-analyse"
+to = "/legacy/analyse"
+status = 301
 
 [[redirects]]
-from = "/whats-new"
-to = "/index.html"
-status = 200
+from = "/legacy-recommendations"
+to = "/legacy/recommendations"
+status = 301
 
 [[redirects]]
-from = "/recommendations"
+from = "/legacy-whats-new"
+to = "/legacy/whats-new"
+status = 301
+
+[[redirects]]
+from = "/legacy/*"
 to = "/index.html"
 status = 200
 

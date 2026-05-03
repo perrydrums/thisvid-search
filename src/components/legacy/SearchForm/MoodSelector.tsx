@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tooltip } from 'react-tooltip';
-import { Mood } from '../../helpers/types';
+import { Mood } from '../../../helpers/types';
 
 interface MoodSelectorProps {
   activeMood: string;
@@ -17,7 +17,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({
     <>
       <label htmlFor="mood">
         Mood{' '}
-        <a className="username" href="/preferences">
+        <a className="username" href="/settings">
           Manage moods
         </a>
       </label>

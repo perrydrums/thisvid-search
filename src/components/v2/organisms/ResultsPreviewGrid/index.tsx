@@ -4,6 +4,7 @@ import { getLocalFavourites } from '../../../../helpers/favourites';
 import debug from '../../../../helpers/debug';
 import { Video } from '../../../../helpers/types';
 
+import { Button } from '../../atoms/Button';
 import { VideoCard } from '../../molecules/VideoCard';
 import { SectionHeader } from '../../molecules/SectionHeader';
 
@@ -16,9 +17,13 @@ export type ResultsPreviewGridProps = {
   videos: Video[];
   /** Profile display name for the active search user (when in user mode). */
   username?: string;
-  /** Same values as classic /search Sort by control. */
+  /** Same values as classic /search sort control. */
   sort: string;
   onSortChange: (sort: string) => void;
+  /** Current shareable URL (`/search?…&run=true`). */
+  getShareUrl: () => string;
+  /** After the latest search run has completed, header shows FOUND count instead of RESULTS. */
+  searchFinished: boolean;
 };
 
 function metaLine(username: string | undefined, date: string | undefined): string | undefined {
@@ -31,12 +36,24 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   username,
   sort,
   onSortChange,
+  getShareUrl,
+  searchFinished,
 }) => {
   const total = videos.length;
   const firstUrl = total > 0 ? videos[0].url : '';
   const favourites = new Set(getLocalFavourites());
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const copyResetRef = useRef<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(INITIAL_BATCH, total));
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+
+  useEffect(() => {
+    return () => {
+      if (copyResetRef.current != null) {
+        window.clearTimeout(copyResetRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setVisibleCount(Math.min(INITIAL_BATCH, total));
@@ -60,10 +77,51 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   }, [total, visibleCount, firstUrl]);
 
   const visible = videos.slice(0, visibleCount);
-  const subtitle =
-    total === 0
-      ? 'No results yet — run a search to load videos.'
-      : `${total} result${total !== 1 ? 's' : ''} (scroll loads more)`;
+
+  const headerTitle = searchFinished
+    ? `FOUND ${total} ${total === 1 ? 'VIDEO' : 'VIDEOS'}`
+    : 'RESULTS';
+
+  const handleCopyShare = async () => {
+    const url = getShareUrl();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    }
+    if (copyResetRef.current != null) {
+      window.clearTimeout(copyResetRef.current);
+    }
+    copyResetRef.current = window.setTimeout(() => {
+      setCopyState('idle');
+      copyResetRef.current = null;
+    }, 2000);
+  };
+
+  const copyShare = (
+    <Button
+      variant="ghost"
+      size="small"
+      className={styles.copyShareBtn}
+      type="button"
+      onClick={() => void handleCopyShare()}
+    >
+      {copyState === 'copied' ? 'Copied!' : copyState === 'failed' ? 'Copy failed' : 'Copy share link'}
+    </Button>
+  );
 
   const sortBy = (
     <div className={styles.sortBy}>
@@ -89,7 +147,12 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
 
   return (
     <section className={styles.section} id="v2-results">
-      <SectionHeader icon="preview" title="RESULTS" subtitle={subtitle} action={sortBy} />
+      <SectionHeader
+        icon="preview"
+        title={headerTitle}
+        center={copyShare}
+        action={sortBy}
+      />
       {total === 0 ? (
         <p className={styles.empty}>Nothing to show yet.</p>
       ) : (

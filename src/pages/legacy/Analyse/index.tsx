@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import '../../App.css';
-import { CirclePacking } from '../../components/CircularPacking';
-import { Node } from '../../components/CircularPacking/data';
-import Header from '../../components/Header';
-import Result from '../../components/Result';
+import '../../../App.css';
+import { CirclePacking } from '../../../components/legacy/CircularPacking';
+import { Node } from '../../../components/legacy/CircularPacking/data';
+import Header from '../../../components/legacy/Header';
+import Result from '../../../components/legacy/Result';
 import {
   type AnalyseFavouriteUsers,
   ANALYSE_USERS_STORAGE_KEY,
@@ -12,7 +12,7 @@ import {
   analyseFavouritesListingPage,
   getFavouriteListingPageLimit,
   runAnalyseFavourites,
-} from '../../helpers/analyseFavourites';
+} from '../../../helpers/analyseFavourites';
 
 type Users = AnalyseFavouriteUsers;
 

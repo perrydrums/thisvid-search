@@ -187,7 +187,7 @@ const HistoryPage = () => {
               Searches are tied to your account when you use the sidebar <strong>LOGIN</strong>. Anonymous searches aren’t listed
               here (RLS only exposes rows with your Supabase auth id).
             </p>
-            <Link className={styles.ctaPrimary} to="/search-v2">
+            <Link className={styles.ctaPrimary} to="/search">
               Go to Search
             </Link>
           </div>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Tooltip } from 'react-tooltip';
 
-import debug from '../../helpers/debug';
-import getDownloadUrl from '../../helpers/getDownloadUrl';
-import friendsIcon from '../../images/friends.png';
+import debug from '../../../helpers/debug';
+import getDownloadUrl from '../../../helpers/getDownloadUrl';
+import friendsIcon from '../../../images/friends.png';
 import './style.css';
 
 type ResultProps = {

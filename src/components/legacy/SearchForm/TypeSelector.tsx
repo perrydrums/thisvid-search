@@ -1,5 +1,5 @@
 import React from 'react';
-import { Types } from '../../helpers/types';
+import { Types } from '../../../helpers/types';
 
 interface TypeSelectorProps {
   mode: string;

@@ -105,7 +105,7 @@ export function searchHistoryReplayHref(record: SearchHistoryRecord): string {
   p.set('quick', record.quick ? 'true' : 'false');
   p.set('run', 'true');
 
-  const path = V2_MODES.has(record.mode) ? '/search-v2' : '/search';
+  const path = V2_MODES.has(record.mode) ? '/search' : '/legacy/search';
   return `${path}?${p.toString()}`;
 }
 

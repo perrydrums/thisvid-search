@@ -38,7 +38,7 @@ Contributors and automation should read the relevant doc **before** changing sea
 
 ## Quick entry points in code
 
-- **Routes**: `src/index.js` — `/`, `/search`, `/analyse`, `/preferences`, `/whats-new`
+- **Routes**: `src/index.js` — `/`, `/search` (primary v2 dashboard), `/settings`, `/moods`, `/history`, `/legacy/*` (classic search and tools)
 - **Search UI**: `src/pages/Search/index.tsx` (`SearchRefactored.tsx` is experimental / not wired as default)
 - **Fetch + filter helpers**: `src/helpers/videos.ts`
 - **Search orchestration**: `src/hooks/useSearchLogic.ts`

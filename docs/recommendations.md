@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `/recommendations` page shows personalised video recommendations based on the user's favourite video analysis. It uses **content-based filtering**: browse ThisVid listings, then narrow results with the same title-tag logic as Search (`filterVideos`).
+The `/legacy/recommendations` page shows personalised video recommendations based on the user's favourite video analysis. It uses **content-based filtering**: browse ThisVid listings, then narrow results with the same title-tag logic as Search (`filterVideos`).
 
 ## Taste profile
 
@@ -14,7 +14,7 @@ A taste profile is built from the same data as the **Analyse** page: aggregated 
 
 Profile extraction is **async** because it fetches the category index to resolve slugs.
 
-### Onboarding on `/recommendations`
+### Onboarding on `/legacy/recommendations`
 
 1. User enters **ThisVid User ID** (or it is prefilled from `tvass-user-id` if already set in Preferences).
 2. **Analyse favourites** runs the same scraping pipeline as the Analyse page ([`runAnalyseFavourites`](src/helpers/analyseFavourites.ts)), shows progress by page, and only then writes **`tvass-user-id`** and **`tvass-analyse-users`**.
@@ -68,8 +68,8 @@ Recommendations are cached in `tvass-recommendations` (localStorage) as `{ fromC
 |------|------|
 | `src/helpers/analyseFavourites.ts` | Shared favourite listing scrape (`runAnalyseFavourites`, per-page helper); storage key constants |
 | `src/helpers/recommendations.ts` | Async profile extraction + slug resolution, fetch/merge/filter/score, caching |
-| `src/pages/Recommendations/index.tsx` | Page UI — User ID + analyse, profile display, generate/refresh, results grid |
-| `src/pages/Analyse/index.tsx` | Full Analyse UI; uses `analyseFavourites` helpers |
+| `src/pages/legacy/Recommendations/index.tsx` | Page UI — User ID + analyse, profile display, generate/refresh, results grid |
+| `src/pages/legacy/Analyse/index.tsx` | Full Analyse UI; uses `analyseFavourites` helpers |
 
 ## Future phases
 
