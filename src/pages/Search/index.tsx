@@ -71,7 +71,9 @@ const Search = () => {
     params[key] = value;
   });
 
-  const [mode, setMode] = useState(params.mode || 'category');
+  const initialMode = params.mode || 'category';
+
+  const [mode, setMode] = useState(initialMode);
   const [id, setId] = useState(params.id || '');
   const [includeTags, setIncludeTags] = useState(params.tags ? params.tags.split(',') : []);
   const [excludeTags, setExcludeTags] = useState(
@@ -90,7 +92,11 @@ const Search = () => {
   const [category, setCategory] = useState(params.category || '');
   const [categoryType, setCategoryType] = useState('');
   const [start, setStart] = useState(params.start || 1);
-  const [type, setType] = useState(params.type || '');
+  const [type, setType] = useState(() => {
+    if (params.type) return params.type;
+    if (initialMode === 'user' || initialMode === 'friend') return 'public';
+    return '';
+  });
   const [quick, setQuick] = useState(true);
   const [omitPrivate, setOmitPrivate] = useState(false);
   const [omitFavourites, setOmitFavourites] = useState(false);
@@ -162,12 +168,14 @@ const Search = () => {
   }, [mode, username, type, category, primaryTag, friendId]);
 
   const getUrl = (page: number): string => {
+    const idTrim = id?.trim?.() ?? '';
+    const friendTrim = friendId?.trim?.() ?? '';
     const baseUrl: {
       [key: string]: string;
     } = {
       newest: `/${type}/${page}/`,
-      user: `/members/${id}/${type}_videos/${page}/`,
-      friend: `/members/${friendId}/${type}_videos/${page}/`,
+      user: idTrim && type ? `/members/${idTrim}/${type}_videos/${page}/` : '',
+      friend: friendTrim && type ? `/members/${friendTrim}/${type}_videos/${page}/` : '',
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
       category: `/categories/${category}/${type}/${page}/`,
       extreme: `/${type}/${page}/?q=${primaryTag}`,
@@ -182,12 +190,14 @@ const Search = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getPageLimitUrl = (): string => {
+    const idTrim = id?.trim?.() ?? '';
+    const friendTrim = friendId?.trim?.() ?? '';
     const baseUrl: {
       [key: string]: string;
     } = {
       newest: `/${type}/`,
-      user: `/members/${id}/${type}_videos/`,
-      friend: `/members/${friendId}/${type}_videos/`,
+      user: idTrim && type ? `/members/${idTrim}/${type}_videos/` : '',
+      friend: friendTrim && type ? `/members/${friendTrim}/${type}_videos/` : '',
       tags: `/tags/${primaryTag}/popular-males/`,
       category: `/categories/${category}/`,
       extreme: `/${type}/1/?q=${primaryTag}`,
@@ -198,12 +208,14 @@ const Search = () => {
 
   const getSourceUrl = () => {
     // Define the base URLs for each search mode
+    const idTrim = id?.trim?.() ?? '';
+    const friendTrim = friendId?.trim?.() ?? '';
     const baseUrl: {
       [key: string]: string;
     } = {
       newest: `/${type}/`,
-      user: `/members/${id}/`,
-      friend: `/members/${friendId}/`,
+      user: idTrim ? `/members/${idTrim}/` : '',
+      friend: friendTrim ? `/members/${friendTrim}/` : '',
       tags: `/tags/${primaryTag}/`,
       category: `/categories/${category}/`,
     };
@@ -336,6 +348,12 @@ const Search = () => {
   }, [mode, id]);
 
   useEffect(() => {
+    if ((mode === 'user' || mode === 'friend') && !type) {
+      setType('public');
+    }
+  }, [mode, type]);
+
+  useEffect(() => {
     const updateUsername = async () => {
       const username = await getUsername(id);
 
@@ -356,16 +374,19 @@ const Search = () => {
     const getPageLimit = async () => {
       const url = getPageLimitUrl();
 
-      let response;
       if (
+        !url.trim() ||
         (mode === 'extreme' && (!type || !primaryTag)) ||
         (mode === 'newest' && !type) ||
-        mode === 'friendsEvents'
+        mode === 'friendsEvents' ||
+        (mode === 'user' && (!(id?.trim?.() ?? '') || !type)) ||
+        (mode === 'friend' && (!(friendId?.trim?.() ?? '') || !type))
       ) {
         return;
-      } else {
-        response = await fetch(url);
       }
+
+      let response;
+      response = await fetch(url);
 
       if (response) {
         if (response.status === 404) {
@@ -516,6 +537,19 @@ const Search = () => {
     let progress = 0;
 
     const urlFirstPage = getUrl(offset);
+    if (!urlFirstPage.trim()) {
+      setFinished(true);
+      setErrorMessage(
+        mode === 'user'
+          ? 'Enter a member ID before running search.'
+          : mode === 'friend'
+            ? 'Select a friend before running search.'
+            : 'Incomplete search inputs.',
+      );
+      setLoading(false);
+      return;
+    }
+
     const firstPageExists = await urlExists(urlFirstPage);
 
     if (!firstPageExists) {

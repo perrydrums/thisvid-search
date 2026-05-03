@@ -65,10 +65,14 @@ export const useSearchLogic = ({
 }: UseSearchLogicProps) => {
 
   const getUrl = useCallback((page: number): string => {
+    const idTrim = id?.trim() ?? '';
+    const friendTrim = friendId?.trim() ?? '';
     const baseUrl: { [key: string]: string } = {
       newest: `/${type}/${page}/`,
-      user: `/members/${id}/${type}_videos/${page}/`,
-      friend: `/members/${friendId}/${type}_videos/${page}/`,
+      user:
+        idTrim && type ? `/members/${idTrim}/${type}_videos/${page}/` : '',
+      friend:
+        friendTrim && type ? `/members/${friendTrim}/${type}_videos/${page}/` : '',
       tags: `/tags/${primaryTag}/${type}-males/${page}/`,
       category: `/categories/${category}/${type}/${page}/`,
       extreme: `/${type}/${page}/?q=${primaryTag}`,
@@ -82,10 +86,12 @@ export const useSearchLogic = ({
   }, [mode, type, id, friendId, primaryTag, category]);
 
   const getPageLimitUrl = useCallback((): string => {
+    const idTrim = id?.trim() ?? '';
+    const friendTrim = friendId?.trim() ?? '';
     const baseUrl: { [key: string]: string } = {
       newest: `/${type}/`,
-      user: `/members/${id}/${type}_videos/`,
-      friend: `/members/${friendId}/${type}_videos/`,
+      user: idTrim && type ? `/members/${idTrim}/${type}_videos/` : '',
+      friend: friendTrim && type ? `/members/${friendTrim}/${type}_videos/` : '',
       tags: `/tags/${primaryTag}/popular-males/`,
       category: `/categories/${category}/`,
       extreme: `/${type}/1/?q=${primaryTag}`,
@@ -95,10 +101,12 @@ export const useSearchLogic = ({
   }, [mode, type, id, friendId, primaryTag, category]);
 
   const getSourceUrl = useCallback(() => {
+    const idTrim = id?.trim() ?? '';
+    const friendTrim = friendId?.trim() ?? '';
     const baseUrl: { [key: string]: string } = {
       newest: `/${type}/`,
-      user: `/members/${id}/`,
-      friend: `/members/${friendId}/`,
+      user: idTrim ? `/members/${idTrim}/` : '',
+      friend: friendTrim ? `/members/${friendTrim}/` : '',
       tags: `/tags/${primaryTag}/`,
       category: `/categories/${category}/`,
     };
@@ -120,16 +128,17 @@ export const useSearchLogic = ({
 
   const getPageLimit = useCallback(async () => {
     const url = getPageLimitUrl();
-
-    let response;
     if (
+      !url.trim() ||
       (mode === 'extreme' && (!type || !primaryTag)) ||
-      (mode === 'newest' && !type)
+      (mode === 'newest' && !type) ||
+      (mode === 'user' && (!(id?.trim?.() ?? '') || !type)) ||
+      (mode === 'friend' && (!(friendId?.trim?.() ?? '') || !type))
     ) {
       return;
-    } else {
-      response = await fetch(url);
     }
+
+    const response = await fetch(url);
 
     if (response) {
       if (response.status === 404) {
@@ -147,7 +156,7 @@ export const useSearchLogic = ({
       setPageLimit(lastPage);
       setAmount(lastPage < 100 ? lastPage : 100);
     }
-  }, [getPageLimitUrl, mode, type, primaryTag, setPageLimit, setAmount]);
+  }, [getPageLimitUrl, mode, type, primaryTag, id, friendId, setPageLimit, setAmount]);
 
   const updateUsername = useCallback(async () => {
     const username = await getUsername(id);
@@ -208,6 +217,19 @@ export const useSearchLogic = ({
     let tempPageLimit = 0;
 
     const urlFirstPage = getUrl(offset);
+    if (!urlFirstPage.trim()) {
+      setFinished(true);
+      setErrorMessage(
+        mode === 'user'
+          ? 'Enter a member ID before running search.'
+          : mode === 'friend'
+            ? 'Select a friend before running search.'
+            : 'Incomplete search inputs.',
+      );
+      setLoading(false);
+      return;
+    }
+
     const firstPageExists = await urlExists(urlFirstPage);
 
     if (!firstPageExists) {

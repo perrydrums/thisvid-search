@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Friend, Category, Mood, LogParams } from '../helpers/types';
 
@@ -17,10 +17,16 @@ export const useSearchState = (options?: UseSearchStateOptions) => {
 
   const fallbackMode = options?.defaultMode ?? 'category';
 
+  const initialMode = params.mode || fallbackMode;
+
   // Core search parameters
-  const [mode, setMode] = useState(params.mode || fallbackMode);
+  const [mode, setMode] = useState(initialMode);
   const [id, setId] = useState(params.id || '');
-  const [type, setType] = useState(params.type || '');
+  const [type, setType] = useState(() => {
+    if (params.type) return params.type;
+    if (initialMode === 'user' || initialMode === 'friend') return 'public';
+    return '';
+  });
   const [category, setCategory] = useState(params.category || '');
   const [categoryType, setCategoryType] = useState('');
   const [primaryTag, setPrimaryTag] = useState(params.primaryTag || '');
@@ -49,6 +55,12 @@ export const useSearchState = (options?: UseSearchStateOptions) => {
   // Friend search UI
   const [friendIdFieldHover, setFriendIdFieldHover] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
+
+  useEffect(() => {
+    if ((mode === 'user' || mode === 'friend') && !type) {
+      setType('public');
+    }
+  }, [mode, type]);
 
   return {
     // Search parameters
