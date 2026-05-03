@@ -1,13 +1,13 @@
 .inner {
   max-width: 72rem;
   margin: 0 auto;
-  padding: var(--v2-space-xl) var(--v2-space-lg);
+  padding: var(--v2-main-content-padding-top) var(--v2-space-lg);
 }
 
 .formBlock {
   max-width: 72rem;
   margin: 0 auto;
-  padding: var(--v2-space-xl) var(--v2-space-lg) var(--v2-space-sm);
+  padding: var(--v2-main-content-padding-top) var(--v2-space-lg) var(--v2-space-sm);
 }
 
 .resultsBlock {

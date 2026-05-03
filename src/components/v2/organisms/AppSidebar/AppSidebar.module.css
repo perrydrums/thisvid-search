@@ -22,26 +22,6 @@
   }
 }
 
-.brand {
-  padding: var(--v2-space-xs) var(--v2-space-md) 0;
-}
-
-.logo {
-  display: block;
-  font-family: var(--v2-font-display);
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  color: var(--v2-accent);
-  text-decoration: none;
-}
-
-.logo:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
 .ul {
   list-style: none;
   margin: 0;

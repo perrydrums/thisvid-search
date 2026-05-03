@@ -17,12 +17,6 @@ export type AppSidebarProps = {
 export const AppSidebar: React.FC<AppSidebarProps> = ({ activePage }) => {
   return (
     <aside className={styles.aside}>
-      <div className={styles.brand}>
-        <Link to="/search-v2" className={styles.logo}>
-          ThisVid Advanced Search Site
-        </Link>
-      </div>
-
       <nav className={styles.nav} aria-label="App">
         <ul className={styles.ul}>
           {APP_NAV_ITEMS.map((item) => (

@@ -5,7 +5,7 @@
 .restrict {
   max-width: 80rem;
   margin: 0 auto;
-  padding: var(--v2-space-xl) var(--v2-space-lg) var(--v2-space-2xl, 56px);
+  padding: var(--v2-main-content-padding-top) var(--v2-space-lg) var(--v2-space-2xl, 56px);
 }
 
 .grid {

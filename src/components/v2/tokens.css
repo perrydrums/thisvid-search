@@ -47,6 +47,12 @@
   --v2-space-xl: 40px;
   --v2-gutter: 20px;
 
+  /*
+   * Main column sits slightly higher than a full xl inset so page blocks sit closer to the sidebar
+   * nav (sidebar keeps md padding; see AppSidebar.module.css).
+   */
+  --v2-main-content-padding-top: calc(var(--v2-space-xl) - var(--v2-space-md));
+
   /* Typography */
   --v2-font-sans: 'Inter', system-ui, sans-serif;
   --v2-font-display: 'Manrope', var(--v2-font-sans);
