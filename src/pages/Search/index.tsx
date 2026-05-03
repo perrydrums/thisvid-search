@@ -208,12 +208,6 @@ const Search = () => {
   }, [userData.moods, setMoods]);
 
   useEffect(() => {
-    if (userIds.length > 0 || searchState.params.id) return;
-    const tv = userData.thisvidUserId?.trim();
-    if (tv) setUserIds([tv]);
-  }, [userData.thisvidUserId, userIds.length, searchState.params.id]);
-
-  useEffect(() => {
     if (searchState.moods.length === 0) return;
 
     const mood = searchState.moods.find((m) => m.name === videoFiltering.activeMood);
