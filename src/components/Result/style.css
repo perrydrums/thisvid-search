@@ -40,6 +40,28 @@
   background-size: 110%;
 }
 
+.result .thumbnail .favourite-star-badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fbbf24;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
+.result .thumbnail .favourite-star-badge svg {
+  display: block;
+  fill: currentColor;
+}
+
 .result .thumbnail .info {
   padding: 0.2rem 0.5rem;
   background-color: rgba(0, 0, 0, 0.5);

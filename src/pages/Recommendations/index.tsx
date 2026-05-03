@@ -10,6 +10,7 @@ import {
   getFavouriteListingPageLimit,
   runAnalyseFavourites,
 } from '../../helpers/analyseFavourites';
+import { getLocalFavourites } from '../../helpers/favourites';
 import {
   RecommendationsBundle,
   ScoredVideo,
@@ -159,6 +160,8 @@ const Recommendations = () => {
     }
     return copy;
   }, [recommendationsBundle, resultsTab, sortMode]);
+
+  const favouriteUrlSet = new Set(getLocalFavourites());
 
   const rawRecommendationsList: ScoredVideo[] = recommendationsBundle
     ? resultsTab === 'categories'
@@ -367,6 +370,7 @@ const Recommendations = () => {
                         page={video.page}
                         relevance={Math.round(video.score)}
                         uploader={video.matchReasons.slice(0, 3).join(', ')}
+                        isFavourite={favouriteUrlSet.has(video.url)}
                       />
                     </LazyLoadComponent>
                   ))}

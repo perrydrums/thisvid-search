@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { getLocalFavourites } from '../../../../helpers/favourites';
 import debug from '../../../../helpers/debug';
 import { Video } from '../../../../helpers/types';
 
@@ -33,6 +34,7 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
 }) => {
   const total = videos.length;
   const firstUrl = total > 0 ? videos[0].url : '';
+  const favourites = new Set(getLocalFavourites());
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(INITIAL_BATCH, total));
 
@@ -103,6 +105,7 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
                 views={v.views}
                 relevance={v.relevance}
                 isPrivate={v.isPrivate}
+                isFavourite={favourites.has(v.url)}
                 debug={debug}
                 onClick={() => window.open(v.url, '_blank', 'noopener,noreferrer')}
               />

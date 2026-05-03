@@ -38,6 +38,8 @@ export type VideoCardProps = {
   isPrivate: boolean;
   /** Mirrors `helpers/debug` (`localhost` or `?debug=true`). */
   debug?: boolean;
+  /** Local favourites list (`tvass-favourites`) includes this URL. */
+  isFavourite?: boolean;
   onClick?: () => void;
 };
 
@@ -50,12 +52,20 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   relevance,
   isPrivate,
   debug = false,
+  isFavourite = false,
   onClick,
 }) => {
   return (
     <button type="button" className={styles.card} onClick={onClick}>
       <div className={styles.thumbWrap}>
         <img src={thumbnailUrl} alt="" className={styles.thumb} />
+        {isFavourite && (
+          <span className={styles.favouriteStar} aria-label="In your favourites" title="In your favourites">
+            <span className={`material-symbols-outlined ${styles.favouriteStarIcon}`} aria-hidden>
+              star
+            </span>
+          </span>
+        )}
         {isPrivate && (
           <span className={styles.privateBadge} aria-label="Private video">
             <span className={`material-symbols-outlined ${styles.lockIcon}`} aria-hidden>

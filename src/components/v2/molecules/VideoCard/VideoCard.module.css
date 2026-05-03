@@ -11,9 +11,27 @@
   color: inherit;
   border-radius: var(--v2-radius);
   box-sizing: border-box;
+  text-transform: none;
   transition:
     background-color 0.2s ease,
     box-shadow 0.2s ease;
+}
+
+/* App.css gives all buttons an inset ring + full-button accent on hover — keep card chrome clean. */
+.card:hover,
+.card:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+.card:focus-visible {
+  outline: none;
+}
+
+.card:hover .textBlock,
+.card:focus-visible .textBlock {
+  background-color: var(--v2-accent);
+  box-shadow: none;
 }
 
 .thumbWrap {
@@ -41,6 +59,32 @@
 
 .card:hover .thumb {
   transform: scale(1.03);
+}
+
+.favouriteStar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.favouriteStarIcon {
+  font-size: 18px !important;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 700,
+    'GRAD' 0,
+    'opsz' 24;
 }
 
 .privateBadge {
@@ -146,9 +190,12 @@
 .textBlock {
   padding: 6px 6px 10px;
   border-radius: 0 0 var(--v2-radius) var(--v2-radius);
+  background: var(--v2-surface, #ffffff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   transition:
     background-color 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .videoTitle {
@@ -164,7 +211,8 @@
   transition: color 0.2s ease;
 }
 
-.card:hover .videoTitle {
+.card:hover .videoTitle,
+.card:focus-visible .videoTitle {
   color: #fff;
 }
 
@@ -177,6 +225,7 @@
   transition: color 0.2s ease;
 }
 
-.card:hover .meta {
+.card:hover .meta,
+.card:focus-visible .meta {
   color: #fff;
 }

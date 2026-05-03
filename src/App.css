@@ -383,13 +383,6 @@ select:hover {
   background-color: var(--input-hover-background-color);
 }
 
-input:focus,
-select:focus,
-button:focus {
-  background-color: var(--input-focus-background-color);
-  outline: none;
-}
-
 input[type='checkbox'],
 input[type='radio'] {
   width: auto;
