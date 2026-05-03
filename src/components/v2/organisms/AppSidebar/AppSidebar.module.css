@@ -18,6 +18,7 @@
 @media (min-width: 1024px) {
   .aside {
     display: flex;
+    flex-direction: column;
   }
 }
 
@@ -84,4 +85,12 @@
 .ico {
   font-size: 22px !important;
   opacity: 0.9;
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  flex-shrink: 0;
+  padding-top: var(--v2-space-lg);
+  padding-bottom: max(var(--v2-space-md), env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--v2-border);
 }

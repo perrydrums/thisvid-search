@@ -22,6 +22,14 @@ export const log = async ({
   const ipAddress = await getIp();
   const location = await getLocationFromIp(ipAddress);
 
+  let authUserId: string | null = null;
+  try {
+    const { data: authData } = await supabase.auth.getUser();
+    authUserId = authData?.user?.id ?? null;
+  } catch {
+    /* non-fatal: log without auth link */
+  }
+
   const { data, error } = await supabase
     .from('searches')
     .insert([
@@ -42,6 +50,7 @@ export const log = async ({
         visitorId,
         visitorGeneratedName: visitorName,
         ipLocation: location.ipLocation,
+        auth_user_id: authUserId,
       },
     ])
     .select();

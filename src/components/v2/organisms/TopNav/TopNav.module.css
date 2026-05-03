@@ -194,10 +194,26 @@
   width: min(300px, 88vw);
   height: calc(100vh - 64px);
   padding: var(--v2-space-md);
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-md);
   background: var(--v2-surface);
   border-left: 1px solid var(--v2-border);
   box-shadow: -8px 0 28px rgba(0, 0, 0, 0.12);
+}
+
+.menuNavScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.menuAuth {
+  flex-shrink: 0;
+  padding-top: var(--v2-space-md);
+  padding-bottom: max(var(--v2-space-lg), env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--v2-border);
 }
 
 .menuUl {

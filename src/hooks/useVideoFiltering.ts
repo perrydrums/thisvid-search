@@ -7,12 +7,21 @@ import { updateLogResultCount } from '../helpers/supabase/log';
 interface UseVideoFilteringProps {
   params: { [key: string]: any };
   searchObject?: LogParams | null;
+  /** v2: default mood from synced profile (falls back to tvass-default-mood in localStorage). */
+  syncedDefaultMood?: string;
 }
 
-export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringProps) => {
+export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: UseVideoFilteringProps) => {
+  const initialActiveMood = () => {
+    if (params.run !== undefined) return '';
+    const d = syncedDefaultMood?.trim();
+    if (d) return d;
+    return localStorage.getItem('tvass-default-mood') || '';
+  };
+
   // Tag-related state
   const [includeTags, setIncludeTags] = useState<string[]>(
-    params.tags ? params.tags.split(',') : []
+    params.tags ? params.tags.split(',') : [],
   );
   const [excludeTags, setExcludeTags] = useState<string[]>(
     params.excludeTags ? params.excludeTags.split(',') : []
@@ -28,9 +37,14 @@ export const useVideoFiltering = ({ params, searchObject }: UseVideoFilteringPro
   );
 
   // Mood and preferences
-  const [activeMood, setActiveMood] = useState(
-    params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : ''
-  );
+  const [activeMood, setActiveMood] = useState(initialActiveMood);
+
+  useEffect(() => {
+    if (params.run !== undefined) return;
+    const d = syncedDefaultMood?.trim();
+    if (!d) return;
+    setActiveMood(d);
+  }, [syncedDefaultMood, params.run]);
 
   // Video data
   const [rawVideos, setRawVideos] = useState<Video[]>([]);

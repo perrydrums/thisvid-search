@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import type { AppSidebarActivePage } from '../../appNavigation';
 import { APP_NAV_ITEMS } from '../../appNavigation';
 
+import { AuthWidget } from '../AuthWidget';
+
 import styles from './AppSidebar.module.css';
 
 export type { AppSidebarActivePage };
@@ -39,6 +41,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ activePage }) => {
           ))}
         </ul>
       </nav>
+
+      <div className={styles.sidebarFooter}>
+        <AuthWidget placement="sidebar" />
+      </div>
     </aside>
   );
 };

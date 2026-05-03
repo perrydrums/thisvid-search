@@ -10,7 +10,7 @@
 
 ## Alternate UI (VideoScraper shell: `/search-v2`, `/settings`, `/moods`, `/history`)
 
-The redesigned **VideoScraper** shell wraps **`/search-v2`** plus **`/settings`** (ThisVid integration, favourites sync, moods export/import, mock **Live Scraping Logs**), **`/moods`** (moods CRUD backed by **`tvass-moods`** in `localStorage`), and **`/history`** (search replay listing — **mock data** until persisted history exists).
+The redesigned **VideoScraper** shell wraps **`/search-v2`** plus **`/settings`** (ThisVid integration, favourites sync, moods export/import), **`/moods`** (moods CRUD backed by **`useUserData`** / **`localStorage`** when anonymous), and **`/history`** — **logged-in search runs** fetched from Supabase **`searches`** (where `auth_user_id` matches the session): infinite scroll loads older rows; **Replay search** rebuilds **`/search-v2`** or **`/search`** query params from stored mode / tags / listing fields (`helpers/supabase/searchHistory.ts`).
 
 Desktop uses the fixed **320px sidebar** (`AppSidebar`) and shared top bar (`TopNav`) with the same **logo / nav / “Who made this?”** chrome on **`/search-v2`**, **`/settings`**, **`/moods`**, and **`/history`** (History adds a center **search history** filter field). Main content is offset via **`V2Chrome`**; **`AppSidebar`** is **shown at `min-width: 1024px`**. Below that, **`TopNav`** shows a **top-right hamburger** that opens an overlay listing **Search · Moods · History · Settings** (same URLs as **`appNavigation`** / **`AppSidebar`**), **`Who made this?` is omitted**, and the fixed sidebar stays hidden.
 

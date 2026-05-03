@@ -5,6 +5,8 @@ import { Tooltip } from 'react-tooltip';
 import type { AppSidebarActivePage } from '../../appNavigation';
 import { APP_NAV_ITEMS } from '../../appNavigation';
 
+import { AuthWidget } from '../AuthWidget';
+
 import styles from './TopNav.module.css';
 
 /** Matches `Search/index.tsx` — opens creator links in a new tab. */
@@ -21,9 +23,16 @@ function activePageFromPath(pathname: string): AppSidebarActivePage | null {
 export type TopNavProps = {
   /** Centered "Search history..." filter field (desktop) */
   variant?: 'default' | 'historySearch';
+  /** Controlled filter for `/history` (desktop search field only). */
+  historySearchValue?: string;
+  onHistorySearchChange?: (value: string) => void;
 };
 
-export const TopNav: React.FC<TopNavProps> = ({ variant = 'default' }) => {
+export const TopNav: React.FC<TopNavProps> = ({
+  variant = 'default',
+  historySearchValue,
+  onHistorySearchChange,
+}) => {
   const { pathname } = useLocation();
   const activeNav = activePageFromPath(pathname);
 
@@ -83,6 +92,8 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'default' }) => {
               className={styles.searchInput}
               placeholder="Search history…"
               aria-label="Search history"
+              value={historySearchValue ?? ''}
+              onChange={(e) => onHistorySearchChange?.(e.target.value)}
             />
           </div>
         )}
@@ -135,7 +146,7 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'default' }) => {
             aria-modal="true"
             aria-label="Site navigation"
           >
-            <nav aria-label="App">
+            <nav className={styles.menuNavScroll} aria-label="App">
               <ul className={styles.menuUl}>
                 {APP_NAV_ITEMS.map((item) => (
                   <li key={item.page}>
@@ -159,6 +170,9 @@ export const TopNav: React.FC<TopNavProps> = ({ variant = 'default' }) => {
                 ))}
               </ul>
             </nav>
+            <div className={styles.menuAuth}>
+              <AuthWidget placement="drawer" onAuthSuccessClose={closeMenu} />
+            </div>
           </div>
         </>
       )}

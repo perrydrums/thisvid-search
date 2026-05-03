@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import '../../components/v2/tokens.css';
 import { Button } from '../../components/v2/atoms/Button';
@@ -7,143 +8,283 @@ import { TopNav } from '../../components/v2/organisms/TopNav';
 
 import chrome from '../../components/v2/V2Chrome.module.css';
 
+import {
+  SEARCH_HISTORY_PAGE_SIZE,
+  fetchSearchHistoryPage,
+  searchHistoryReplayHref,
+  type SearchHistoryRecord,
+} from '../../helpers/supabase/searchHistory';
+import { useAuth } from '../../hooks/useAuth';
+
 import styles from './History.module.css';
 
-type ModeKind = 'extreme' | 'user' | 'category' | 'tag';
+function formatWhen(iso: string | null): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString();
+}
 
-const MOCK: Array<{
-  id: string;
-  mode: ModeKind;
-  title: string;
-  idBadge: string;
-  tags: string[];
-  meta: string;
-  thumbHue: number;
-}> = [
-  {
-    id: '1',
-    mode: 'extreme',
-    title: 'Hardware_Benchmark_2024',
-    idBadge: 'ID: #XS-92831',
-    tags: ['# RTX 4090', '# 4K Ultra', 'Last 30 Days'],
-    meta: 'Executed 2 hours ago • 1,240 results found',
-    thumbHue: 200,
-  },
-  {
-    id: '2',
-    mode: 'user',
-    title: 'TechReviewer_Official',
-    idBadge: 'ID: #U-55201',
-    tags: ['@tech_guru', 'Exclude shorts'],
-    meta: 'Executed Yesterday, 14:20 • 85 results found',
-    thumbHue: 40,
-  },
-  {
-    id: '3',
-    mode: 'category',
-    title: 'Education / Science / AI',
-    idBadge: 'ID: #C-10332',
-    tags: ['English only', 'HD+'],
-    meta: 'Executed Oct 12, 2023 • 4,502 results found',
-    thumbHue: 280,
-  },
-  {
-    id: '4',
-    mode: 'tag',
-    title: 'Modern_UI_Design_Trends',
-    idBadge: 'ID: #T-77219',
-    tags: ['TailwindCSS', 'Figma', 'Glass morphism'],
-    meta: 'Executed Oct 10, 2023 • 312 results found',
-    thumbHue: 340,
-  },
-];
+/** Human-readable headline for search history row (video-free). */
+function rowHeadline(row: SearchHistoryRecord): string {
+  const typeLabel = row.type ? row.type.replace(/-/g, ' ') : '';
+  switch (row.mode) {
+    case 'user':
+      return row.thisvidMemberId ? `Member ${row.thisvidMemberId}${typeLabel ? ` · ${typeLabel}` : ''}` : `User · ${typeLabel}`;
+    case 'friend':
+      return row.friendId ? `Friend ${row.friendId}${typeLabel ? ` · ${typeLabel}` : ''}` : `Friend · ${typeLabel}`;
+    case 'category':
+      return row.category ? `Category / ${row.category}` : 'Category';
+    case 'tags':
+      return row.primaryTag ? `Tag “${row.primaryTag}”` : 'Tags';
+    case 'extreme':
+      return row.primaryTag ? `Extreme · “${row.primaryTag}”` : 'Extreme';
+    case 'newest':
+      return `Newest${typeLabel ? ` · ${typeLabel}` : ''}`;
+    case 'friendsEvents':
+      return `Friends feed`;
+    default:
+      return row.mode ? `${row.mode}${typeLabel ? ` · ${typeLabel}` : ''}` : 'Search';
+  }
+}
 
-const BADGE_LABEL: Record<ModeKind, string> = {
-  extreme: 'Extreme',
-  user: 'User',
-  category: 'Category',
-  tag: 'Tag',
-};
-
-const MODE_CLASS_MAP: Record<ModeKind, keyof typeof styles> = {
-  extreme: 'mode_extreme',
-  user: 'mode_user',
-  category: 'mode_category',
-  tag: 'mode_tag',
-};
+function rowHaystack(row: SearchHistoryRecord): string {
+  return [
+    formatWhen(row.createdAtIso),
+    row.mode,
+    row.type,
+    row.category,
+    row.primaryTag,
+    row.thisvidMemberId,
+    row.friendId,
+    row.tags.join(' '),
+    String(row.resultCount),
+  ]
+    .join(' ')
+    .toLowerCase();
+}
 
 const HistoryPage = () => {
+  const { user, loading: authLoading } = useAuth();
+  const [filter, setFilter] = useState('');
+  const [rows, setRows] = useState<SearchHistoryRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [initialError, setInitialError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const pagingLock = useRef(false);
+
+  const reload = useCallback(async () => {
+    pagingLock.current = false;
+    if (!user?.id || authLoading) return;
+    setLoading(true);
+    setFetchError(null);
+    setInitialError(null);
+    setHasMore(true);
+    const { rows: first, error } = await fetchSearchHistoryPage(user.id, 0, SEARCH_HISTORY_PAGE_SIZE);
+    setLoading(false);
+    if (error) {
+      setInitialError(error);
+      setRows([]);
+      setHasMore(false);
+      return;
+    }
+    setRows(first);
+    setHasMore(first.length >= SEARCH_HISTORY_PAGE_SIZE);
+  }, [user?.id, authLoading]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function boot() {
+      if (authLoading) return;
+      if (!user?.id) {
+        setRows([]);
+        setHasMore(false);
+        return;
+      }
+      if (!cancelled) await reload();
+    }
+    void boot();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user?.id, reload]);
+
+  const loadMore = useCallback(async () => {
+    if (!user?.id || loading || !hasMore || pagingLock.current) return;
+    pagingLock.current = true;
+    setLoading(true);
+    setFetchError(null);
+    const offset = rows.length;
+    try {
+      const { rows: next, error } = await fetchSearchHistoryPage(user.id, offset, SEARCH_HISTORY_PAGE_SIZE);
+      if (error) {
+        setFetchError(error);
+        return;
+      }
+      setRows((prev) => [...prev, ...next]);
+      setHasMore(next.length >= SEARCH_HISTORY_PAGE_SIZE);
+    } finally {
+      setLoading(false);
+      pagingLock.current = false;
+    }
+  }, [user?.id, loading, hasMore, rows.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !user?.id || !hasMore || authLoading) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const [e] = entries;
+        if (e?.isIntersecting && hasMore && !loading) void loadMore();
+      },
+      { root: null, rootMargin: '200px', threshold: 0 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [user?.id, hasMore, loading, loadMore, authLoading, rows.length]);
+
+  const filterNorm = filter.trim().toLowerCase();
+
+  const visibleRows = useMemo(() => {
+    if (!filterNorm) return rows;
+    return rows.filter((row) => rowHaystack(row).includes(filterNorm));
+  }, [rows, filterNorm]);
+
   return (
     <div className={`v2-root ${chrome.page}`}>
-      <TopNav variant="historySearch" />
+      <TopNav variant="historySearch" historySearchValue={filter} onHistorySearchChange={setFilter} />
       <AppSidebar activePage="history" />
 
       <main className={`${chrome.main} ${styles.wrap}`}>
         <header className={styles.hdr}>
           <div>
-            <h1 className={styles.hero}>Search History</h1>
-            <p className={styles.sub}>Review and re-run your previous scraping configurations.</p>
+            <h1 className={styles.hero}>Search history</h1>
+            <p className={styles.sub}>
+              Past searches you ran while signed in ({SEARCH_HISTORY_PAGE_SIZE} more load as you scroll). Filter applies to loaded
+              items.
+            </p>
           </div>
-          <div className={styles.hdrBtns}>
-            <Button variant="secondary" size="medium" type="button" title="Coming soon">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                filter_list
-              </span>
-              Filter
-            </Button>
-            <button type="button" className={styles.clearBtn} disabled title="Coming soon">
-              <span className="material-symbols-outlined">delete_sweep</span>
-              Clear all
-            </button>
-          </div>
+          {user?.id ? (
+            <div className={styles.hdrBtns}>
+              <Button variant="secondary" size="medium" type="button" onClick={() => void reload()} disabled={loading}>
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                  refresh
+                </span>
+                Refresh
+              </Button>
+            </div>
+          ) : null}
         </header>
 
-        <div className={styles.grid}>
-          {MOCK.map((row) => (
-            <article key={row.id} className={styles.card}>
-              <div className={styles.media} style={{ ['--hue' as string]: `${row.thumbHue}deg` }}>
-                <div className={styles.thumbTint} aria-hidden />
-                <span className={[styles.modePill, styles[MODE_CLASS_MAP[row.mode]]].join(' ')}>{BADGE_LABEL[row.mode]}</span>
-              </div>
+        {!authLoading && !user?.id ? (
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>Sign in to see search history</p>
+            <p className={styles.emptySub}>
+              Searches are tied to your account when you use the sidebar <strong>LOGIN</strong>. Anonymous searches aren’t listed
+              here (RLS only exposes rows with your Supabase auth id).
+            </p>
+            <Link className={styles.ctaPrimary} to="/search-v2">
+              Go to Search
+            </Link>
+          </div>
+        ) : null}
 
-              <div className={styles.body}>
-                <div className={styles.centerStack}>
-                  <div className={styles.titleRow}>
-                    <h2 className={styles.entryTitle}>{row.title}</h2>
-                    <span className={styles.idChip}>{row.idBadge}</span>
+        {initialError ? (
+          <div className={styles.bannerErr}>
+            <span className="material-symbols-outlined">error</span>
+            <span>{initialError}</span>
+          </div>
+        ) : null}
+
+        {fetchError ? (
+          <div className={styles.bannerWarn}>
+            <span className="material-symbols-outlined">warning</span>
+            <span>{fetchError}</span>
+          </div>
+        ) : null}
+
+        {user?.id && !initialError ? (
+          <div className={styles.grid}>
+            {visibleRows.length === 0 && !loading ? (
+              <p className={styles.emptyInline}>No matching searches yet. Run a search on Search v2 while logged in.</p>
+            ) : null}
+
+            {visibleRows.map((row) => {
+              const href = searchHistoryReplayHref(row);
+              const resultPhrase =
+                typeof row.resultCount === 'number'
+                  ? `${row.resultCount.toLocaleString()} result${row.resultCount === 1 ? '' : 's'}`
+                  : '— results';
+              return (
+                <article key={row.id} className={styles.card}>
+                  <div className={styles.body}>
+                    <div className={styles.centerStack}>
+                      <div className={styles.titleRow}>
+                        <h2 className={styles.entryTitle}>{rowHeadline(row)}</h2>
+                      </div>
+                      <p className={styles.dateLine}>{formatWhen(row.createdAtIso)}</p>
+
+                      {row.pageAmount > 0 || row.duration > 0 ? (
+                        <div className={styles.details}>
+                          {row.pageAmount ? (
+                            <span>
+                              Pages: <strong>{row.pageAmount}</strong>
+                            </span>
+                          ) : null}
+                          {row.duration > 0 ? (
+                            <span>
+                              Min duration: <strong>{row.duration} min</strong>
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      {row.tags.length > 0 ? (
+                        <div className={styles.chips}>
+                          {row.tags.slice(0, 12).map((t, i) => (
+                            <span key={`${row.id}-${i}-${t}`} className={styles.chip}>
+                              {t}
+                            </span>
+                          ))}
+                          {row.tags.length > 12 ? (
+                            <span className={[styles.chip, styles.chipMuted].join(' ')}>+{row.tags.length - 12} tags</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      <p className={styles.meta}>{resultPhrase}</p>
+                    </div>
+
+                    <div className={styles.actions}>
+                      <Link className={styles.replayBtn} to={href}>
+                        Replay search
+                      </Link>
+                    </div>
                   </div>
-                  <div className={styles.chips}>
-                    {row.tags.map((t) => (
-                      <span key={t} className={styles.chip}>
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <p className={styles.meta}>{row.meta}</p>
-                </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
 
-                <div className={styles.actions}>
-                  <button type="button" className={styles.heart} title="Coming soon">
-                    <span className="material-symbols-outlined">favorite_border</span>
-                  </button>
-                  <Button variant="primary" size="medium" type="button" disabled title="Coming soon">
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                      refresh
-                    </span>
-                    Repeat Search
-                  </Button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className={styles.moreWrap}>
-          <button type="button" className={styles.showMore}>
-            Show more history
-            <span className="material-symbols-outlined">expand_more</span>
-          </button>
-        </div>
+        {user?.id ? (
+          <>
+            <div ref={sentinelRef} className={styles.sentinel} aria-hidden />
+            {loading ? (
+              <p className={styles.loadingFoot}>
+                <span className={['material-symbols-outlined', styles.spinIco].join(' ')}>progress_activity</span>
+                Loading…
+              </p>
+            ) : null}
+            {!loading && !hasMore && rows.length > 0 ? (
+              <p className={styles.endFoot}>End of history</p>
+            ) : null}
+          </>
+        ) : null}
       </main>
     </div>
   );
