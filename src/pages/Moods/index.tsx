@@ -179,8 +179,7 @@ const MoodsPage = () => {
               <h4 className={styles.noteTitle}>What are moods?</h4>
               <p className={styles.noteText}>
                 Moods are saved tag presets (include, exclude, boost, diminish, and minimum duration). When you pick a mood on the
-                search page, those defaults apply to new searches. They are stored locally in your browser as{' '}
-                <code>tvass-moods</code>.
+                search page, those defaults apply to new searches.
               </p>
             </div>
           </section>

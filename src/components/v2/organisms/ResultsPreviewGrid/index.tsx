@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import debug from '../../../../helpers/debug';
 import { Video } from '../../../../helpers/types';
 
 import { VideoCard } from '../../molecules/VideoCard';
@@ -14,30 +15,19 @@ export type ResultsPreviewGridProps = {
   videos: Video[];
   /** Profile display name for the active search user (when in user mode). */
   username?: string;
-  userId?: string;
   /** Same values as classic /search Sort by control. */
   sort: string;
   onSortChange: (sort: string) => void;
 };
 
-function formatViews(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M views`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K views`;
-  return `${n} views`;
-}
-
-function metaLine(userId: string | undefined, username: string | undefined, views: number): string {
-  const base = formatViews(views);
-  if (userId && username) return `${username} (ID ${userId}) · ${base}`;
-  if (userId) return `ID ${userId} · ${base}`;
-  if (username) return `${username} · ${base}`;
-  return base;
+function metaLine(username: string | undefined, date: string | undefined): string | undefined {
+  const parts = [username?.trim(), date?.trim()].filter(Boolean) as string[];
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   videos,
   username,
-  userId,
   sort,
   onSortChange,
 }) => {
@@ -109,7 +99,11 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
                 title={v.title}
                 thumbnailUrl={v.avatar}
                 duration={v.duration}
-                metaLine={metaLine(userId, username, v.views)}
+                metaLine={metaLine(username, v.date)}
+                views={v.views}
+                relevance={v.relevance}
+                isPrivate={v.isPrivate}
+                debug={debug}
                 onClick={() => window.open(v.url, '_blank', 'noopener,noreferrer')}
               />
             ))}

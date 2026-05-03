@@ -35,29 +35,57 @@
   margin-top: var(--v2-space-sm);
 }
 
-.pagesReadout {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--v2-radius);
-  border: 1px solid var(--v2-border);
-  background: var(--v2-surface-low);
-}
-
-.pagesReadoutLabel {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--v2-on-surface-subtle);
-}
-
-.pagesReadoutValue {
-  font-size: 16px;
+.searchProgressBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 12px 20px;
+  font-family: var(--v2-font-display);
+  font-size: 15px;
   font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--v2-on-surface);
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: var(--v2-radius);
+  cursor: pointer;
+  overflow: hidden;
+  background: #24262b;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.1s ease, filter 0.15s ease;
+}
+
+.searchProgressBtn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.searchProgressBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.searchProgressBtn:disabled {
+  cursor: wait;
+  opacity: 1;
+  filter: none;
+}
+
+.searchProgressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--v2-accent);
+  transition: width 0.2s ease;
+  pointer-events: none;
+}
+
+.searchProgressLabel {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .error {

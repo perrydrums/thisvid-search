@@ -1,8 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import LoadingBar from 'react-top-loading-bar';
-
 import '../../components/v2/tokens.css';
-import { Button } from '../../components/v2/atoms/Button';
 import { AdvancedScoringSection } from '../../components/v2/organisms/AdvancedScoringSection';
 import { AppSidebar } from '../../components/v2/organisms/AppSidebar';
 import { MoodTermsCard } from '../../components/v2/organisms/MoodTermsCard';
@@ -88,7 +85,17 @@ const SearchV2 = () => {
   const [userIdChipLabel, setUserIdChipLabel] = useState<Record<string, string>>({});
 
   const resultsRef = useRef<HTMLDivElement>(null);
-  const executeScroll = () => resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const executeScroll = () => {
+    requestAnimationFrame(() => {
+      const el = resultsRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportTopInset = Math.round(window.innerHeight * 0.14);
+      const intoBlock = Math.min(Math.round(rect.height * 0.38), 280);
+      const y = window.scrollY + rect.top + intoBlock - viewportTopInset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  };
 
   const searchLogic = useSearchLogic({
     mode: searchState.mode,
@@ -244,6 +251,11 @@ const SearchV2 = () => {
     return types[m] || types.user;
   }, [searchState.mode]);
 
+  const pageTotal = Math.max(1, searchState.amount);
+  const isSearching = searchState.loading;
+  const pagesDone = searchState.progressCount;
+  const progressFillPct = isSearching ? Math.min(100, (pagesDone / pageTotal) * 100) : 0;
+
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage('');
@@ -280,16 +292,6 @@ const SearchV2 = () => {
 
   return (
     <div className={`v2-root ${chrome.page}`}>
-      <LoadingBar
-        progress={
-          searchState.progressCount
-            ? Math.round((searchState.progressCount / searchState.amount) * 100)
-            : 0
-        }
-        color="var(--v2-accent, #ff003c)"
-        height={8}
-        onLoaderFinished={() => setProgressCount(0)}
-      />
       <TopNav />
       {isV2Mode && <AppSidebar activePage="search" />}
 
@@ -351,13 +353,19 @@ const SearchV2 = () => {
               />
 
               <div className={styles.actions}>
-                <Button type="submit" variant="primary" size="large">
-                  Run search
-                </Button>
-                <div className={styles.pagesReadout} aria-live="polite">
-                  <span className={styles.pagesReadoutLabel}>Pages</span>
-                  <span className={styles.pagesReadoutValue}>{searchState.amount}</span>
-                </div>
+                <button
+                  type="submit"
+                  className={styles.searchProgressBtn}
+                  disabled={isSearching}
+                  aria-busy={isSearching}
+                >
+                  <span className={styles.searchProgressFill} style={{ width: `${progressFillPct}%` }} />
+                  <span className={styles.searchProgressLabel}>
+                    {isSearching
+                      ? `SEARCHING ${pagesDone}/${pageTotal}...`
+                      : `SEARCH ${pageTotal} PAGES`}
+                  </span>
+                </button>
               </div>
             </>
           )}
@@ -367,7 +375,6 @@ const SearchV2 = () => {
           {isV2Mode && (
             <ResultsPreviewGrid
               videos={videoFiltering.videos}
-              userId={searchState.id}
               username={searchState.username}
               sort={videoFiltering.sort}
               onSortChange={videoFiltering.setSort}
