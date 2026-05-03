@@ -1,6 +1,9 @@
 // Test script for friendsEvents function
 // Usage: node test-friendsEvents.js <username> <password>
 //
+// When SITE_ALLOWED_ORIGINS is set on the function, add a matching Origin header, e.g.
+//   SITE_ALLOWED_ORIGINS="http://localhost" node test-friendsEvents.js ...
+//
 // For local testing, you may need to set CHROME_EXECUTABLE_PATH environment variable
 // to point to your local Chrome installation:
 //   macOS: CHROME_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" node test-friendsEvents.js <username> <password>
@@ -17,17 +20,14 @@ if (!username || !password) {
   process.exit(1);
 }
 
-// Create a mock event object similar to what Netlify Functions receive
 const event = {
-  queryStringParameters: {
-    username: username,
-    password: password,
-  },
+  httpMethod: 'POST',
+  headers: {},
+  body: JSON.stringify({ username, password }),
 };
 
 const context = {};
 
-// Call the handler
 handler(event, context)
   .then((response) => {
     console.log('Status Code:', response.statusCode);

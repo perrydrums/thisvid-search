@@ -6,22 +6,67 @@ const adBlocker = AdBlockerPlugin({
 });
 puppeteer.use(adBlocker);
 
+const { requireSiteOrigin } = require('./allowedOrigins');
+
 const headers = {
   'Content-Type': 'application/json',
-  'Cache-Control': 'public, max-age=7200, s-maxage=7200', // Cache for 2 hours (7200 seconds)
+  'Cache-Control': 'public, max-age=7200, s-maxage=7200',
   'Netlify-Vary': 'query',
 };
 
 exports.handler = async function (event, context) {
-  const username = event.queryStringParameters.username;
-  const password = event.queryStringParameters.password;
+  const method = (event.httpMethod || 'GET').toUpperCase();
+
+  if (method === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        ...headers,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    };
+  }
+
+  const forbidden = requireSiteOrigin(event);
+  if (forbidden) return forbidden;
+
+  if (method !== 'POST') {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({
+        status: 'Method Not Allowed',
+        message: 'Use POST with JSON body: { "username": "...", "password": "..." }',
+        success: false,
+      }),
+      headers,
+    };
+  }
+
+  let username;
+  let password;
+  try {
+    const parsed = JSON.parse(event.body || '{}');
+    username = typeof parsed.username === 'string' ? parsed.username.trim() : '';
+    password = typeof parsed.password === 'string' ? parsed.password : '';
+  } catch {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Expected JSON body with username and password',
+        success: false,
+      }),
+      headers,
+    };
+  }
 
   if (!username || !password) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         status: 'Bad Request',
-        message: 'Missing username or password query parameters',
+        message: 'Missing username or password',
         success: false,
       }),
       headers,
@@ -33,7 +78,6 @@ exports.handler = async function (event, context) {
   };
 
   if (!process.env.CHROME_EXECUTABLE_PATH) {
-    // Use @sparticuz/chromium defaults for Netlify/Lambda
     options.args = chromium.args;
     options.defaultViewport = chromium.defaultViewport;
     options.headless = chromium.headless;
@@ -44,19 +88,15 @@ exports.handler = async function (event, context) {
     browser = await puppeteer.launch(options);
     const page = await browser.newPage();
 
-    // Set longer timeout for slow connections
     page.setDefaultNavigationTimeout(60000);
     page.setDefaultTimeout(60000);
 
-    // Navigate to login page
     await page.goto('https://thisvid.com/login.php', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Fill login form
     await page.waitForSelector('#login_username');
     await page.type('#login_username', username);
     await page.type('#login_pass', password);
 
-    // Submit form - try to find submit button or form element
     const submitButton = await page.$('input[type="submit"], button[type="submit"], form input[type="submit"]');
     if (submitButton) {
       await Promise.all([
@@ -64,7 +104,6 @@ exports.handler = async function (event, context) {
         submitButton.click(),
       ]);
     } else {
-      // Fallback: submit the form directly
       await page.evaluate(() => {
         const form = document.querySelector('form');
         if (form) form.submit();
@@ -72,7 +111,6 @@ exports.handler = async function (event, context) {
       await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 });
     }
 
-    // Check if login was successful by checking if we're redirected away from login page
     const currentUrl = page.url();
     if (currentUrl.includes('login.php')) {
       await browser.close();
@@ -87,10 +125,8 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Navigate to friends events page
     await page.goto('https://thisvid.com/my_friends_events/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Extract video data
     const videos = await page.evaluate(() => {
       const entries = document.querySelectorAll('.entry');
       const videoData = [];
@@ -110,24 +146,19 @@ exports.handler = async function (event, context) {
         let thumbnail = '';
 
         if (thumbElement) {
-          // Check if it's a private video (has 'private' class)
           const isPrivate = thumbElement.classList.contains('private');
 
           if (isPrivate) {
-            // For private videos, extract from style attribute background
             const style = thumbElement.getAttribute('style') || '';
             const backgroundMatch = style.match(/background:\s*url\(([^)]+)\)/);
             if (backgroundMatch && backgroundMatch[1]) {
               thumbnail = backgroundMatch[1].trim();
-              // Remove quotes if present
               thumbnail = thumbnail.replace(/^["']|["']$/g, '');
             }
           } else if (thumbImg) {
-            // For non-private videos, use data-original or src
             thumbnail = thumbImg.getAttribute('data-original') || thumbImg.getAttribute('src') || '';
           }
 
-          // Handle protocol-relative URLs
           if (thumbnail && thumbnail.startsWith('//')) {
             thumbnail = 'https:' + thumbnail;
           }
@@ -147,8 +178,8 @@ exports.handler = async function (event, context) {
     });
 
     await browser.close();
+    browser = null;
 
-    // Sort videos by uploader name
     videos.sort((a, b) => a.uploader.localeCompare(b.uploader));
 
     return {
@@ -161,13 +192,18 @@ exports.handler = async function (event, context) {
     };
   } catch (error) {
     if (browser) {
-      await browser.close();
+      try {
+        await browser.close();
+      } catch {
+        /* ignore */
+      }
     }
+    console.error('friendsEvents:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({
         status: 'Internal Server Error',
-        message: error.message || 'An error occurred while fetching friends events',
+        message: 'Failed to load friends events',
         success: false,
       }),
       headers,

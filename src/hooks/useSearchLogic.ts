@@ -178,7 +178,6 @@ export const useSearchLogic = ({
 
   const logSearch = async () => {
     const s = await log({
-      id: parseInt(id) || 0,
       mode,
       type,
       advanced,

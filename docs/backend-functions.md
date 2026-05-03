@@ -6,33 +6,43 @@ Functions under `functions/` run on Netlify (Node). They fetch **ThisVid HTML or
 
 The site build and function runtime follow **`NODE_VERSION` in `netlify.toml`** (currently Node 22), aligned with `.nvmrc` and `package.json` `engines`.
 
+## Abuse controls
+
+- **`netlify.toml` redirect rate limits**: proxied routes **`/getVideos`**, **`/download`**, **`/friends`**, **`/friendsEvents`**, **`/videoDetails`** declare **`[redirects.rate_limit]`** (requests per **`window_size`** seconds, keyed by **`ip`** + **`domain`**). Tune per route if legitimate traffic spikes.
+- **Optional caller lock (`SITE_ALLOWED_ORIGINS`)**: when set to a comma-separated list of full origins (`https://your-site.example,http://localhost:3000`), each function wraps early with **`functions/allowedOrigins.js`** and rejects callers whose **`Origin` / `Referer`** does not match. Leave **unset** to keep permissive localhost / generic testing workflows.
+- **`functions/validateThisvidUrl.js`**: rejects URLs/paths that are not anchored to **`https://thisvid.com`**, guarding **`videos.js`**, **`videoDetails.js`**, and **`download.js`** against SSRF probes.
+
+Errors returned to browsers are **generic**; details stay in **`console.error`** logs on Netlify.
+
 ## `functions/videos.js` — listing scrape
 
-- **Input** (**GET** query string, preferred for Netlify CDN caching): `url` (path only, e.g. `/newest/1/`), `page`, `omitPrivate` (`true`/`false`), `minDuration` (minutes), `quick` (`true`/`false`). **POST** JSON with the same keys is still accepted for backward compatibility.
-- **Behavior**: `fetch('https://thisvid.com' + url)`, load HTML, select thumbnails (`.tumbpu`), extract title, href, private flag, avatar, views, date, duration.
-- **Duration filter**: compares parsed mm:ss to `minDuration * 60` seconds.
-- **404**: returns JSON error shape with `success: false` (client expects empty or failed response handling).
-- **Caching**: successful responses set `Netlify-CDN-Cache-Control` with the `durable` directive and `Netlify-Vary: query` so repeat **GET** requests with the same query can hit Edge/Durable caches. Errors use `Cache-Control: no-store`.
+- **Input** (**GET** query string, preferred for Netlify CDN caching): `url` (path only, must start with `/` and satisfy `validateThisvidUrl` rules — e.g. `/newest/1/`), `page`, `omitPrivate`, `minDuration` (minutes), `quick`. **POST** JSON with the same keys is still accepted for backward compatibility.
+- **Behavior**: resolves `url` safely, then **`fetch(LISTING_BASE + pathSuffix)`**. When **`quick`** is **`false`**, subsequent per-video **`fetch`** calls resolve each scraped `href` to an absolute **`https://thisvid.com`** URL before fetching.
+- **Duration filter**, **404** handling, and **CDN caching headers** behave as before (see legacy notes in git history).
 
 Selectors and DOM structure are **coupled to ThisVid’s markup**. If the site changes class names or layout, this file (and possibly `getCategories.ts` / pagination parsing in `useSearchLogic`) must be updated together.
 
+## `functions/videoDetails.js`
+
+**GET** with `url=` must be an **absolute** `https://thisvid.com/...` URL. Fetches HTML and extracts category hints for client-side enrichment (`Search` → `friendsEvents`, `WhatsNew`, etc.).
+
+## `functions/download.js`
+
+**GET** with `url=` must be an absolute **`https://thisvid.com`** page (Puppeteer opens it and reads the `<video>` `src`). Non-allowed URLs fail fast with **`400`**.
+
 ## `functions/friends.js`
 
-Paginates `/members/{userId}/friends/` and aggregates friend cards. Used by `GET /friends?userId=…` via `helpers/friends.ts`.
+Paginates `/members/{userId}/friends/` and aggregates friend cards (`GET /friends?userId=…`, `helpers/friends.ts`). `userId` is **`encodeURIComponent`’d** in the outbound path segments.
 
 ## `functions/friendsEvents.js` (experimental)
 
-**GET** with `username` and `password` query parameters. Logs into ThisVid via **Puppeteer** (headless Chromium), then scrapes the authenticated “what’s new”/events-style feed. **Credentials hit your serverless function**—high risk on a public deployment; this feature is **experimental** and **may be removed from public access**. See [`search-and-filtering.md`](./search-and-filtering.md#friendsevents-experimental).
+**POST** with JSON **`{ "username": "…", "password": "…" }`**. **`OPTIONS`** is answered for CORS preflight before origin checks. Logs into ThisVid via **Puppeteer** (headless Chromium), then scrapes the authenticated “what’s new”/events-style feed.
+
+**Credentials still cross your serverless runtime** (in-memory only for the request). This feature is **experimental**; keep rate limits tight and consider **`SITE_ALLOWED_ORIGINS`** in production. See [`search-and-filtering.md`](./search-and-filtering.md#friendsevents-experimental).
 
 ## Other handlers
 
-Inspect the `functions/` directory for:
-
-- `videoDetails.js` — per-video metadata
-- `download.js` — download-related proxying
-- `feed.js` — feed aggregation
-
-Each should be treated as **server-side scraping** with the same fragility: respect rate limits and ToS in operational use.
+Inspect the `functions/` directory for additional utilities (e.g. shared **`allowedOrigins.js`**, **`validateThisvidUrl.js`**). Each handler should be treated as **server-side scraping** with the same fragility: respect rate limits and ToS in operational use.
 
 ## Local development
 
@@ -45,4 +55,4 @@ So local CRA can mimic production without running Netlify CLI—**but** you depe
 
 ## Production redirects
 
-`netlify.toml` defines SPA fallbacks for client routes (`/search`, `/search-v2`, `/settings`, `/moods`, `/history`, `/analyse`, `/preferences`, `/whats-new`, `/recommendations`, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. If you add a new API path, add matching **redirect** and **dev proxy** entries.
+`netlify.toml` defines SPA fallbacks for client routes (`/search`, `/search-v2`, `/settings`, `/moods`, `/history`, `/analyse`, `/preferences`, `/whats-new`, `/recommendations`, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. Global **security headers** (CSP, HSTS, clickjacking protection, etc.) ship via **`[[headers]] for = "/*"`**. If you add a new API path, add matching **redirect**, **`rate_limit`** (if proxied externally), dev **proxy**, and CSP **`connect-src`** entries when needed.

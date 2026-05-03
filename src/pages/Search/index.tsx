@@ -409,7 +409,6 @@ const Search = () => {
 
   const logSearch = async () => {
     const s: LogParams | null = await log({
-      id,
       mode,
       type,
       advanced,
@@ -446,9 +445,16 @@ const Search = () => {
       }
 
       try {
-        const response = await fetch(
-          `/friendsEvents?username=${encodeURIComponent(friendsEventsUsername)}&password=${encodeURIComponent(friendsEventsPassword)}`,
-        );
+        const response = await fetch('/friendsEvents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: friendsEventsUsername,
+            password: friendsEventsPassword,
+          }),
+        });
 
         const data = await response.json();
 
@@ -705,7 +711,8 @@ const Search = () => {
 
     // Update log entry if searchObject exists and has an id
     if (searchObject?.id) {
-      updateLogResultCount(searchObject.id, sortedVideos.length).catch((error) => {
+      updateLogResultCount(searchObject.id, sortedVideos.length, searchObject.resultUpdateToken).catch(
+        (error) => {
         console.error('Failed to update log result count:', error);
       });
     }

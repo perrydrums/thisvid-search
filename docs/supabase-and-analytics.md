@@ -28,21 +28,21 @@ When a user completes email magic-link sign-in (`src/hooks/useAuth.tsx`), the ap
 - **`moods`** — curated mood definitions per user (`user_id` → `profiles.id`). Replaces ad-hoc `tvass-moods` when logged in via `helpers/supabase/userProfile.ts`.
 - **`useUserData`** — single hook for Search v2, Settings (`/settings`), Moods (`/moods`): loads from Supabase when authenticated (with one-time merge from local keys), writes back on change; anonymous users stay on **`localStorage` only** (legacy `/search` etc. unchanged). First-login sync **merges** local into `profiles`: empty local scalar fields keep existing remote values instead of wiping the row. **Note:** the hook state is **per component instance** (not a global store). **Settings** therefore calls **`refreshProfileFromCloud({ quiet: true })`** after auth + `useUserData` loading finish on every visit so ThisVid ID / favourites / moods always rehydrate from Supabase when signed in, even if `localStorage` was cleared and another page had a different hook instance.
 
-Row Level Security: typical pattern is full CRUD for `profiles` / `moods` where `auth.uid() = id` (profile) or `auth.uid() = user_id` (moods). See migration `supabase/migrations/20260503180000_user_profiles_moods_auth_searches.sql` for exact policies.
+Row Level Security: typical pattern is full CRUD for `profiles` / `moods` where `auth.uid() = id` (profile) or `auth.uid() = user_id` (moods). **`searches`** policies and RPCs are defined in `supabase/migrations/20260503180000_user_profiles_moods_auth_searches.sql` (initial `auth_user_id` + broad policies), then tightened in `20260503203000_security_searches_rls_and_update_rpc.sql` (insert check, **no** broad update, **`result_update_token`**, **`update_search_result_count`**), with **`insert_search_log`** added in `20260503203300_insert_search_log_rpc.sql`.
 
 ## Search logging
 
 `helpers/supabase/log.ts`:
 
-- **`log`** — inserts a row into the `searches` table after a search run (see `useSearchLogic.logSearch`). Captures mode, type, tags, page count, duration filter, category, user/friend IDs, visitor id/name, resolved IP + coarse location (`getIp`, `getLocationFromIp`), and when the Supabase session is present, **`auth_user_id`** (links the row to `auth.users`).
-- **`updateLogResultCount`** — after client-side filtering, updates `resultCount` for the inserted row (`useVideoFiltering`).
+- **`log`** — calls the Supabase RPC **`insert_search_log`** (`supabase/migrations/20260503203300_insert_search_log_rpc.sql`) so a row is written to **`searches`** without granting anonymous clients **SELECT** on other people’s analytics. The RPC sets **`auth_user_id`** from **`auth.uid()`** (clients cannot spoof it). Returned fields include **`search_id`**, **`result_token`** (stored client-side only as `LogParams.resultUpdateToken`), and **`stored_result_count`**. Telemetry still includes mode, tags, visitor id/name, IP + coarse location (`getIp`, `getLocationFromIp`).
+- **`updateLogResultCount`** — after client-side filtering, calls **`update_search_result_count`** (`supabase/migrations/20260503203000_security_searches_rls_and_update_rpc.sql`) with **`p_id`** + **`p_token`** so **`result_count`** can be patched without an open **`UPDATE`** policy on **`searches`** (`useVideoFiltering` / legacy Search page).
 - **`fetchSearchHistoryPage`** (`helpers/supabase/searchHistory.ts`) — paginated **SELECT** from **`searches`** for the signed-in user (`auth.user` must match **`auth_user_id`**; policy **`searches_select_own`** in the migration). The **`/history`** page uses infinite scroll (**`SEARCH_HISTORY_PAGE_SIZE`** rows per request) and **`searchHistoryReplayHref`** to rebuild **`/search-v2`** or **`/search`** query strings from stored listing fields.
 
 The shape matches `LogParams` in `helpers/types.ts`. Schema changes on Supabase require updates here and in any dashboards that read `searches`.
 
 ## Feedback
 
-`helpers/supabase/feedback.ts` (and `components/Feedback`) may submit user feedback to Supabase—check the module for table names and fields when extending.
+`helpers/supabase/feedback.ts` (and `components/Feedback`) insert star ratings into **`feedback`**. RLS is defined in `supabase/migrations/20260503203100_feedback_rls.sql`: **INSERT** only for anon/authenticated clients (no client **SELECT** / **UPDATE** / **DELETE** policies). Service role still bypasses RLS for admin tooling.
 
 ## Privacy note
 

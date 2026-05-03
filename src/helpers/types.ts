@@ -46,6 +46,8 @@ export type FriendsResponse = {
 
 export type LogParams = {
   id: number;
+  /** Present after insert — required to PATCH result counts under tightened RLS. */
+  resultUpdateToken?: string | null;
   mode: string;
   advanced: boolean;
   type: string;
@@ -63,6 +65,9 @@ export type LogParams = {
   ipAddress?: string;
   ipLocation?: string;
 };
+
+/** Payload for `log()` before the row exists (no `id` / `resultUpdateToken`). */
+export type LogInsertParams = Omit<LogParams, 'id' | 'resultUpdateToken'>;
 
 export type Modes = {
   [key: string]: string;

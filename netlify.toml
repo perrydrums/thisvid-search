@@ -103,28 +103,53 @@ status = 200
 from = "/getVideos"
 to = "https://tvass.netlify.app/.netlify/functions/videos"
 status = 200
+  [redirects.rate_limit]
+  window_limit = 300
+  window_size = 60
+  aggregate_by = ["ip", "domain"]
 
 [[redirects]]
 from = "/download"
 to = "https://tvass.netlify.app/.netlify/functions/download"
 status = 200
+  [redirects.rate_limit]
+  window_limit = 30
+  window_size = 60
+  aggregate_by = ["ip", "domain"]
 
 [[redirects]]
 from = "/friends"
 to = "https://tvass.netlify.app/.netlify/functions/friends"
 status = 200
-
-[[redirects]]
-from = "/feed"
-to = "https://tvass.netlify.app/.netlify/functions/feed"
-status = 200
+  [redirects.rate_limit]
+  window_limit = 120
+  window_size = 60
+  aggregate_by = ["ip", "domain"]
 
 [[redirects]]
 from = "/friendsEvents"
 to = "https://tvass.netlify.app/.netlify/functions/friendsEvents"
 status = 200
+  [redirects.rate_limit]
+  window_limit = 20
+  window_size = 60
+  aggregate_by = ["ip", "domain"]
 
 [[redirects]]
 from = "/videoDetails"
 to = "https://tvass.netlify.app/.netlify/functions/videoDetails"
 status = 200
+  [redirects.rate_limit]
+  window_limit = 200
+  window_size = 60
+  aggregate_by = ["ip", "domain"]
+
+[[headers]]
+for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https: data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://thisvid.com https://randomuser.me https://ipapi.co https://tvass.netlify.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"

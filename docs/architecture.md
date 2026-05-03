@@ -28,9 +28,13 @@ public/            Static assets, PWA manifest
 2. **Serverless scraping** (`GET /getVideos` with query params; **POST** JSON still works)  
    The browser calls your app’s `/getVideos?url=…`, which redirects (Netlify) or proxies (dev) to a **Netlify function** that fetches `https://thisvid.com` + path server-side, parses thumbnails with Cheerio, and returns JSON (`Video[]`). This keeps listing markup parsing centralized and allows options like `omitPrivate`, `minDuration`, and `quick`. **GET** carries all options in the URL so Netlify’s Edge/Durable cache can key on `Netlify-Vary: query` (`Netlify-CDN-Cache-Control` is set in `functions/videos.js`).
 
-Production also routes `/friends`, `/download`, `/videoDetails`, etc. to the **tvass.netlify.app** deployment (see `netlify.toml`). Local dev mirrors that via `setupProxy.js`.
+Production also routes **`/friends`**, **`/friendsEvents`** (**POST**, JSON credentials), **`/download`**, **`/videoDetails`**, etc. to the **tvass.netlify.app** deployment (see `netlify.toml`). Local dev mirrors that via `setupProxy.js`.
 
-## Visitor identity
+## Security hardening (Netlify + functions)
+
+Global response headers (**CSP**, **HSTS**, **X-Frame-Options**, **Referrer-Policy**, etc.) ship from **`[[headers]] for = "/*"`** in `netlify.toml` (CRA currently needs **`unsafe-inline`** for scripts/styles—narrow further if the bundle allows).
+
+Proxied function paths declare **`[redirects.rate_limit]`** buckets. Handlers share **`allowedOrigins.js`** (optional **`SITE_ALLOWED_ORIGINS`**) and **`validateThisvidUrl.js`** (SSRF guardrails). Details: [`backend-functions.md`](./backend-functions.md).
 
 On first load, `src/index.js` sets `localStorage.visitorId` and resolves a display name via `getNameWithSeed` (see `helpers/users`). This pairs with analytics logging, not with ThisVid auth.
 

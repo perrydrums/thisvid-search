@@ -83,7 +83,7 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
 
     // Update log entry if searchObject exists and has an id
     if (searchObject?.id) {
-      updateLogResultCount(searchObject.id, sortedVideos.length).catch((error) => {
+      updateLogResultCount(searchObject.id, sortedVideos.length, searchObject.resultUpdateToken).catch((error) => {
         console.error('Failed to update log result count:', error);
       });
     }

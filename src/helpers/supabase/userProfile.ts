@@ -26,7 +26,7 @@ function mapProfileRow(row: Record<string, unknown> | null): ProfileRow | null {
 export async function fetchProfile(authUserId: string): Promise<ProfileRow | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+  .select('id, thisvid_user_id, default_mood, favourites, last_sync_date, created_at, updated_at')
     .eq('id', authUserId)
     .maybeSingle();
 

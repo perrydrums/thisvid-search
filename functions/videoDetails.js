@@ -1,21 +1,43 @@
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 
+const { requireSiteOrigin } = require('./allowedOrigins');
+const { assertAbsoluteThisvidHttps } = require('./validateThisvidUrl');
+
 const headers = {
   'Content-Type': 'application/json',
-  'Cache-Control': 'public, max-age=31536000, s-maxage=31536000', // Cache permanently (1 year)
+  'Cache-Control': 'public, max-age=31536000, s-maxage=31536000',
   'Netlify-Vary': 'query',
 };
 
 exports.handler = async function (event, context) {
-  const videoUrl = event.queryStringParameters.url;
+  const forbidden = requireSiteOrigin(event);
+  if (forbidden) return forbidden;
 
-  if (!videoUrl) {
+  const videoUrlParam = event.queryStringParameters?.url;
+
+  if (!videoUrlParam) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         status: 'Bad Request',
         message: 'Missing url query parameter',
+        success: false,
+      }),
+      headers,
+    };
+  }
+
+  let videoUrl;
+  try {
+    videoUrl = assertAbsoluteThisvidHttps(videoUrlParam);
+  } catch {
+    console.warn('videoDetails: rejected non-ThisVid URL');
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid url',
         success: false,
       }),
       headers,
@@ -40,24 +62,19 @@ exports.handler = async function (event, context) {
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    // Extract category from ul.description
-    // Structure: first li = description, second li = category, third li = tags, fourth li = uploader
     const descriptionList = $('.box ul.description').first();
     let category = '';
 
-    // Try to find by span text first
     descriptionList.find('li').each((index, element) => {
       const $li = $(element);
       const spanText = $li.find('span').first().text().trim();
 
       if (spanText === 'Categories:') {
-        // Extract category
         const categoryLink = $li.find('a').first();
         category = categoryLink.text().trim();
       }
     });
 
-    // Fallback: use nth-child selector if span-based extraction didn't work
     if (!category) {
       category = descriptionList.find('li:nth-child(2) a').first().text().trim();
     }
@@ -71,11 +88,12 @@ exports.handler = async function (event, context) {
       headers,
     };
   } catch (error) {
+    console.error('videoDetails:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({
         status: 'Internal Server Error',
-        message: error.message || 'An error occurred while fetching video details',
+        message: 'Failed to load video details',
         success: false,
       }),
       headers,

@@ -26,3 +26,6 @@ yarn-error.log*
 .netlify
 
 .env
+.env.development
+.env.production
+.env.test

@@ -4,7 +4,7 @@
 
 1. User picks a **mode** (`newest`, `category`, `user`, `friend`, `tags`, `extreme`, or experimental **`friendsEvents`**) and related inputs (type, IDs, category slug, primary tag, etc.).
 2. The app may fetch **HTML** from ThisVid (via proxied same-origin URLs) for pagination metadata or usernames.
-3. For most modes, **`run`** in `useSearchLogic` fires **parallel** `getVideos` requests for a range of pages (`start` … `start + amount - 1`). **`friendsEvents` does not use that path**; it calls `GET /friendsEvents` with credentials (see below).
+3. For most modes, **`run`** in `useSearchLogic` fires **parallel** `getVideos` requests for a range of pages (`start` … `start + amount - 1`). **`friendsEvents` does not use that path**; it calls **`POST /friendsEvents`** with a JSON body (`username`, `password`) — see [`backend-functions.md`](./backend-functions.md) and below.
 4. Results are merged and deduped by **video URL** where applicable (`useSearchLogic.run` for listing modes).
 5. **`filterVideos`** and **`sortVideos`** in `helpers/videos.ts` refine the merged list **entirely on the client** (title substring matching, exclude tags, relevance scoring). `friendsEvents` adds optional **category** filtering after enrichment (`videoDetails`-style metadata).
 
@@ -37,7 +37,7 @@ If the first page returns 404, search aborts with an error message (standard lis
 
 Labeled **“What’s New”** in the UI. Intended to load activity from a **logged-in** ThisVid session.
 
-- **Credentials**: the user enters their ThisVid **username and password** in Search (same flow exists on `WhatsNew`). The client requests `GET /friendsEvents?username=…&password=…`, which is handled by **`functions/friendsEvents.js`**. That function uses **Puppeteer** (and headless Chromium on Netlify via `@sparticuz/chromium`) to open `login.php`, submit the form, then scrape the post-login feed.
+- **Credentials**: the user enters their **own** ThisVid **username and password** in Search (`/search`) or on **`WhatsNew`**. The client sends them in the **JSON body** of **`POST /friendsEvents`** (`Content-Type: application/json`). They pass through **`functions/friendsEvents.js`** for the Puppeteer session only—they are **not** stored server-side. Avoid GET/query-string credentials so proxies and CDN logs cannot retain passwords.
 - **Security / privacy**: passwords are sent to your **serverless backend**, not only to ThisVid in the user’s browser. Treat this as **high-risk** for a public app; rotating credentials, network transport, and logging policies matter. This is a key reason the feature **may be removed from public access** or gated behind private deployment.
 - **Flow**: unlike other modes, there is no `getUrl` + parallel `getVideos` scrape of public listing pages. Results may be **cached in `localStorage`** (`tvass-whats-new-videos`) when revisiting the mode. The Search page can **enrich** items (e.g. category) via `videoDetails` in batches before applying tag filters and sort.
 - **Status**: **experimental**; behavior and exposure can change. Prefer documenting any removal or feature-flag in this file and in [`backend-functions.md`](./backend-functions.md).

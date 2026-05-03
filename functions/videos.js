@@ -1,7 +1,9 @@
 const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 
-/** Browser: avoid stale JSON in bfcache; Edge/Durable: cache by full query string. */
+const { requireSiteOrigin } = require('./allowedOrigins');
+const { LISTING_BASE, assertSafeListingPath, resolvePageHrefToThisvid } = require('./validateThisvidUrl');
+
 const successHeaders = {
   'Content-Type': 'application/json',
   'Cache-Control': 'public, max-age=0, must-revalidate',
@@ -42,6 +44,9 @@ function readVideosInput(event) {
 }
 
 exports.handler = async function (event, context) {
+  const forbidden = requireSiteOrigin(event);
+  if (forbidden) return forbidden;
+
   let input;
   try {
     input = readVideosInput(event);
@@ -73,8 +78,25 @@ exports.handler = async function (event, context) {
     };
   }
 
+  let pathSuffix;
   try {
-    const response = await fetch('https://thisvid.com' + url);
+    pathSuffix = assertSafeListingPath(url);
+  } catch (e) {
+    console.warn('videos: invalid listing path', e?.message || e);
+    return {
+      statusCode: 400,
+      headers: errorHeaders,
+      body: JSON.stringify({
+        status: 'Bad Request',
+        message: 'Invalid url',
+        success: false,
+        videos: [],
+      }),
+    };
+  }
+
+  try {
+    const response = await fetch(LISTING_BASE + pathSuffix);
 
     if (response.status === 404) {
       return {
@@ -101,17 +123,10 @@ exports.handler = async function (event, context) {
       }
 
       const avatar = isPrivate
-        ? // @ts-ignore
-        $('span', element)
-          .first()
-          .attr('style')
-          .match(/url\((.*?)\)/)[1]
-          .replace('//', 'https://')
-        : // @ts-ignore
-        $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
+        ? $('span', element).first().attr('style').match(/url\((.*?)\)/)[1].replace('//', 'https://')
+        : $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
 
       const viewsHtml = $('.view', element).first().text();
-      // @ts-ignore
       const views = viewsHtml.match(/\d+/)[0];
       const date = $('.date', element).first().text();
 
@@ -121,7 +136,6 @@ exports.handler = async function (event, context) {
 
       const title = $(element).attr('title') || '';
 
-      // Only filter by basic criteria (duration), tags will be filtered client-side
       if (time >= minDuration * 60) {
         if (quick) {
           videos.push({
@@ -132,7 +146,7 @@ exports.handler = async function (event, context) {
             avatar,
             views: parseInt(views),
             date,
-            relevance: 0, // Will be calculated client-side
+            relevance: 0,
             page,
           });
         } else {
@@ -154,12 +168,10 @@ exports.handler = async function (event, context) {
     if (!quick) {
       for (const video of urls) {
         try {
-          const videoUrl = video.url;
-          const response = await fetch(videoUrl);
-          const body = await response.text();
-          const $ = cheerio.load(body);
+          const absVideoUrl = resolvePageHrefToThisvid(video.url);
+          const vidResponse = await fetch(absVideoUrl);
+          await vidResponse.text();
 
-          // Just add the video, tags will be filtered client-side
           videos.push({
             relevance: video.relevance,
             title: video.title,
@@ -172,7 +184,7 @@ exports.handler = async function (event, context) {
             page: video.page,
           });
         } catch (error) {
-          console.log(error);
+          console.error('videos: skipped bad video url', error?.message || error);
         }
       }
     }
@@ -186,13 +198,13 @@ exports.handler = async function (event, context) {
       }),
     };
   } catch (error) {
-    console.log(error);
+    console.error('videos:', error);
     return {
       statusCode: 500,
       headers: errorHeaders,
       body: JSON.stringify({
         status: 'Error',
-        message: error instanceof Error ? error.message : 'Unexpected error',
+        message: 'Failed to load videos',
         success: false,
         videos: [],
       }),
