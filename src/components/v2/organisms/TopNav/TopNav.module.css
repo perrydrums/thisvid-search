@@ -168,13 +168,15 @@
   top: 64px;
   left: 0;
   right: 0;
-  bottom: 0;
   z-index: 51;
   margin: 0;
   padding: 0;
   border: none;
   background: rgba(0, 0, 0, 0.42);
   cursor: pointer;
+  /* Match panel: avoid stretching under mobile browser chrome when 100vh > visible viewport */
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
 }
 
 .menuBackdrop:focus {
@@ -192,8 +194,11 @@
   z-index: 52;
   box-sizing: border-box;
   width: min(300px, 88vw);
+  /* vh includes area behind mobile URL/toolbars; dvh tracks the visible viewport */
   height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
   padding: var(--v2-space-md);
+  padding-bottom: max(var(--v2-space-md), env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -212,7 +217,11 @@
 .menuAuth {
   flex-shrink: 0;
   padding-top: var(--v2-space-md);
-  padding-bottom: max(var(--v2-space-lg), env(safe-area-inset-bottom, 0px));
+  /*
+   * safe-area = home indicator; extra min reserves typical mobile browser bottom bar
+   * (often not counted in env(safe-area-inset-*)).
+   */
+  padding-bottom: max(var(--v2-space-lg), calc(env(safe-area-inset-bottom, 0px) + var(--v2-space-sm)), 56px);
   border-top: 1px solid var(--v2-border);
 }
 

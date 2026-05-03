@@ -12,12 +12,12 @@
   padding: var(--v2-space-xs, 6px) 0 var(--v2-space-lg, 20px);
   margin-bottom: 0;
   gap: calc(var(--v2-space-md, 12px) + 2px);
-  padding-bottom: max(var(--v2-space-lg, 20px), env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(var(--v2-space-lg, 20px), calc(env(safe-area-inset-bottom, 0px) + var(--v2-space-sm, 8px)), 52px);
 }
 
 /** Extra clearance for the lone LOGIN button so it does not hug the viewport edge. */
 .browseSpacer {
-  padding-bottom: max(28px, var(--v2-space-xl, 28px), env(safe-area-inset-bottom, 0px));
+  padding-bottom: max(32px, var(--v2-space-xl, 28px), calc(env(safe-area-inset-bottom, 0px) + var(--v2-space-sm, 8px)), 56px);
 }
 
 .title {
