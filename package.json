@@ -19,6 +19,7 @@
     "d3": "^7.8.5",
     "dotenv": "^16.3.1",
     "http-proxy-middleware": "^2.0.6",
+    "nanoid": "^3.3.12",
     "node-fetch": "^2.7.0",
     "puppeteer-core": "^21.4.1",
     "puppeteer-extra": "^3.3.6",

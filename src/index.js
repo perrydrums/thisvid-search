@@ -7,6 +7,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Search from './pages/Search';
+import { ShortLinkResolver } from './pages/ShortLinkResolver';
 import History from './pages/History';
 import Moods from './pages/Moods';
 import Settings from './pages/Settings';
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: '/history',
         element: <History />,
+      },
+      {
+        path: '/s/:code',
+        element: <ShortLinkResolver />,
       },
       {
         path: '/legacy/search',

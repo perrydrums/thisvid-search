@@ -18,6 +18,7 @@ import { useSearchState } from '../../../hooks/useSearchState';
 import { useVideoFiltering } from '../../../hooks/useVideoFiltering';
 import { useSearchLogic } from '../../../hooks/useSearchLogic';
 
+import { createShortLink } from '../../../helpers/supabase/shortLinks';
 import { getCategories } from '../../../helpers/getCategories';
 import { Modes, Types } from '../../../helpers/types';
 
@@ -216,8 +217,8 @@ const SearchRefactored = () => {
   };
 
   // Generate share URL
-  const getShareUrl = () => {
-    const params = new URLSearchParams({
+  const getShareUrl = async () => {
+    const params: Record<string, string> = {
       mode: searchState.mode,
       activeMood: videoFiltering.activeMood,
       type: searchState.type,
@@ -235,8 +236,9 @@ const SearchRefactored = () => {
       orderBy: videoFiltering.sort,
       start: searchState.start.toString(),
       run: 'true',
-    });
-    return `${window.location.origin}/legacy/search?${params.toString()}`;
+    };
+    const code = await createShortLink('/legacy/search', params);
+    return `${window.location.origin}/s/${code}`;
   };
 
   return (

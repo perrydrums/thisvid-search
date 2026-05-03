@@ -73,6 +73,8 @@ Relevance blends weighted tag frequency in the title with boost/diminish bonuses
 
 `useSearchState` and the Search page sync many fields from **`useSearchParams`** (`mode`, `id`, `type`, `category`, `primaryTag`, `friendId`, `tags`, `excludeTags`, `boosterTags`, `diminishingTags`, `termsOperator`, `start`, `amount`, `minDuration`, `orderBy`, `run`, etc.). For **`friendsEvents`**, `friendsEventsUsername` and `friendsEventsCategory` can appear in the query string; the **password is not** persisted in the URL (in-memory field only). Deep links should keep working if you extend query keys—update both parsing and any share/export UI.
 
+**Short share links:** “Copy share link” stores the current query fields in Supabase table **`short_links`** and copies a compact URL **`{origin}/s/{code}`** (8-character nanoid). Route **`/s/:code`** (`ShortLinkResolver`) loads the row and **`replace`**-navigates to **`/search`** or **`/legacy/search`** with the stored params and **`run=true`**. Netlify serves **`/s/*`** as SPA (`netlify.toml`); migration: `supabase/migrations/20260503204300_short_links.sql`.
+
 ## Preferences and moods
 
 `Preferences` stores **moods** and default tag sets in **localStorage** (`tvass-moods`, `tvass-default-mood`, etc.). Search can apply a mood to populate tag fields (`useVideoFiltering.applyMoodPreferences`).

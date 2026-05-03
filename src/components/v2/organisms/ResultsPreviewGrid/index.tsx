@@ -20,8 +20,8 @@ export type ResultsPreviewGridProps = {
   /** Same values as classic /search sort control. */
   sort: string;
   onSortChange: (sort: string) => void;
-  /** Current shareable URL (`/search?…&run=true`). */
-  getShareUrl: () => string;
+  /** Resolves to a short public share URL (`/s/{code}`). */
+  getShareUrl: () => Promise<string>;
   /** After the latest search run has completed, header shows FOUND count instead of RESULTS. */
   searchFinished: boolean;
 };
@@ -45,7 +45,7 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const copyResetRef = useRef<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(INITIAL_BATCH, total));
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [copyState, setCopyState] = useState<'idle' | 'generating' | 'copied' | 'failed'>('idle');
 
   useEffect(() => {
     return () => {
@@ -83,8 +83,9 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
     : 'RESULTS';
 
   const handleCopyShare = async () => {
-    const url = getShareUrl();
+    setCopyState('generating');
     try {
+      const url = await getShareUrl();
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
       } else {
@@ -117,9 +118,16 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
       size="small"
       className={styles.copyShareBtn}
       type="button"
+      disabled={copyState === 'generating'}
       onClick={() => void handleCopyShare()}
     >
-      {copyState === 'copied' ? 'Copied!' : copyState === 'failed' ? 'Copy failed' : 'Copy share link'}
+      {copyState === 'generating'
+        ? 'Generating link…'
+        : copyState === 'copied'
+        ? 'Copied!'
+        : copyState === 'failed'
+        ? 'Copy failed'
+        : 'Copy share link'}
     </Button>
   );
 

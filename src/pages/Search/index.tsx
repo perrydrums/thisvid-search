@@ -16,6 +16,7 @@ import { useSearchLogic } from '../../hooks/useSearchLogic';
 import { useSearchState } from '../../hooks/useSearchState';
 import { useUserData } from '../../hooks/useUserData';
 import { useVideoFiltering } from '../../hooks/useVideoFiltering';
+import { createShortLink } from '../../helpers/supabase/shortLinks';
 
 import styles from './Search.module.css';
 
@@ -286,8 +287,8 @@ const Search = () => {
     searchLogic.run(searchState.start);
   };
 
-  const getShareUrl = () => {
-    const params = new URLSearchParams({
+  const getShareUrl = async () => {
+    const params: Record<string, string> = {
       mode: searchState.mode,
       activeMood: videoFiltering.activeMood,
       type: searchState.type,
@@ -305,8 +306,9 @@ const Search = () => {
       orderBy: videoFiltering.sort,
       start: String(searchState.start),
       run: 'true',
-    });
-    return `${window.location.origin}/search?${params.toString()}`;
+    };
+    const code = await createShortLink('/search', params);
+    return `${window.location.origin}/s/${code}`;
   };
 
   const v2Mode = searchState.mode as SearchMode;

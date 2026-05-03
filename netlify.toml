@@ -30,6 +30,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/s/*"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/legacy-search"
 to = "/legacy/search"
 status = 301

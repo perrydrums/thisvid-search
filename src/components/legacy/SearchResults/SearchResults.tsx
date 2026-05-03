@@ -25,7 +25,7 @@ interface SearchResultsProps {
   searchObject: LogParams | null;
   sort: string;
   setSort: (sort: string) => void;
-  getShareUrl: () => string;
+  getShareUrl: () => Promise<string>;
 }
 
 export const SearchResults: React.FC<SearchResultsProps> = ({
@@ -107,7 +107,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         {searchObject && (
           <>
             <Feedback search={searchObject} />
-            <Share url={getShareUrl()} />
+            <Share getShareUrl={getShareUrl} />
           </>
         )}
         <div>

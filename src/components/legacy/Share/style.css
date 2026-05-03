@@ -10,6 +10,15 @@
   text-underline-offset: 3px;
 }
 
+.share-cta--generating {
+  cursor: wait;
+  opacity: 0.85;
+}
+
+.share-error {
+  color: var(--error, #c00);
+}
+
 .feedback-confirmation {
   animation: fade-out 0.2s ease-in-out forwards 3s;
 }

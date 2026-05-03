@@ -16,6 +16,7 @@ import { getLocalFavourites } from '../../../helpers/favourites';
 import { getFriends } from '../../../helpers/friends';
 import { getCategories } from '../../../helpers/getCategories';
 import { log, updateLogResultCount } from '../../../helpers/supabase/log';
+import { createShortLink } from '../../../helpers/supabase/shortLinks';
 import { Category, Friend, LogParams, Modes, Mood, Types, Video } from '../../../helpers/types';
 import { getUsername } from '../../../helpers/users';
 import { getVideos, filterVideos, sortVideos } from '../../../helpers/videos';
@@ -688,28 +689,28 @@ const SearchLegacy = () => {
     run(start);
   };
 
-  const getShareUrl = () => {
-    // @ts-ignore
-    const params = new URLSearchParams({
-      mode,
-      activeMood,
-      type,
+  const getShareUrl = async () => {
+    const params: Record<string, string> = {
+      mode: String(mode),
+      activeMood: String(activeMood),
+      type: String(type),
       tags: includeTags.join(','),
       excludeTags: excludeTags.join(','),
       boosterTags: boosterTags.join(','),
       diminishingTags: diminishingTags.join(','),
-      amount,
-      minDuration,
-      primaryTag,
-      category,
-      id,
-      friendId,
-      termsOperator,
-      orderBy: sort,
-      start,
-      run: true,
-    });
-    return `${window.location.origin}/legacy/search?${params.toString()}`;
+      amount: String(amount),
+      minDuration: String(minDuration),
+      primaryTag: String(primaryTag),
+      category: String(category),
+      id: String(id),
+      friendId: String(friendId),
+      termsOperator: String(termsOperator),
+      orderBy: String(sort),
+      start: String(start),
+      run: 'true',
+    };
+    const code = await createShortLink('/legacy/search', params);
+    return `${window.location.origin}/s/${code}`;
   };
 
   // Apply client-side filtering whenever tag settings change
@@ -1284,7 +1285,7 @@ const SearchLegacy = () => {
                   {searchObject && (
                     <>
                       <Feedback search={searchObject} />
-                      <Share url={getShareUrl()} />
+                      <Share getShareUrl={getShareUrl} />
                     </>
                   )}
                   <div>

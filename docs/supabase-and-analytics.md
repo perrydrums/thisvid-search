@@ -44,6 +44,10 @@ The shape matches `LogParams` in `helpers/types.ts`. Schema changes on Supabase 
 
 `helpers/supabase/feedback.ts` (and `components/legacy/Feedback`) insert star ratings into **`feedback`**. RLS is defined in `supabase/migrations/20260503203100_feedback_rls.sql`: **INSERT** only for anon/authenticated clients (no client **SELECT** / **UPDATE** / **DELETE** policies). Service role still bypasses RLS for admin tooling.
 
+## Short share links (`/s/:code`)
+
+Compact share URLs avoid long query strings. **`helpers/supabase/shortLinks.ts`** inserts rows into **`public.short_links`** (`code`, `path` `/search` or `/legacy/search`, **`params` JSONB** without `run`). RLS: world-readable, anyone may insert (see migration **`20260503204300_short_links.sql`**). **`ShortLinkResolver`** (`/s/:code`) resolves the code client-side and redirects with **`run=true`**. Requires **`REACT_APP_SUPABASE_*`** so inserts and lookups succeed.
+
 ## Privacy note
 
 Logging includes **visitor-generated names**, **IP**, and **approximate location**. Document this in user-facing privacy policy if the app is public; avoid logging unnecessary PII when changing the schema.
