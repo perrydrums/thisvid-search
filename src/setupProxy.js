@@ -49,6 +49,15 @@ module.exports = function (app) {
     }),
   );
 
+  // ThisVid video pages may live under /legacy/videos/; must not hit SPA /legacy/* or CRA fallback proxy.
+  app.use(
+    '/legacy/videos',
+    createProxyMiddleware({
+      target: 'https://thisvid.com',
+      changeOrigin: true,
+    }),
+  );
+
   app.use(
     '/categories',
     createProxyMiddleware({

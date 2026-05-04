@@ -2,7 +2,6 @@
   "name": "thisvid-ass",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3000",
   "dependencies": {
     "@sparticuz/chromium": "^141.0.0",
     "@supabase/supabase-js": "^2.38.4",

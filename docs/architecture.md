@@ -21,9 +21,9 @@ public/            Static assets, PWA manifest
 
 ## Why two “ways” to hit ThisVid?
 
-1. **Same-origin paths** (`/newest/`, `/members/`, `/categories/`, etc.)  
+1. **Same-origin paths** (`/newest/`, `/members/`, `/categories/`, `/legacy/videos/…`, etc.)  
    In **development**, `src/setupProxy.js` forwards these to `https://thisvid.com`.  
-   In **production**, `netlify.toml` uses **redirects** so the browser still requests your domain; Netlify proxies to ThisVid. That avoids CORS when the React app fetches listing or profile HTML and parses it with Cheerio.
+   In **production**, `netlify.toml` uses **redirects** so the browser still requests your domain; Netlify proxies to ThisVid. That avoids CORS when the React app fetches listing or profile HTML and parses it with Cheerio. SPA routes under **`/legacy/`** stay on **`index.html`** except **`/legacy/videos/*`**, which is proxied to ThisVid like **`/videos/*`**.
 
 2. **Serverless scraping** (`GET /getVideos` with query params; **POST** JSON still works)  
    The browser calls your app’s `/getVideos?url=…`, which redirects (Netlify) or proxies (dev) to a **Netlify function** that fetches `https://thisvid.com` + path server-side, parses thumbnails with Cheerio, and returns JSON (`Video[]`). This keeps listing markup parsing centralized and allows options like `omitPrivate`, `minDuration`, and `quick`. **GET** carries all options in the URL so Netlify’s Edge/Durable cache can key on `Netlify-Vary: query` (`Netlify-CDN-Cache-Control` is set in `functions/videos.js`).

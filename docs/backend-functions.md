@@ -48,11 +48,11 @@ Inspect the `functions/` directory for additional utilities (e.g. shared **`allo
 
 `src/setupProxy.js` maps:
 
-- ThisVid paths → `https://thisvid.com`
+- ThisVid paths → `https://thisvid.com` (including **`/legacy/videos/`** for video detail pages; this must not fall through to the SPA **`/legacy/*`** route)
 - `/getVideos`, `/friends`, `/download`, etc. → `https://tvass.netlify.app/.netlify/functions/…`
 
-So local CRA can mimic production without running Netlify CLI—**but** you depend on the remote functions being available. To work fully offline, run Netlify dev or point the proxy at a local functions server.
+So local CRA can mimic production without running Netlify CLI—**but** you depend on the remote functions being available. To work fully offline, run Netlify dev or point the proxy at a local functions server. Do **not** set **`package.json`** **`"proxy"`** to the same host/port as the dev server (that can recurse and yield **`431 Request Header Fields Too Large`** on unmatched paths).
 
 ## Production redirects
 
-`netlify.toml` defines SPA fallbacks for client routes (`/`, `/search`, `/settings`, `/moods`, `/history`, **`/legacy/*`**, …) and **200 redirects** that proxy path prefixes to ThisVid or to the functions host. Global **security headers** (CSP, HSTS, clickjacking protection, etc.) ship via **`[[headers]] for = "/*"`**. If you add a new API path, add matching **redirect**, **`rate_limit`** (if proxied externally), dev **proxy**, and CSP **`connect-src`** entries when needed. The client resolves the visitor IP via **`getIp`** (`src/helpers/supabase/getIp.ts`), which calls **`https://api.ipify.org`** and must stay in **`connect-src`**.
+`netlify.toml` defines SPA fallbacks for client routes (`/`, `/search`, `/settings`, `/moods`, `/history`, **`/legacy/*`**, …), with **`/legacy/videos/*`** proxied to **ThisVid** **before** the **`/legacy/*`** fallback so Cheerio fetches (e.g. legacy Analyse) receive real video HTML. Other **200 redirects** proxy path prefixes to ThisVid or to the functions host. Global **security headers** (CSP, HSTS, clickjacking protection, etc.) ship via **`[[headers]] for = "/*"`**. If you add a new API path, add matching **redirect**, **`rate_limit`** (if proxied externally), dev **proxy**, and CSP **`connect-src`** entries when needed. The client resolves the visitor IP via **`getIp`** (`src/helpers/supabase/getIp.ts`), which calls **`https://api.ipify.org`** and must stay in **`connect-src`**.

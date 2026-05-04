@@ -24,6 +24,12 @@ export type AnalyseFavouriteUsers = Record<string, AnalyseFavouriteUser>;
 export const TVASS_USER_ID_STORAGE_KEY = 'tvass-user-id';
 export const ANALYSE_USERS_STORAGE_KEY = 'tvass-analyse-users';
 
+/** Same-origin path for fetch (proxied to ThisVid in dev + prod). Handles absolute or relative hrefs. */
+function hrefToProxiedPath(href: string): string {
+  const { pathname, search } = new URL(href, 'https://thisvid.com');
+  return `${pathname}${search}`;
+}
+
 async function fetchMemberAvatar(memberNumericId: string): Promise<string> {
   const id = parseInt(memberNumericId, 10);
   if (!id) return '';
@@ -89,8 +95,7 @@ export async function analyseFavouritesListingPage(
   const rows = await Promise.all(
     hrefs.map(async (href) => {
       try {
-        const proxyPath = href.split('/').slice(3).join('/');
-        const res = await fetch(proxyPath);
+        const res = await fetch(hrefToProxiedPath(href));
         const html = await res.text();
         const $v = cheerio.load(html);
 

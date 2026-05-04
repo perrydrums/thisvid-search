@@ -54,6 +54,12 @@ from = "/legacy-whats-new"
 to = "/legacy/whats-new"
 status = 301
 
+# Video detail HTML under /legacy/videos/ must proxy to ThisVid before the SPA catch-all below.
+[[redirects]]
+from = "/legacy/videos/*"
+to = "https://thisvid.com/legacy/videos/:splat"
+status = 200
+
 [[redirects]]
 from = "/legacy/*"
 to = "/index.html"
