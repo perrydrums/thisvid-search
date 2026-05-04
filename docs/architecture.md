@@ -32,7 +32,7 @@ Production also routes **`/friends`**, **`/friendsEvents`** (**POST**, JSON cred
 
 ## Security hardening (Netlify + functions)
 
-Global response headers (**CSP**, **HSTS**, **X-Frame-Options**, **Referrer-Policy**, etc.) ship from **`[[headers]] for = "/*"`** in `netlify.toml` (CRA currently needs **`unsafe-inline`** for scripts/styles—narrow further if the bundle allows).
+Global response headers (**CSP**, **HSTS**, **X-Frame-Options**, **Referrer-Policy**, etc.) ship from **`[[headers]] for = "/*"`** in `netlify.toml` (CRA currently needs **`unsafe-inline`** for scripts/styles—narrow further if the bundle allows). Keep **`connect-src`** aligned with client **`fetch`** targets (for example **`api.ipify.org`** for visitor IP via **`getIp`**).
 
 Proxied function paths declare **`[redirects.rate_limit]`** buckets. Handlers share **`allowedOrigins.js`** (optional **`SITE_ALLOWED_ORIGINS`**) and **`validateThisvidUrl.js`** (SSRF guardrails). Details: [`backend-functions.md`](./backend-functions.md).
 
