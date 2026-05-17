@@ -11,7 +11,7 @@
 
 ```
 src/
-  pages/           Primary shell: `Search` (`/` + `/search`), `Settings`, `Moods`, `History`; legacy screens under `pages/legacy/` (`SearchLegacy`, Analyse, Recommendations, WhatsNew, Preferences, Home)
+  pages/           Primary shell: `Search` (`/` + `/search`), `Analyse` (`/analyse`), `Settings`, `Moods`, `History`; legacy screens under `pages/legacy/` (`SearchLegacy`, Recommendations, WhatsNew, Preferences, Home)
   components/      `components/v2/` (primary UI); `components/legacy/` (classic search/header/results); shared `AuthEmailReturnHandler.tsx` at top level
   hooks/           useSearchLogic, useSearchState, useVideoFiltering (partial refactor), useAuth
   helpers/         videos.ts, types.ts, Supabase, favourites, categories, users, recommendations, analyseFavourites

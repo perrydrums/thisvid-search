@@ -1,0 +1,98 @@
+.wrap {
+  border-radius: var(--v2-radius-lg);
+  background: var(--v2-surface-low);
+  border: 1px solid var(--v2-border);
+  box-shadow: var(--v2-shadow-1);
+  padding: var(--v2-space-md);
+  max-height: min(420px, 55vh);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-sm);
+}
+
+.row {
+  margin: 0;
+  padding: 0;
+}
+
+.barRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-xs);
+  width: 100%;
+  padding: var(--v2-space-sm);
+  border-radius: var(--v2-radius-md);
+  background: var(--v2-surface);
+  border: 1px solid var(--v2-border);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    box-shadow 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.barRow:hover:not(:disabled) {
+  border-color: var(--v2-border-strong);
+  box-shadow: var(--v2-shadow-1);
+}
+
+.barRow:focus-visible {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 2px;
+}
+
+.rowTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--v2-space-md);
+  min-width: 0;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--v2-on-surface);
+  font-family: var(--v2-font-display);
+}
+
+.count {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--v2-on-surface-subtle);
+}
+
+.barTrack {
+  position: relative;
+  height: 10px;
+  border-radius: var(--v2-radius-full);
+  background: var(--v2-surface-muted);
+  overflow: hidden;
+  border: 1px solid var(--v2-border);
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--v2-primary) 0%, var(--v2-accent) 100%);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+  transition: width 0.35s ease;
+}

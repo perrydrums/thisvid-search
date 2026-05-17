@@ -30,6 +30,11 @@ to = "/index.html"
 status = 200
 
 [[redirects]]
+from = "/analyse"
+to = "/index.html"
+status = 200
+
+[[redirects]]
 from = "/s/*"
 to = "/index.html"
 status = 200
@@ -41,7 +46,12 @@ status = 301
 
 [[redirects]]
 from = "/legacy-analyse"
-to = "/legacy/analyse"
+to = "/analyse"
+status = 301
+
+[[redirects]]
+from = "/legacy/analyse"
+to = "/analyse"
 status = 301
 
 [[redirects]]

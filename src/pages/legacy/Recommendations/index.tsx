@@ -214,7 +214,7 @@ const Recommendations = () => {
                 </button>
                 <p style={{ color: '#666', fontSize: '0.85em', marginTop: '12px' }}>
                   You can also use the{' '}
-                  <a href="/legacy/analyse" style={{ color: 'var(--accent-color)' }}>
+                  <a href="/analyse" style={{ color: 'var(--accent-color)' }}>
                     Analyse
                   </a>{' '}
                   page for the same analysis with per-page controls.

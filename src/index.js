@@ -1,18 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import { AuthEmailReturnHandler } from './components/AuthEmailReturnHandler';
 import { AuthProvider } from './hooks/useAuth';
 import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Search from './pages/Search';
+import Analyse from './pages/Analyse';
 import { ShortLinkResolver } from './pages/ShortLinkResolver';
 import History from './pages/History';
 import Moods from './pages/Moods';
 import Settings from './pages/Settings';
 import SearchLegacy from './pages/legacy/SearchLegacy';
-import Analyse from './pages/legacy/Analyse';
 import Recommendations from './pages/legacy/Recommendations';
 import WhatsNew from './pages/legacy/WhatsNew';
 
@@ -66,6 +66,10 @@ const router = createBrowserRouter([
         element: <History />,
       },
       {
+        path: '/analyse',
+        element: <Analyse />,
+      },
+      {
         path: '/s/:code',
         element: <ShortLinkResolver />,
       },
@@ -75,7 +79,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/legacy/analyse',
-        element: <Analyse />,
+        element: <Navigate to="/analyse" replace />,
       },
       {
         path: '/legacy/recommendations',

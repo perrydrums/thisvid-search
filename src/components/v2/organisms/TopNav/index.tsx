@@ -14,6 +14,7 @@ const CREATOR_LINKTREE_URL = 'https://linktr.ee/sdaynoam';
 
 function activePageFromPath(pathname: string): AppSidebarActivePage | null {
   if (pathname === '/' || pathname.startsWith('/search')) return 'search';
+  if (pathname.startsWith('/analyse')) return 'analyse';
   if (pathname.startsWith('/moods')) return 'moods';
   if (pathname.startsWith('/history')) return 'history';
   if (pathname.startsWith('/settings')) return 'settings';

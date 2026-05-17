@@ -69,7 +69,7 @@ Recommendations are cached in `tvass-recommendations` (localStorage) as `{ fromC
 | `src/helpers/analyseFavourites.ts` | Shared favourite listing scrape (`runAnalyseFavourites`, per-page helper); storage key constants |
 | `src/helpers/recommendations.ts` | Async profile extraction + slug resolution, fetch/merge/filter/score, caching |
 | `src/pages/legacy/Recommendations/index.tsx` | Page UI — User ID + analyse, profile display, generate/refresh, results grid |
-| `src/pages/legacy/Analyse/index.tsx` | Full Analyse UI; uses `analyseFavourites` helpers |
+| `src/pages/Analyse/index.tsx` | Full Analyse UI (v2 shell); uses `analyseFavourites` helpers |
 
 ## Future phases
 
