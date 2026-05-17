@@ -209,7 +209,7 @@ const SearchRefactored = () => {
     if (
       (e.nativeEvent.submitter as SubmitEvent['submitter'] as HTMLInputElement)?.name === 'next'
     ) {
-      searchLogic.run(searchState.start + searchState.amount);
+      searchLogic.run(searchState.start + searchState.amount, { append: true });
       searchState.setStart(searchState.start + searchState.amount);
       return;
     }

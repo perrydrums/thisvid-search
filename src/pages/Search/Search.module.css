@@ -29,10 +29,19 @@
 
 .actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: var(--v2-space-md);
-  align-items: center;
+  align-items: stretch;
+  width: 100%;
   margin-top: var(--v2-space-sm);
+}
+
+.actions > button {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  box-sizing: border-box;
 }
 
 .searchProgressBtn {
@@ -40,7 +49,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 220px;
   padding: 12px 20px;
   font-family: var(--v2-font-display);
   font-size: 15px;
@@ -86,6 +94,41 @@
   z-index: 1;
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.nextPagesBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-family: var(--v2-font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border: 2px solid #24262b;
+  border-radius: var(--v2-radius);
+  cursor: pointer;
+  background: transparent;
+  color: #24262b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.1s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.nextPagesBtn:hover:not(:disabled) {
+  background: #24262b;
+  color: #fff;
+}
+
+.nextPagesBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.nextPagesBtn:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .error {

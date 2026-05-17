@@ -6,6 +6,15 @@ import { getFriends } from '../helpers/friends';
 import { getUsername } from '../helpers/users';
 import { log } from '../helpers/supabase/log';
 
+export type RunSearchOptions = {
+  /** When true, keep existing crawled rows and concatenate the new batch (dedup still applies). Defaults to preserveResults hook prop. */
+  append?: boolean;
+  /** Overrides how many listing pages this run fetches (`start … start + pages - 1`). Defaults to hook `amount`. */
+  pages?: number;
+  /** Fires once after listings are merged successfully (same path as `logSearch`; not invoked on validation/404 exits). */
+  onBatchComplete?: (info: { offset: number; pageCount: number; append: boolean }) => void;
+};
+
 interface UseSearchLogicProps {
   mode: string;
   type: string;
@@ -185,13 +194,17 @@ export const useSearchLogic = ({
     localStorage.setItem('uid', id);
   };
 
-  const logSearch = async () => {
+  const logSearch = async (pageAmountOverride?: number) => {
+    const pageAmount =
+      typeof pageAmountOverride === 'number' && Number.isFinite(pageAmountOverride)
+        ? pageAmountOverride
+        : amount;
     const s = await log({
       mode,
       type,
       advanced,
       tags: includeTags,
-      pageAmount: amount,
+      pageAmount,
       quick,
       duration: minDuration,
       primaryTag,
@@ -205,11 +218,18 @@ export const useSearchLogic = ({
     setSearchObject(s);
   };
 
-  const run = async (offset: number) => {
+  const run = async (offset: number, options?: RunSearchOptions) => {
     setLoading(true);
     setProgressCount(0);
 
-    if (!preserveResults) {
+    const shouldAppend = options?.append ?? preserveResults;
+
+    let pageCount =
+      typeof options?.pages === 'number' && Number.isFinite(options.pages)
+        ? Math.max(1, Math.floor(options.pages))
+        : Math.max(1, Math.floor(Number(amount)) || 1);
+
+    if (!shouldAppend) {
       setRawVideos([]);
     }
     const promises = [];
@@ -239,7 +259,7 @@ export const useSearchLogic = ({
       return;
     }
 
-    for (let i = offset; i <= offset - 1 + amount; i++) {
+    for (let i = offset; i <= offset - 1 + pageCount; i++) {
       const url = getUrl(i);
       const currentPage = i;
       promises.push(
@@ -280,14 +300,19 @@ export const useSearchLogic = ({
         (value, index, self) => index === self.findIndex((v) => v.url === value.url),
       );
 
-      const newRawVideos = preserveResults
+      const newRawVideos = shouldAppend
         ? [...rawVideos, ...videos] as Video[]
         : videos as Video[];
 
       setRawVideos(newRawVideos);
       setFinished(true);
       executeScroll();
-      logSearch();
+      options?.onBatchComplete?.({
+        offset,
+        pageCount,
+        append: shouldAppend,
+      });
+      logSearch(pageCount);
     } catch (error) {
       console.log('Error: ' + error);
     }

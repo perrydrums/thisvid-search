@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../../components/v2/tokens.css';
 import { AdvancedScoringSection } from '../../components/v2/organisms/AdvancedScoringSection';
 import { AppSidebar } from '../../components/v2/organisms/AppSidebar';
@@ -12,13 +12,17 @@ import type { SearchMode } from '../../components/v2/searchMode';
 import { getCategories } from '../../helpers/getCategories';
 import { Modes, Types, type Mood } from '../../helpers/types';
 import { getUsername } from '../../helpers/users';
-import { useSearchLogic } from '../../hooks/useSearchLogic';
+import { useSearchLogic, type RunSearchOptions } from '../../hooks/useSearchLogic';
 import { useSearchState } from '../../hooks/useSearchState';
 import { useUserData } from '../../hooks/useUserData';
 import { useVideoFiltering } from '../../hooks/useVideoFiltering';
 import { createShortLink } from '../../helpers/supabase/shortLinks';
 
 import styles from './Search.module.css';
+
+const SEARCH_PAGE_CHUNK = 100;
+/** Replay anchor encoded in share links (`totalListingPages` counts from this listing page onward). */
+const LISTING_SHARE_REPLAY_START = 1;
 
 const modes: Modes = {
   newest: 'Newest videos',
@@ -81,6 +85,41 @@ const Search = () => {
     syncedDefaultMood: userData.defaultMood,
   });
 
+  const isV2ListingMode = ['user', 'category', 'tags', 'extreme'].includes(searchState.mode);
+
+  const startPage = useMemo(
+    () => Math.max(1, Number(searchState.start) || 1),
+    [searchState.start],
+  );
+
+  const listingChunkPages = useMemo(() => {
+    if (!isV2ListingMode) return Math.max(1, Number(searchState.amount) || 1);
+    const limit = searchState.pageLimit;
+    if (limit > 0) {
+      return Math.min(SEARCH_PAGE_CHUNK, Math.max(1, limit - startPage + 1));
+    }
+    const fallback = Number(searchState.amount) || SEARCH_PAGE_CHUNK;
+    return Math.min(SEARCH_PAGE_CHUNK, Math.max(1, fallback));
+  }, [isV2ListingMode, searchState.pageLimit, searchState.amount, startPage]);
+
+  const listingPagesFetchedEndRef = useRef(0);
+  /** Listing pages this `run` will fetch (`run` resets `progressCount` to 0). Used while `loading` for X/N bar (can exceed SEARCH_PAGE_CHUNK on share replay). */
+  const listingRunProgressTotalRef = useRef(1);
+
+  const searchLogicRunRef = useRef<((offset: number, opts?: RunSearchOptions) => Promise<void>) | null>(null);
+
+  const handleListingBatchComplete = useCallback(
+    (info: { offset: number; pageCount: number; append: boolean }) => {
+      const endPg = info.offset + info.pageCount - 1;
+      if (!info.append) {
+        listingPagesFetchedEndRef.current = endPg;
+      } else {
+        listingPagesFetchedEndRef.current = Math.max(listingPagesFetchedEndRef.current, endPg);
+      }
+    },
+    [],
+  );
+
   const {
     setId,
     setCategories,
@@ -127,7 +166,7 @@ const Search = () => {
     rawVideos: videoFiltering.rawVideos,
     includeTags: videoFiltering.includeTags,
     advanced: true,
-    amount: searchState.amount,
+    amount: isV2ListingMode ? listingChunkPages : searchState.amount,
     setLoading: searchState.setLoading,
     setProgressCount,
     setRawVideos: videoFiltering.setRawVideos,
@@ -141,6 +180,8 @@ const Search = () => {
     setSearchObject,
     executeScroll,
   });
+
+  searchLogicRunRef.current = searchLogic.run;
 
   useEffect(() => {
     setId(userIds[0] || '');
@@ -249,9 +290,72 @@ const Search = () => {
   ]);
 
   useEffect(() => {
-    if (searchState.params.run) {
-      searchLogic.run(Number(searchState.params.start) || 1);
+    const pr = searchState.params;
+    if (!pr.run) return;
+
+    let cancelled = false;
+
+    async function replayFromShareOrUrl() {
+      const runListing = searchLogicRunRef.current;
+      if (!runListing) return;
+
+      const replayStart = Number(pr.start) || LISTING_SHARE_REPLAY_START;
+      const totalRaw = pr.totalListingPages;
+      const hasTotalListed =
+        totalRaw !== undefined &&
+        totalRaw !== null &&
+        String(totalRaw).trim() !== '' &&
+        Number.isFinite(Number(totalRaw));
+
+      const totalListed = hasTotalListed
+        ? Math.max(1, Math.floor(Number(totalRaw)))
+        : null;
+
+      let listingPagesConsumed = 0;
+
+      try {
+        if (totalListed != null) {
+          if (!cancelled) {
+            listingRunProgressTotalRef.current = Math.max(1, totalListed);
+            await runListing(replayStart, {
+              append: false,
+              pages: totalListed,
+              onBatchComplete: handleListingBatchComplete,
+            });
+          }
+          if (!cancelled) {
+            listingPagesConsumed = totalListed;
+          }
+        } else if (!cancelled) {
+          const fromUrl = Number(pr.amount);
+          const legacyPages =
+            Number.isFinite(fromUrl) && fromUrl > 0
+              ? Math.floor(fromUrl)
+              : Math.min(
+                  SEARCH_PAGE_CHUNK,
+                  Math.max(1, Number(searchState.amount) || SEARCH_PAGE_CHUNK),
+                );
+          listingRunProgressTotalRef.current = Math.max(1, legacyPages);
+          await runListing(replayStart, {
+            pages: legacyPages,
+            onBatchComplete: handleListingBatchComplete,
+          });
+          listingPagesConsumed = legacyPages;
+        }
+
+        if (!cancelled && listingPagesConsumed > 0) {
+          searchState.setStart(replayStart + listingPagesConsumed);
+        }
+      } catch {
+        // Errors are surfaced via search state inside `run`
+      }
     }
+
+    void replayFromShareOrUrl();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -268,20 +372,78 @@ const Search = () => {
     return types[m] || types.user;
   }, [searchState.mode]);
 
-  const pageTotal = Math.max(1, searchState.amount);
+  const idleSearchPageTotal = Math.max(
+    1,
+    isV2ListingMode ? listingChunkPages : Number(searchState.amount) || 1,
+  );
   const isSearching = searchState.loading;
   const pagesDone = searchState.progressCount;
-  const progressFillPct = isSearching ? Math.min(100, (pagesDone / pageTotal) * 100) : 0;
+  const progressBarListingTotal =
+    isV2ListingMode && isSearching ? Math.max(1, listingRunProgressTotalRef.current) : idleSearchPageTotal;
+
+  const progressFillPct = isSearching
+    ? Math.min(100, (pagesDone / progressBarListingTotal) * 100)
+    : 0;
+
+  const hasMoreListingPages =
+    isV2ListingMode &&
+    Boolean(searchState.finished) &&
+    !searchState.loading &&
+    searchState.pageLimit > 0 &&
+    startPage + listingChunkPages <= searchState.pageLimit;
+
+  const nextBatchPageCount =
+    searchState.pageLimit > 0
+      ? Math.min(
+          SEARCH_PAGE_CHUNK,
+          Math.max(1, searchState.pageLimit - (startPage + listingChunkPages) + 1),
+        )
+      : SEARCH_PAGE_CHUNK;
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage('');
     setFinished(false);
     setSearchObject(null);
-    searchLogic.run(searchState.start);
+    if (isV2ListingMode) {
+      videoFiltering.setPreserveResults(false);
+      listingPagesFetchedEndRef.current = 0;
+      searchState.setStart(1);
+      const chunk =
+        searchState.pageLimit > 0
+          ? Math.min(SEARCH_PAGE_CHUNK, searchState.pageLimit)
+          : Math.min(SEARCH_PAGE_CHUNK, Math.max(1, Number(searchState.amount) || SEARCH_PAGE_CHUNK));
+      listingRunProgressTotalRef.current = Math.max(1, chunk);
+      searchLogic.run(LISTING_SHARE_REPLAY_START, {
+        append: false,
+        pages: chunk,
+        onBatchComplete: handleListingBatchComplete,
+      });
+      return;
+    }
+    searchLogic.run(Number(searchState.start) || 1);
+  };
+
+  const loadNextListingChunk = () => {
+    setErrorMessage('');
+    const nextStart = startPage + listingChunkPages;
+    const chunk = nextBatchPageCount;
+    listingRunProgressTotalRef.current = Math.max(1, chunk);
+    searchState.setStart(nextStart);
+    searchLogic.run(nextStart, {
+      append: true,
+      pages: chunk,
+      onBatchComplete: handleListingBatchComplete,
+    });
   };
 
   const getShareUrl = async () => {
+    const cumulativeEndListingPage = listingPagesFetchedEndRef.current;
+    const totalListingPagesForShare =
+      isV2ListingMode && cumulativeEndListingPage >= LISTING_SHARE_REPLAY_START
+        ? cumulativeEndListingPage - LISTING_SHARE_REPLAY_START + 1
+        : Math.max(1, isV2ListingMode ? listingChunkPages : Number(searchState.amount) || 1);
+
     const params: Record<string, string> = {
       mode: searchState.mode,
       activeMood: videoFiltering.activeMood,
@@ -290,7 +452,7 @@ const Search = () => {
       excludeTags: videoFiltering.excludeTags.join(','),
       boosterTags: videoFiltering.boosterTags.join(','),
       diminishingTags: videoFiltering.diminishingTags.join(','),
-      amount: String(searchState.amount),
+      amount: String(isV2ListingMode ? listingChunkPages : searchState.amount),
       minDuration: String(videoFiltering.minDuration),
       primaryTag: searchState.primaryTag,
       category: searchState.category,
@@ -298,7 +460,8 @@ const Search = () => {
       friendId: searchState.friendId,
       termsOperator: videoFiltering.termsOperator,
       orderBy: videoFiltering.sort,
-      start: String(searchState.start),
+      start: String(LISTING_SHARE_REPLAY_START),
+      ...(isV2ListingMode ? { totalListingPages: String(totalListingPagesForShare) } : {}),
       run: 'true',
     };
     const code = await createShortLink('/search', params);
@@ -306,7 +469,7 @@ const Search = () => {
   };
 
   const v2Mode = searchState.mode as SearchMode;
-  const isV2Mode = ['user', 'category', 'tags', 'extreme'].includes(searchState.mode);
+  const isV2Mode = isV2ListingMode;
 
   return (
     <div className={`v2-root ${chrome.page}`}>
@@ -383,10 +546,20 @@ const Search = () => {
                   <span className={styles.searchProgressFill} style={{ width: `${progressFillPct}%` }} />
                   <span className={styles.searchProgressLabel}>
                     {isSearching
-                      ? `SEARCHING ${pagesDone}/${pageTotal}...`
-                      : `SEARCH ${pageTotal} PAGES`}
+                      ? `SEARCHING ${pagesDone}/${progressBarListingTotal}...`
+                      : `SEARCH ${idleSearchPageTotal} PAGES`}
                   </span>
                 </button>
+                {hasMoreListingPages ? (
+                  <button
+                    type="button"
+                    className={styles.nextPagesBtn}
+                    disabled={isSearching}
+                    onClick={loadNextListingChunk}
+                  >
+                    NEXT {nextBatchPageCount} PAGES
+                  </button>
+                ) : null}
               </div>
             </>
           )}
