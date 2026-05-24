@@ -569,7 +569,6 @@ const Search = () => {
           {isV2Mode && (
             <ResultsPreviewGrid
               videos={videoFiltering.videos}
-              username={searchState.username}
               sort={videoFiltering.sort}
               onSortChange={videoFiltering.setSort}
               getShareUrl={getShareUrl}

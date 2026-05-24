@@ -15,8 +15,6 @@ const LOAD_MORE = 24;
 
 export type ResultsPreviewGridProps = {
   videos: Video[];
-  /** Profile display name for the active search user (when in user mode). */
-  username?: string;
   /** Same values as classic /search sort control. */
   sort: string;
   onSortChange: (sort: string) => void;
@@ -26,14 +24,13 @@ export type ResultsPreviewGridProps = {
   searchFinished: boolean;
 };
 
-function metaLine(username: string | undefined, date: string | undefined): string | undefined {
-  const parts = [username?.trim(), date?.trim()].filter(Boolean) as string[];
-  return parts.length > 0 ? parts.join(' · ') : undefined;
+function metaLine(date: string | undefined): string | undefined {
+  const trimmed = date?.trim();
+  return trimmed || undefined;
 }
 
 export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   videos,
-  username,
   sort,
   onSortChange,
   getShareUrl,
@@ -172,7 +169,7 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
                 title={v.title}
                 thumbnailUrl={v.avatar}
                 duration={v.duration}
-                metaLine={metaLine(username, v.date)}
+                metaLine={metaLine(v.date)}
                 views={v.views}
                 relevance={v.relevance}
                 isPrivate={v.isPrivate}
