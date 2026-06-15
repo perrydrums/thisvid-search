@@ -377,6 +377,8 @@ const Search = () => {
     isV2ListingMode ? listingChunkPages : Number(searchState.amount) || 1,
   );
   const isSearching = searchState.loading;
+  const isPreparingPageLimit = isV2ListingMode && searchLogic.pageLimitLoading;
+  const isSearchDisabled = isSearching || isPreparingPageLimit;
   const pagesDone = searchState.progressCount;
   const progressBarListingTotal =
     isV2ListingMode && isSearching ? Math.max(1, listingRunProgressTotalRef.current) : idleSearchPageTotal;
@@ -544,21 +546,23 @@ const Search = () => {
                 <button
                   type="submit"
                   className={styles.searchProgressBtn}
-                  disabled={isSearching}
-                  aria-busy={isSearching}
+                  disabled={isSearchDisabled}
+                  aria-busy={isSearchDisabled}
                 >
                   <span className={styles.searchProgressFill} style={{ width: `${progressFillPct}%` }} />
                   <span className={styles.searchProgressLabel}>
                     {isSearching
                       ? `SEARCHING ${pagesDone}/${progressBarListingTotal}...`
-                      : `SEARCH ${idleSearchPageTotal} PAGES`}
+                      : isPreparingPageLimit
+                        ? 'PREPARING'
+                        : `SEARCH ${idleSearchPageTotal} PAGES`}
                   </span>
                 </button>
                 {hasMoreListingPages ? (
                   <button
                     type="button"
                     className={styles.nextPagesBtn}
-                    disabled={isSearching}
+                    disabled={isSearchDisabled}
                     onClick={loadNextListingChunk}
                   >
                     NEXT {nextBatchPageCount} PAGES

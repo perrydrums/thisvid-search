@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import cheerio from 'cheerio';
 import { Video } from '../helpers/types';
 import { getVideos } from '../helpers/videos';
@@ -70,6 +70,7 @@ export const useSearchLogic = ({
   setSearchObject,
   executeScroll,
 }: UseSearchLogicProps) => {
+  const [pageLimitLoading, setPageLimitLoading] = useState(false);
 
   const getUrl = useCallback((page: number): string => {
     const idTrim = id?.trim() ?? '';
@@ -142,26 +143,32 @@ export const useSearchLogic = ({
       (mode === 'user' && (!(id?.trim?.() ?? '') || !type)) ||
       (mode === 'friend' && (!(friendId?.trim?.() ?? '') || !type))
     ) {
+      setPageLimitLoading(false);
       return;
     }
 
-    const response = await fetch(url);
+    setPageLimitLoading(true);
+    try {
+      const response = await fetch(url);
 
-    if (response) {
-      if (response.status === 404) {
-        return;
+      if (response) {
+        if (response.status === 404) {
+          return;
+        }
+
+        const body = await response.text();
+        const $ = cheerio.load(body);
+
+        const lastPage =
+          parseInt(
+            $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
+          ) || 1;
+
+        setPageLimit(lastPage);
+        setAmount(lastPage < 100 ? lastPage : 100);
       }
-
-      const body = await response.text();
-      const $ = cheerio.load(body);
-
-      const lastPage =
-        parseInt(
-          $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-        ) || 1;
-
-      setPageLimit(lastPage);
-      setAmount(lastPage < 100 ? lastPage : 100);
+    } finally {
+      setPageLimitLoading(false);
     }
   }, [getPageLimitUrl, mode, type, primaryTag, id, friendId, setPageLimit, setAmount]);
 
@@ -324,6 +331,7 @@ export const useSearchLogic = ({
     urlExists,
     checkSourceExists,
     getPageLimit,
+    pageLimitLoading,
     updateUsername,
     getFriendsById,
     logSearch,
