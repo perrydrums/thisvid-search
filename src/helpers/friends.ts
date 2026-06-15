@@ -1,4 +1,4 @@
-import { Friend, FriendsResponse } from './types';
+import { FriendsResponse } from './types';
 
 export async function fetchAllFriends(userId: string): Promise<FriendsResponse> {
   const trimmed = userId.trim();
