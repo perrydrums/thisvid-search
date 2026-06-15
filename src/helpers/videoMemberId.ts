@@ -34,8 +34,21 @@ export async function fetchMemberIdForVideoUrl(videoUrl: string): Promise<string
 const ENRICH_BATCH = 8;
 
 /** Fill missing `memberId` on private rows (e.g. favourite listings) via video page scrape. */
-export async function enrichPrivateVideoMemberIds(videos: Video[]): Promise<Video[]> {
-  const toEnrich = videos.filter((v) => v.isPrivate && !v.memberId?.trim());
+export async function enrichPrivateVideoMemberIds(
+  videos: Video[],
+  options?: { rejectMemberIds?: string[] },
+): Promise<Video[]> {
+  const reject = new Set(
+    (options?.rejectMemberIds ?? []).map((s) => s.trim()).filter(Boolean),
+  );
+  const needsUploader = (v: Video) => {
+    if (!v.isPrivate) return false;
+    const mid = v.memberId?.trim();
+    if (!mid) return true;
+    return reject.has(mid);
+  };
+
+  const toEnrich = videos.filter(needsUploader);
   if (toEnrich.length === 0) return videos;
 
   const updates = new Map<string, string>();

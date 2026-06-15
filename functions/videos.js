@@ -46,9 +46,13 @@ function memberIdFromProfileHref(href) {
   return m ? m[1] : '';
 }
 
+function isFavouriteVideosListingPath(pathSuffix) {
+  return /\/members\/[^/]+\/favourite_videos(?:\/|$)/.test(pathSuffix);
+}
+
 function memberIdFromListingPath(pathSuffix) {
   // Favourite listings are videos from many uploaders — not the profile owner.
-  if (/\/members\/[^/]+\/favourite_videos(?:\/|$)/.test(pathSuffix)) {
+  if (isFavouriteVideosListingPath(pathSuffix)) {
     return '';
   }
   return memberIdFromProfileHref(pathSuffix);
@@ -159,7 +163,9 @@ exports.handler = async function (event, context) {
       const time = minutes * 60 + seconds;
 
       const title = $(element).attr('title') || '';
-      const memberId = memberIdFromThumb($, element, listingMemberId);
+      const memberId = isFavouriteVideosListingPath(pathSuffix)
+        ? ''
+        : memberIdFromThumb($, element, listingMemberId);
 
       if (time >= minDuration * 60) {
         if (quick) {

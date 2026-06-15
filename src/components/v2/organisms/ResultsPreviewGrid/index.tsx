@@ -29,8 +29,10 @@ export type ResultsPreviewGridProps = {
   searchFinished: boolean;
   /** Comma-separated ThisVid member IDs (from Settings sync); falls back to localStorage. */
   friendIdsCsv?: string;
-  /** Listing owner when searching a member's videos (user mode). */
+  /** Listing owner when searching a member's public/private videos (not favourites). */
   listingMemberId?: string;
+  /** Profile owner when browsing favourite listings — excluded from uploader resolution. */
+  favouriteListingOwnerId?: string;
 };
 
 function metaLine(date: string | undefined): string | undefined {
@@ -46,6 +48,7 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   searchFinished,
   friendIdsCsv,
   listingMemberId = '',
+  favouriteListingOwnerId = '',
 }) => {
   const total = videos.length;
   const firstUrl = total > 0 ? videos[0].url : '';
@@ -193,7 +196,10 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
                 isFavourite={favourites.has(v.url)}
                 isPrivateWatchable={
                   v.isPrivate &&
-                  isFriendMemberId(resolveVideoMemberId(v, listingMemberId), friendIds)
+                  isFriendMemberId(
+                    resolveVideoMemberId(v, listingMemberId, favouriteListingOwnerId),
+                    friendIds,
+                  )
                 }
                 debug={debug}
                 onClick={() => window.open(v.url, '_blank', 'noopener,noreferrer')}

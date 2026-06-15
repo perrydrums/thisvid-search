@@ -79,10 +79,19 @@ const SELECT_MOOD_PLACEHOLDER: Mood = {
 const Search = () => {
   const searchState = useSearchState({ defaultMode: 'user' });
   const userData = useUserData();
+
+  const favouriteListingOwnerId = useMemo(() => {
+    if (searchState.type !== 'favourite') return '';
+    if (searchState.mode === 'user') return searchState.id?.trim() || '';
+    if (searchState.mode === 'friend') return searchState.friendId?.trim() || '';
+    return '';
+  }, [searchState.type, searchState.mode, searchState.id, searchState.friendId]);
+
   const videoFiltering = useVideoFiltering({
     params: searchState.params,
     searchObject: searchState.searchObject,
     syncedDefaultMood: userData.defaultMood,
+    favouriteListingOwnerId,
   });
 
   const isV2ListingMode = ['user', 'category', 'tags', 'extreme'].includes(searchState.mode);
@@ -585,6 +594,7 @@ const Search = () => {
               searchFinished={searchState.finished}
               friendIdsCsv={userData.friendIds}
               listingMemberId={listingMemberId}
+              favouriteListingOwnerId={favouriteListingOwnerId}
             />
           )}
           <p className={styles.footerNote}>

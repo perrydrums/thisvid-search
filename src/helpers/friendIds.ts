@@ -13,11 +13,25 @@ export function getLocalFriendIds(): string[] {
   return raw.split(',').map((s) => s.trim()).filter(Boolean);
 }
 
+export function isFavouriteVideosListingPath(path: string): boolean {
+  return /\/members\/[^/]+\/favourite_videos(?:\/|$)/.test(String(path || ''));
+}
+
+/** Member whose favourites list is being browsed (not per-video uploader). */
+export function memberIdFromFavouriteListingPath(path: string): string {
+  const m = String(path || '').match(/\/members\/([^/?#]+)\/favourite_videos/);
+  return m ? m[1] : '';
+}
+
 export function resolveVideoMemberId(
   video: { memberId?: string },
   listingMemberId?: string,
+  /** When set, this profile owner ID is never treated as the uploader (favourite listings). */
+  favouriteListingOwnerId?: string,
 ): string {
-  const fromVideo = video.memberId?.trim();
+  const owner = favouriteListingOwnerId?.trim();
+  let fromVideo = video.memberId?.trim();
+  if (fromVideo && owner && fromVideo === owner) fromVideo = '';
   if (fromVideo) return fromVideo;
   return listingMemberId?.trim() || '';
 }
