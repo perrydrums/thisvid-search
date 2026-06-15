@@ -40,8 +40,6 @@ export type VideoCardProps = {
   debug?: boolean;
   /** Local favourites list (`tvass-favourites`) includes this URL. */
   isFavourite?: boolean;
-  /** Private video from a synced friend — you can watch it on ThisVid. */
-  isPrivateWatchable?: boolean;
   onClick?: () => void;
 };
 
@@ -55,7 +53,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   isPrivate,
   debug = false,
   isFavourite = false,
-  isPrivateWatchable = false,
   onClick,
 }) => {
   return (
@@ -70,11 +67,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           </span>
         )}
         {isPrivate && (
-          <span
-            className={[styles.privateBadge, isPrivateWatchable ? styles.privateBadgeFriend : ''].join(' ')}
-            aria-label={isPrivateWatchable ? 'Private video — friend can watch' : 'Private video'}
-            title={isPrivateWatchable ? 'Friend — you can watch this private video' : undefined}
-          >
+          <span className={styles.privateBadge} aria-label="Private video">
             <span className={`material-symbols-outlined ${styles.lockIcon}`} aria-hidden>
               lock
             </span>

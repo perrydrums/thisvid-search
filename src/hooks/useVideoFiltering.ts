@@ -1,25 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Video, LogParams } from '../helpers/types';
 import { filterVideos, sortVideos } from '../helpers/videos';
 import { getLocalFavourites } from '../helpers/favourites';
 import { updateLogResultCount } from '../helpers/supabase/log';
-import { enrichPrivateVideoMemberIds } from '../helpers/videoMemberId';
 
 interface UseVideoFilteringProps {
   params: { [key: string]: any };
   searchObject?: LogParams | null;
   /** v2: default mood from synced profile (falls back to tvass-default-mood in localStorage). */
   syncedDefaultMood?: string;
-  /** Profile owner when browsing favourite listings — not the per-video uploader. */
-  favouriteListingOwnerId?: string;
 }
 
-export const useVideoFiltering = ({
-  params,
-  searchObject,
-  syncedDefaultMood,
-  favouriteListingOwnerId = '',
-}: UseVideoFilteringProps) => {
+export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: UseVideoFilteringProps) => {
   const initialActiveMood = () => {
     if (params.run !== undefined) return '';
     const d = syncedDefaultMood?.trim();
@@ -65,58 +57,6 @@ export const useVideoFiltering = ({
   const [omitPrivate, setOmitPrivate] = useState(false);
   const [omitFavourites, setOmitFavourites] = useState(false);
   const [preserveResults, setPreserveResults] = useState(false);
-
-  const enrichAttemptedRef = useRef(new Set<string>());
-  const rawFirstUrlRef = useRef('');
-
-  const favouriteOwner = favouriteListingOwnerId.trim();
-
-  // Favourite / mixed listings omit uploader on tiles — scrape video pages for private rows.
-  useEffect(() => {
-    if (rawVideos.length === 0) {
-      enrichAttemptedRef.current.clear();
-      rawFirstUrlRef.current = '';
-      return;
-    }
-
-    const first = rawVideos[0]?.url ?? '';
-    if (first !== rawFirstUrlRef.current) {
-      rawFirstUrlRef.current = first;
-      enrichAttemptedRef.current.clear();
-    }
-
-    const needsUploader = (v: Video) => {
-      if (!v.isPrivate) return false;
-      const mid = v.memberId?.trim();
-      if (!mid) return true;
-      return Boolean(favouriteOwner && mid === favouriteOwner);
-    };
-
-    const pending = rawVideos.filter(
-      (v) => needsUploader(v) && !enrichAttemptedRef.current.has(v.url),
-    );
-    if (pending.length === 0) return;
-
-    pending.forEach((v) => enrichAttemptedRef.current.add(v.url));
-
-    let cancelled = false;
-    void enrichPrivateVideoMemberIds(pending, {
-      rejectMemberIds: favouriteOwner ? [favouriteOwner] : [],
-    }).then((enriched) => {
-      if (cancelled) return;
-      const byUrl = new Map(enriched.map((v) => [v.url, v.memberId]));
-      setRawVideos((prev) =>
-        prev.map((v) => {
-          const memberId = byUrl.get(v.url);
-          return memberId ? { ...v, memberId } : v;
-        }),
-      );
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [rawVideos, favouriteOwner]);
 
   // Apply client-side filtering whenever relevant state changes
   useEffect(() => {

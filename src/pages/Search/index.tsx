@@ -80,18 +80,10 @@ const Search = () => {
   const searchState = useSearchState({ defaultMode: 'user' });
   const userData = useUserData();
 
-  const favouriteListingOwnerId = useMemo(() => {
-    if (searchState.type !== 'favourite') return '';
-    if (searchState.mode === 'user') return searchState.id?.trim() || '';
-    if (searchState.mode === 'friend') return searchState.friendId?.trim() || '';
-    return '';
-  }, [searchState.type, searchState.mode, searchState.id, searchState.friendId]);
-
   const videoFiltering = useVideoFiltering({
     params: searchState.params,
     searchObject: searchState.searchObject,
     syncedDefaultMood: userData.defaultMood,
-    favouriteListingOwnerId,
   });
 
   const isV2ListingMode = ['user', 'category', 'tags', 'extreme'].includes(searchState.mode);
@@ -479,13 +471,6 @@ const Search = () => {
   const v2Mode = searchState.mode as SearchMode;
   const isV2Mode = isV2ListingMode;
 
-  const listingMemberId = useMemo(() => {
-    if (searchState.mode !== 'user') return '';
-    const type = searchState.type;
-    if (type === 'public' || type === 'private') return searchState.id?.trim() || '';
-    return '';
-  }, [searchState.mode, searchState.type, searchState.id]);
-
   return (
     <div className={`v2-root ${chrome.page}`}>
       <TopNav />
@@ -592,9 +577,6 @@ const Search = () => {
               onSortChange={videoFiltering.setSort}
               getShareUrl={getShareUrl}
               searchFinished={searchState.finished}
-              friendIdsCsv={userData.friendIds}
-              listingMemberId={listingMemberId}
-              favouriteListingOwnerId={favouriteListingOwnerId}
             />
           )}
           <p className={styles.footerNote}>

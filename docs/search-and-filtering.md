@@ -71,7 +71,7 @@ Relevance blends weighted tag frequency in the title with boost/diminish bonuses
 - **omitPrivate** (UI: **Exclude private**): client filters out rows with `isPrivate` on already-fetched results (same as favourites; no re-scrape).
 - **quick**: when `true`, only listing page is fetched per video row; when `false`, function may open each video URL (slower; current code still focuses on list data).
 - **omitFavourites** (UI: **Exclude favourites**): client filters out URLs present in local favourites (`helpers/favourites`).
-- **friend_ids** (Settings **Sync profile**): stored in `tvass-friend-ids` / `profiles.friend_ids`. On search results, a **green** `PRIVATE` badge means the **uploader** is in that list (`Video.memberId`). Favourite listings scrape each private video’s page for uploader ID (the profile whose favourites you browse is not the uploader).
+- **friend_ids** (Settings **Sync profile**): stored in `tvass-friend-ids` / `profiles.friend_ids` alongside favourites. Not used on the search results grid.
 - **preserveResults**: append new batch to `rawVideos` instead of replacing (infinite-style loading).
 
 ## URL / shareable state

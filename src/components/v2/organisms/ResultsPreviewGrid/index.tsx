@@ -1,11 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { getLocalFavourites } from '../../../../helpers/favourites';
-import {
-  getLocalFriendIds,
-  isFriendMemberId,
-  resolveVideoMemberId,
-} from '../../../../helpers/friendIds';
 import debug from '../../../../helpers/debug';
 import { Video } from '../../../../helpers/types';
 
@@ -27,12 +22,6 @@ export type ResultsPreviewGridProps = {
   getShareUrl: () => Promise<string>;
   /** After the latest search run has completed, header shows FOUND count instead of RESULTS. */
   searchFinished: boolean;
-  /** Comma-separated ThisVid member IDs (from Settings sync); falls back to localStorage. */
-  friendIdsCsv?: string;
-  /** Listing owner when searching a member's public/private videos (not favourites). */
-  listingMemberId?: string;
-  /** Profile owner when browsing favourite listings — excluded from uploader resolution. */
-  favouriteListingOwnerId?: string;
 };
 
 function metaLine(date: string | undefined): string | undefined {
@@ -46,19 +35,10 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
   onSortChange,
   getShareUrl,
   searchFinished,
-  friendIdsCsv,
-  listingMemberId = '',
-  favouriteListingOwnerId = '',
 }) => {
   const total = videos.length;
   const firstUrl = total > 0 ? videos[0].url : '';
   const favourites = new Set(getLocalFavourites());
-  const friendIds = useMemo(() => {
-    const raw = friendIdsCsv?.trim()
-      ? friendIdsCsv.split(',').map((s) => s.trim()).filter(Boolean)
-      : getLocalFriendIds();
-    return new Set(raw);
-  }, [friendIdsCsv]);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const copyResetRef = useRef<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(() => Math.min(INITIAL_BATCH, total));
@@ -194,13 +174,6 @@ export const ResultsPreviewGrid: React.FC<ResultsPreviewGridProps> = ({
                 relevance={v.relevance}
                 isPrivate={v.isPrivate}
                 isFavourite={favourites.has(v.url)}
-                isPrivateWatchable={
-                  v.isPrivate &&
-                  isFriendMemberId(
-                    resolveVideoMemberId(v, listingMemberId, favouriteListingOwnerId),
-                    friendIds,
-                  )
-                }
                 debug={debug}
                 onClick={() => window.open(v.url, '_blank', 'noopener,noreferrer')}
               />

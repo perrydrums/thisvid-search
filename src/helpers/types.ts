@@ -2,8 +2,6 @@ export type Video = {
   title: string;
   url: string;
   isPrivate: boolean;
-  /** ThisVid member ID when known (listing owner or uploader link on the tile). */
-  memberId?: string;
   duration: string;
   avatar: string;
   views: number;

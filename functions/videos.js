@@ -41,35 +41,6 @@ function readVideosInput(event) {
   };
 }
 
-function memberIdFromProfileHref(href) {
-  const m = String(href || '').match(/\/members\/([^/?#]+)/);
-  return m ? m[1] : '';
-}
-
-function isFavouriteVideosListingPath(pathSuffix) {
-  return /\/members\/[^/]+\/favourite_videos(?:\/|$)/.test(pathSuffix);
-}
-
-function memberIdFromListingPath(pathSuffix) {
-  // Favourite listings are videos from many uploaders — not the profile owner.
-  if (isFavouriteVideosListingPath(pathSuffix)) {
-    return '';
-  }
-  return memberIdFromProfileHref(pathSuffix);
-}
-
-function memberIdFromThumb($, element, listingMemberId) {
-  if (listingMemberId) return listingMemberId;
-
-  const authorHref =
-    $(element).closest('.item').find('a[href*="/members/"]').first().attr('href') ||
-    $(element).parent().siblings().find('a[href*="/members/"]').first().attr('href') ||
-    $(element).parent().find('a[href*="/members/"]').first().attr('href') ||
-    '';
-
-  return memberIdFromProfileHref(authorHref);
-}
-
 exports.handler = async function (event, context) {
   const forbidden = requireSiteOrigin(event);
   if (forbidden) return forbidden;
@@ -141,8 +112,6 @@ exports.handler = async function (event, context) {
     const body = await response.text();
     const $ = cheerio.load(body);
 
-    const listingMemberId = memberIdFromListingPath(pathSuffix);
-
     const videos = [];
     const urls = [];
     $('.tumbpu').each((i, element) => {
@@ -163,9 +132,6 @@ exports.handler = async function (event, context) {
       const time = minutes * 60 + seconds;
 
       const title = $(element).attr('title') || '';
-      const memberId = isFavouriteVideosListingPath(pathSuffix)
-        ? ''
-        : memberIdFromThumb($, element, listingMemberId);
 
       if (time >= minDuration * 60) {
         if (quick) {
@@ -173,7 +139,6 @@ exports.handler = async function (event, context) {
             title,
             url: $(element).attr('href') || '',
             isPrivate,
-            memberId,
             duration,
             avatar,
             views: parseInt(views),
@@ -186,7 +151,6 @@ exports.handler = async function (event, context) {
             title,
             url: $(element).attr('href') || '',
             isPrivate,
-            memberId,
             duration,
             avatar,
             views: parseInt(views),
@@ -210,7 +174,6 @@ exports.handler = async function (event, context) {
             title: video.title,
             url: video.url,
             isPrivate: video.isPrivate,
-            memberId: video.memberId,
             duration: video.duration,
             avatar: video.avatar,
             views: video.views,
