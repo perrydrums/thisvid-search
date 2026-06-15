@@ -567,7 +567,6 @@ const SearchLegacy = () => {
           minDuration,
           quick,
           page: i,
-          omitPrivate,
           // eslint-disable-next-line
         }).then((s) => {
           // @ts-ignore
@@ -732,6 +731,10 @@ const SearchLegacy = () => {
       filteredVideos = filteredVideos.filter((video) => !favourites.includes(video.url));
     }
 
+    if (omitPrivate) {
+      filteredVideos = filteredVideos.filter((video) => !video.isPrivate);
+    }
+
     // Apply category filter for friendsEvents mode
     if (mode === 'friendsEvents' && friendsEventsCategory) {
       filteredVideos = filteredVideos.filter((video) => {
@@ -751,7 +754,7 @@ const SearchLegacy = () => {
         console.error('Failed to update log result count:', error);
       });
     }
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, mode, friendsEventsCategory, enrichedVideosData, searchObject]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, sort, mode, friendsEventsCategory, enrichedVideosData, searchObject]);
 
   return (
     <>

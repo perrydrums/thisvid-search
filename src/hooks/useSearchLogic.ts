@@ -24,7 +24,6 @@ interface UseSearchLogicProps {
   category: string;
   minDuration: number;
   quick: boolean;
-  omitPrivate: boolean;
   preserveResults: boolean;
   rawVideos: Video[];
   includeTags: string[];
@@ -53,7 +52,6 @@ export const useSearchLogic = ({
   category,
   minDuration,
   quick,
-  omitPrivate,
   preserveResults,
   rawVideos,
   includeTags,
@@ -268,7 +266,6 @@ export const useSearchLogic = ({
           minDuration,
           quick,
           page: currentPage,
-          omitPrivate,
         // eslint-disable-next-line no-loop-func -- callback runs when each page settles; shared progress/tempPageLimit (see Search/index.tsx)
         }).then((s) => {
           // @ts-ignore

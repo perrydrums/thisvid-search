@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Switch } from '../../atoms/Switch';
 import { ChipInput } from '../../molecules/ChipInput';
 
 import styles from './AdvancedScoringSection.module.css';
@@ -11,6 +12,10 @@ export type AdvancedScoringSectionProps = {
   onDiminishingChange: (t: string[]) => void;
   excludeTags: string[];
   onExcludeChange: (t: string[]) => void;
+  omitFavourites: boolean;
+  onOmitFavouritesChange: (omit: boolean) => void;
+  omitPrivate: boolean;
+  onOmitPrivateChange: (omit: boolean) => void;
 };
 
 export const AdvancedScoringSection: React.FC<AdvancedScoringSectionProps> = ({
@@ -20,6 +25,10 @@ export const AdvancedScoringSection: React.FC<AdvancedScoringSectionProps> = ({
   onDiminishingChange,
   excludeTags,
   onExcludeChange,
+  omitFavourites,
+  onOmitFavouritesChange,
+  omitPrivate,
+  onOmitPrivateChange,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -27,8 +36,8 @@ export const AdvancedScoringSection: React.FC<AdvancedScoringSectionProps> = ({
     <div className={styles.shell}>
       <button type="button" className={styles.head} onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className={styles.headLabel}>
-          <span className="material-symbols-outlined">psychology</span>
-          ADVANCED RELEVANCE SCORING
+          <span className="material-symbols-outlined">tune</span>
+          MORE SETTINGS
         </span>
         <span
           className={['material-symbols-outlined', styles.chev, open ? styles.chevOpen : ''].join(' ')}
@@ -42,6 +51,20 @@ export const AdvancedScoringSection: React.FC<AdvancedScoringSectionProps> = ({
         <div className={styles.panel}>
           <div className={styles.decor} aria-hidden>
             <span className="material-symbols-outlined">tune</span>
+          </div>
+          <div className={styles.switchesRow}>
+            <Switch
+              id="omit-favourites"
+              label="Exclude favourites"
+              checked={omitFavourites}
+              onChange={onOmitFavouritesChange}
+            />
+            <Switch
+              id="omit-private"
+              label="Exclude private"
+              checked={omitPrivate}
+              onChange={onOmitPrivateChange}
+            />
           </div>
           <div className={styles.cols}>
             <div>

@@ -77,6 +77,10 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
       filteredVideos = filteredVideos.filter((video) => !favourites.includes(video.url));
     }
 
+    if (omitPrivate) {
+      filteredVideos = filteredVideos.filter((video) => !video.isPrivate);
+    }
+
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
@@ -87,7 +91,7 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
         console.error('Failed to update log result count:', error);
       });
     }
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, sort, searchObject]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, sort, searchObject]);
 
   // Helper function to reset tags based on mood
   const applyMoodPreferences = (moodPreferences: any) => {

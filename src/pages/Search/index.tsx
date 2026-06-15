@@ -161,7 +161,6 @@ const Search = () => {
     category: searchState.category,
     minDuration: videoFiltering.minDuration,
     quick: videoFiltering.quick,
-    omitPrivate: videoFiltering.omitPrivate,
     preserveResults: videoFiltering.preserveResults,
     rawVideos: videoFiltering.rawVideos,
     includeTags: videoFiltering.includeTags,
@@ -534,6 +533,10 @@ const Search = () => {
                 onDiminishingChange={videoFiltering.setDiminishingTags}
                 excludeTags={videoFiltering.excludeTags}
                 onExcludeChange={videoFiltering.setExcludeTags}
+                omitFavourites={videoFiltering.omitFavourites}
+                onOmitFavouritesChange={videoFiltering.setOmitFavourites}
+                omitPrivate={videoFiltering.omitPrivate}
+                onOmitPrivateChange={videoFiltering.setOmitPrivate}
               />
 
               <div className={styles.actions}>

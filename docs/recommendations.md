@@ -30,7 +30,7 @@ The engine does **not** call `/tags/...` directly. It uses `getVideos` only for:
 | Top 5 uploaders — public | `/members/{uid}/public_videos/1/` | 1 per uploader |
 | Top 5 uploaders — private | `/members/{uid}/private_videos/1/` | 1 per uploader |
 
-That is **35** parallel listing requests in one batch. Private tiles may appear on the private listing; `omitPrivate` is off so those rows are included where the scraper returns them.
+That is **35** parallel listing requests in one batch. Private tiles may appear on the private listing; the scraper returns them with `isPrivate: true` where applicable.
 
 ## Tag filtering (combined search behaviour)
 

@@ -83,7 +83,6 @@ const SearchRefactored = () => {
     category: searchState.category,
     minDuration: videoFiltering.minDuration,
     quick: videoFiltering.quick,
-    omitPrivate: videoFiltering.omitPrivate,
     preserveResults: videoFiltering.preserveResults,
     rawVideos: videoFiltering.rawVideos,
     includeTags: videoFiltering.includeTags,

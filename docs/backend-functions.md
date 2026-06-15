@@ -16,7 +16,7 @@ Errors returned to browsers are **generic**; details stay in **`console.error`**
 
 ## `functions/videos.js` — listing scrape
 
-- **Input** (**GET** query string, preferred for Netlify CDN caching): `url` (path only, must start with `/` and satisfy `validateThisvidUrl` rules — e.g. `/newest/1/`), `page`, `omitPrivate`, `minDuration` (minutes), `quick`. **POST** JSON with the same keys is still accepted for backward compatibility.
+- **Input** (**GET** query string, preferred for Netlify CDN caching): `url` (path only, must start with `/` and satisfy `validateThisvidUrl` rules — e.g. `/newest/1/`), `page`, `minDuration` (minutes), `quick`. **POST** JSON with the same keys is still accepted for backward compatibility.
 - **Behavior**: resolves `url` safely, then **`fetch(LISTING_BASE + pathSuffix)`**. When **`quick`** is **`false`**, subsequent per-video **`fetch`** calls resolve each scraped `href` to an absolute **`https://thisvid.com`** URL before fetching.
 - **Duration filter**, **404** handling, and **CDN caching headers** behave as before (see legacy notes in git history).
 

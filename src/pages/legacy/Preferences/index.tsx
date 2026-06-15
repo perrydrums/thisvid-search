@@ -156,7 +156,6 @@ const Preferences = () => {
         getVideos({
           url: `/members/${userId}/favourite_videos/${i}`,
           page: i,
-          omitPrivate: false,
           minDuration: 0,
           quick: true,
         }),

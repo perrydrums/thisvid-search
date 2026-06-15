@@ -68,9 +68,9 @@ Relevance blends weighted tag frequency in the title with boost/diminish bonuses
 ## Other options
 
 - **minDuration** (minutes): enforced in **server** function when scraping (`functions/videos.js`) and mirrored in client state.
-- **omitPrivate**: server skips private thumbnails when true.
+- **omitPrivate** (UI: **Exclude private**): client filters out rows with `isPrivate` on already-fetched results (same as favourites; no re-scrape).
 - **quick**: when `true`, only listing page is fetched per video row; when `false`, function may open each video URL (slower; current code still focuses on list data).
-- **omitFavourites**: client filters out URLs present in local favourites (`helpers/favourites`).
+- **omitFavourites** (UI: **Exclude favourites**): client filters out URLs present in local favourites (`helpers/favourites`).
 - **preserveResults**: append new batch to `rawVideos` instead of replacing (infinite-style loading).
 
 ## URL / shareable state

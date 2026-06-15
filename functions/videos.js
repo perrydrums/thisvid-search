@@ -24,7 +24,6 @@ function readVideosInput(event) {
     return {
       url: typeof q.url === 'string' ? q.url.trim() : '',
       page: q.page !== undefined ? parseInt(String(q.page), 10) || 1 : 1,
-      omitPrivate: q.omitPrivate === 'true',
       minDuration:
         q.minDuration !== undefined && q.minDuration !== null && String(q.minDuration).trim() !== ''
           ? parseFloat(String(q.minDuration)) || 0
@@ -37,7 +36,6 @@ function readVideosInput(event) {
   return {
     url: raw.url ?? '',
     page: raw.page ?? 1,
-    omitPrivate: Boolean(raw.omitPrivate),
     minDuration: Number(raw.minDuration) || 0,
     quick: raw.quick !== false,
   };
@@ -63,7 +61,7 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const { url, page = 1, omitPrivate = false, minDuration = 0, quick = true } = input;
+  const { url, page = 1, minDuration = 0, quick = true } = input;
 
   if (!url) {
     return {
@@ -118,9 +116,6 @@ exports.handler = async function (event, context) {
     const urls = [];
     $('.tumbpu').each((i, element) => {
       const isPrivate = $('span', element).first().hasClass('private');
-      if (omitPrivate && isPrivate) {
-        return;
-      }
 
       const avatar = isPrivate
         ? $('span', element).first().attr('style').match(/url\((.*?)\)/)[1].replace('//', 'https://')

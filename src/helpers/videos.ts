@@ -3,7 +3,6 @@ import { Video, VideoResponse } from './types';
 type GetVideosOptions = {
   url: string;
   page: number;
-  omitPrivate?: boolean;
   minDuration?: number;
   quick?: boolean;
 };
@@ -33,7 +32,6 @@ type FilterVideosOptions = {
 export const getVideos = async ({
   url,
   page,
-  omitPrivate = false,
   minDuration = 0,
   quick = true,
 }: GetVideosOptions): Promise<Array<Video>> => {
@@ -42,7 +40,6 @@ export const getVideos = async ({
     const qs = new URLSearchParams({
       url,
       page: String(page),
-      omitPrivate: omitPrivate ? 'true' : 'false',
       minDuration: String(minDuration),
       quick: quick ? 'true' : 'false',
     });

@@ -128,7 +128,6 @@ const fetchListingPage = async (url: string, page: number): Promise<Video[]> => 
     const videos = await getVideos({
       url,
       page,
-      omitPrivate: false,
       minDuration: 0,
       quick: true,
     });
