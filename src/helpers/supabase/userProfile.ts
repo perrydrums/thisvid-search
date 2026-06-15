@@ -1,3 +1,8 @@
+import {
+  FRIEND_IDS_STORAGE_KEY,
+  FRIENDS_LAST_SYNC_STORAGE_KEY,
+} from '../friendIds';
+import { normalizeSyncTimestampForDb } from '../syncTimestamp';
 import type { Mood } from '../types';
 
 import { supabase } from './client';
@@ -8,6 +13,8 @@ export type ProfileRow = {
   default_mood: string | null;
   favourites: string[];
   last_sync_date: string | null;
+  friend_ids: string[];
+  friends_last_sync_date: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -20,17 +27,42 @@ function mapProfileRow(row: Record<string, unknown> | null): ProfileRow | null {
     default_mood: (row.default_mood as string) ?? null,
     favourites: Array.isArray(row.favourites) ? (row.favourites as string[]) : [],
     last_sync_date: row.last_sync_date ? String(row.last_sync_date) : null,
+    friend_ids: Array.isArray(row.friend_ids) ? (row.friend_ids as string[]) : [],
+    friends_last_sync_date: row.friends_last_sync_date ? String(row.friends_last_sync_date) : null,
   };
 }
 
 export async function fetchProfile(authUserId: string): Promise<ProfileRow | null> {
-  const { data, error } = await supabase
+  const fullSelect =
+    'id, thisvid_user_id, default_mood, favourites, last_sync_date, friend_ids, friends_last_sync_date, created_at, updated_at';
+  const legacySelect =
+    'id, thisvid_user_id, default_mood, favourites, last_sync_date, created_at, updated_at';
+
+  let { data, error } = await supabase
     .from('profiles')
-  .select('id, thisvid_user_id, default_mood, favourites, last_sync_date, created_at, updated_at')
+    .select(fullSelect)
     .eq('id', authUserId)
     .maybeSingle();
 
   if (error) {
+    const msg = String(error.message || '');
+    if (msg.includes('friend_ids') || msg.includes('friends_last_sync_date')) {
+      const fallback = await supabase
+        .from('profiles')
+        .select(legacySelect)
+        .eq('id', authUserId)
+        .maybeSingle();
+      if (fallback.error) {
+        console.error('fetchProfile', fallback.error);
+        return null;
+      }
+      const row = mapProfileRow(fallback.data as Record<string, unknown> | null);
+      if (row) {
+        row.friend_ids = [];
+        row.friends_last_sync_date = null;
+      }
+      return row;
+    }
     console.error('fetchProfile', error);
     return null;
   }
@@ -44,14 +76,47 @@ export async function updateProfile(
     default_mood: string | null;
     favourites: string[];
     last_sync_date: string | null;
+    friend_ids: string[];
+    friends_last_sync_date: string | null;
   }>,
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from('profiles')
-    .update({ ...patch, updated_at: new Date().toISOString() })
-    .eq('id', authUserId);
+  const normalized: typeof patch = { ...patch };
+  if (patch.last_sync_date !== undefined) {
+    normalized.last_sync_date = normalizeSyncTimestampForDb(patch.last_sync_date);
+  }
+  if (patch.friends_last_sync_date !== undefined) {
+    normalized.friends_last_sync_date = normalizeSyncTimestampForDb(patch.friends_last_sync_date);
+  }
+
+  const payload = { ...normalized, updated_at: new Date().toISOString() };
+  const { error } = await supabase.from('profiles').update(payload).eq('id', authUserId);
 
   if (error) {
+    const msg = String(error.message || '');
+    if (
+      (patch.friend_ids !== undefined || patch.friends_last_sync_date !== undefined) &&
+      (msg.includes('friend_ids') || msg.includes('friends_last_sync_date'))
+    ) {
+      const { friend_ids: _f, friends_last_sync_date: _fs, ...rest } = normalized;
+      if (Object.keys(rest).length === 0) {
+        console.warn(
+          'updateProfile: friend columns missing in Supabase — apply migration 20260615120000_profiles_friend_ids.sql',
+        );
+        return true;
+      }
+      const { error: retryErr } = await supabase
+        .from('profiles')
+        .update({ ...rest, updated_at: new Date().toISOString() })
+        .eq('id', authUserId);
+      if (retryErr) {
+        console.error('updateProfile', retryErr);
+        return false;
+      }
+      console.warn(
+        'updateProfile: saved profile without friend_ids — apply migration 20260615120000_profiles_friend_ids.sql',
+      );
+      return true;
+    }
     console.error('updateProfile', error);
     return false;
   }
@@ -165,6 +230,12 @@ export async function syncLocalStorageToProfile(authUserId: string): Promise<voi
     .map((s) => s.trim())
     .filter(Boolean);
   const lastSyncTrimmed = (localStorage.getItem('tvass-last-sync-date') || '').trim();
+  const friendIdsComma = localStorage.getItem(FRIEND_IDS_STORAGE_KEY) || '';
+  const friendIdsFromLocal = friendIdsComma
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const friendsLastSyncTrimmed = (localStorage.getItem(FRIENDS_LAST_SYNC_STORAGE_KEY) || '').trim();
 
   let moods: Mood[] = [];
   try {
@@ -182,12 +253,18 @@ export async function syncLocalStorageToProfile(authUserId: string): Promise<voi
   const mergedFavourites =
     favouritesFromLocal.length > 0 ? favouritesFromLocal : (existing?.favourites ?? []);
   const mergedLastSync = lastSyncTrimmed || existing?.last_sync_date || null;
+  const mergedFriendIds =
+    friendIdsFromLocal.length > 0 ? friendIdsFromLocal : (existing?.friend_ids ?? []);
+  const mergedFriendsLastSync =
+    friendsLastSyncTrimmed || existing?.friends_last_sync_date || null;
 
   await updateProfile(authUserId, {
     thisvid_user_id: mergedThisvid,
     default_mood: mergedDefaultMood,
     favourites: mergedFavourites,
     last_sync_date: mergedLastSync,
+    friend_ids: mergedFriendIds,
+    friends_last_sync_date: mergedFriendsLastSync,
   });
 
   if (moods.length > 0) {
@@ -207,5 +284,14 @@ export function mirrorProfileToLocalStorage(p: ProfileRow, moods: Mood[]): void 
 
   localStorage.setItem('tvass-favourites', (p.favourites || []).join(','));
   if (p.last_sync_date) localStorage.setItem('tvass-last-sync-date', p.last_sync_date);
+  else localStorage.removeItem('tvass-last-sync-date');
+
+  localStorage.setItem(FRIEND_IDS_STORAGE_KEY, (p.friend_ids || []).join(','));
+  if (p.friends_last_sync_date) {
+    localStorage.setItem(FRIENDS_LAST_SYNC_STORAGE_KEY, p.friends_last_sync_date);
+  } else {
+    localStorage.removeItem(FRIENDS_LAST_SYNC_STORAGE_KEY);
+  }
+
   localStorage.setItem('tvass-moods', JSON.stringify(moods));
 }

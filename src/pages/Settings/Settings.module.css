@@ -131,6 +131,12 @@
   pointer-events: none;
 }
 
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-md);
+}
+
 .ctaRow {
   display: inline-flex !important;
   align-items: center;

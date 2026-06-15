@@ -9,6 +9,26 @@ const headers = {
   'Netlify-Vary': 'query',
 };
 
+function memberIdFromProfileHref(href) {
+  const m = String(href || '').match(/\/members\/([^/?#]+)/);
+  return m ? m[1] : '';
+}
+
+function parseFriendsFromPage($) {
+  return $('.tumbpu')
+    .map((i, e) => {
+      const $e = $(e);
+      const url = $e.attr('href') || '';
+      const uid = memberIdFromProfileHref(url);
+      const avatar = $e.find('.thumb img').attr('src') || '';
+      const username = $e.find('.title').text() || '';
+
+      return { uid, username, avatar, url };
+    })
+    .get()
+    .filter((f) => f.uid);
+}
+
 exports.handler = async function (event, context) {
   const forbidden = requireSiteOrigin(event);
   if (forbidden) return forbidden;
@@ -52,23 +72,14 @@ exports.handler = async function (event, context) {
       parseInt($('ul.pagination-list li:nth-last-child(2) a').text()) ||
       1;
 
-    const friends = await Promise.all(
+    const page1Friends = parseFriendsFromPage($);
+
+    const restPages = await Promise.all(
       [...Array(pageAmount).keys()].slice(1).map(async (page) => {
         const res = await fetch(`https://thisvid.com/members/${encoded}/friends/${page}/`);
         const b = await res.text();
         const $$ = cheerio.load(b);
-
-        return $$('.tumbpu')
-          .map((i, e) => {
-            const $e = $$(e);
-            const url = $e.attr('href') || '';
-            const uid = $e.attr('href')?.split('/').filter(Boolean).pop() || '';
-            const avatar = $e.find('.thumb img').attr('src') || '';
-            const username = $e.find('.title').text() || '';
-
-            return { uid, username, avatar, url };
-          })
-          .get();
+        return parseFriendsFromPage($$);
       }),
     );
 
@@ -78,7 +89,7 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({
         success: true,
         pageAmount,
-        friends: friends.flat(),
+        friends: [page1Friends, ...restPages].flat(),
       }),
     };
   } catch (error) {

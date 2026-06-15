@@ -10,6 +10,8 @@ import chrome from '../../components/v2/V2Chrome.module.css';
 
 import styles from './Settings.module.css';
 import type { Mood } from '../../helpers/types';
+import { fetchAllFriends } from '../../helpers/friends';
+import { createSyncTimestamp, formatSyncTimestampForDisplay } from '../../helpers/syncTimestamp';
 import { getVideos } from '../../helpers/videos';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserData } from '../../hooks/useUserData';
@@ -23,6 +25,9 @@ const LOG_LINES = [
   { ts: '[10:42:12]', line: 'SYNCING LOCAL CACHE WITH LOCAL STORAGE...', tone: 'ok' as const },
 ];
 
+/** One progress step after all favourite listing pages (friends API). */
+const FRIENDS_SYNC_STEPS = 1;
+
 const Settings = () => {
   const { loading: authLoading } = useAuth();
   const userData = useUserData();
@@ -30,28 +35,34 @@ const Settings = () => {
     isCloud,
     loading: userDataLoading,
     refreshProfileFromCloud,
+    setProfileSync,
   } = userData;
 
-  const [loading, setLoading] = useState(false);
-  const [favDone, setFavDone] = useState(0);
-  const [favTotal, setFavTotal] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncDone, setSyncDone] = useState(0);
+  const [syncTotal, setSyncTotal] = useState(0);
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
   const [importError, setImportError] = useState('');
 
   const lastSyncDate = userData.lastSyncDate;
+  const friendsLastSyncDate = userData.friendsLastSyncDate;
 
   const userId = userData.thisvidUserId;
   const favourites = userData.favourites;
+  const friendIds = userData.friendIds;
 
   const favouritesCount =
     favourites.length === 0 ? 0 : favourites.split(',').filter((x) => x.trim()).length;
 
+  const friendsCount =
+    friendIds.length === 0 ? 0 : friendIds.split(',').filter((x) => x.trim()).length;
+
   /** react-top-loading-bar only finishes when progress hits 100; then it fades out and fires this callback. */
-  const resetFetchFavsBar = useCallback(() => {
-    setLoading(false);
-    setFavDone(0);
-    setFavTotal(0);
+  const resetSyncBar = useCallback(() => {
+    setSyncing(false);
+    setSyncDone(0);
+    setSyncTotal(0);
   }, []);
 
   /**
@@ -63,11 +74,11 @@ const Settings = () => {
     void refreshProfileFromCloud({ quiet: true });
   }, [isCloud, authLoading, userDataLoading, refreshProfileFromCloud]);
 
-  const fetchFavorites = async () => {
+  const syncProfile = async () => {
     if (!userId.trim()) return;
-    setLoading(true);
-    setFavDone(0);
-    setFavTotal(0);
+    setSyncing(true);
+    setSyncDone(0);
+    setSyncTotal(0);
     try {
       const response = await fetch(`/members/${userId}/favourite_videos/`);
       const body = await response.text();
@@ -79,7 +90,7 @@ const Settings = () => {
           10,
         ) || 1;
 
-      setFavTotal(lastPage);
+      setSyncTotal(lastPage + FRIENDS_SYNC_STEPS);
 
       const promises = [];
       for (let i = 1; i <= lastPage; i++) {
@@ -90,7 +101,7 @@ const Settings = () => {
             minDuration: 0,
             quick: true,
           }).then((batch) => {
-            setFavDone((n) => n + 1);
+            setSyncDone((n) => n + 1);
             return batch;
           }),
         );
@@ -100,14 +111,27 @@ const Settings = () => {
         (value, index, self) => index === self.findIndex((v) => v.url === value.url),
       );
 
-      setFavDone(lastPage);
+      const friendsResult = await fetchAllFriends(userId);
+      setSyncDone(lastPage + FRIENDS_SYNC_STEPS);
 
+      if (!friendsResult.success) {
+        throw new Error('Failed to fetch friends');
+      }
+
+      const ids = [...new Set(friendsResult.friends.map((f) => f.uid).filter(Boolean))];
       const videoUrls = videos.map((v) => v.url);
-      await userData.setFavouritesAndLastSync(videoUrls.join(','), new Date().toLocaleString());
+      const now = createSyncTimestamp();
+
+      await setProfileSync({
+        favouritesCsv: videoUrls.join(','),
+        friendIdsCsv: ids.join(','),
+        lastSync: now,
+        friendsLastSync: now,
+      });
     } catch (e) {
       console.error(e);
-      alert('Failed to fetch favourites. Check console.');
-      resetFetchFavsBar();
+      alert('Failed to sync profile. Check console.');
+      resetSyncBar();
     }
   };
 
@@ -132,17 +156,18 @@ const Settings = () => {
     }
   };
 
+  const syncProgressPct =
+    syncing && syncTotal > 0
+      ? Math.min(100, Math.round((Math.min(syncDone, syncTotal) / syncTotal) * 100))
+      : 0;
+
   return (
     <div className={`v2-root ${chrome.page}`}>
       <LoadingBar
-        progress={
-          loading && favTotal > 0
-            ? Math.min(100, Math.round((Math.min(favDone, favTotal) / favTotal) * 100))
-            : 0
-        }
+        progress={syncProgressPct}
         color="var(--v2-accent, #ff003c)"
         height={8}
-        onLoaderFinished={resetFetchFavsBar}
+        onLoaderFinished={resetSyncBar}
       />
       <TopNav />
       <AppSidebar activePage="settings" />
@@ -176,25 +201,33 @@ const Settings = () => {
                   type="button"
                   variant="primary"
                   size="large"
-                  onClick={() => void fetchFavorites()}
-                  disabled={loading || !userId.trim()}
+                  onClick={() => void syncProfile()}
+                  disabled={syncing || !userId.trim()}
                   className={styles.ctaRow}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
                     sync
                   </span>
-                  Fetch Favorites
+                  {syncing ? 'Syncing profile…' : 'Sync profile'}
                 </Button>
 
                 <div className={styles.stats}>
                   <div>
-                    <span className={styles.statsLab}>Last fetched</span>
-                    <span className={styles.statsVal}>{lastSyncDate || '—'}</span>
+                    <span className={styles.statsLab}>Favorites last fetched</span>
+                    <span className={styles.statsVal}>{formatSyncTimestampForDisplay(lastSyncDate)}</span>
+                    <span className={styles.statsLab} style={{ marginTop: 8 }}>
+                      Favorites found
+                    </span>
+                    <span className={styles.statsHighlight}>{favouritesCount.toLocaleString()}</span>
                   </div>
                   <div className={styles.statsSep} />
                   <div>
-                    <span className={styles.statsLab}>Favorites Found</span>
-                    <span className={styles.statsHighlight}>{favouritesCount.toLocaleString()}</span>
+                    <span className={styles.statsLab}>Friends last fetched</span>
+                    <span className={styles.statsVal}>{formatSyncTimestampForDisplay(friendsLastSyncDate)}</span>
+                    <span className={styles.statsLab} style={{ marginTop: 8 }}>
+                      Friends found
+                    </span>
+                    <span className={styles.statsHighlight}>{friendsCount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

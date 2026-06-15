@@ -470,6 +470,13 @@ const Search = () => {
   const v2Mode = searchState.mode as SearchMode;
   const isV2Mode = isV2ListingMode;
 
+  const listingMemberId = useMemo(() => {
+    if (searchState.mode !== 'user') return '';
+    const type = searchState.type;
+    if (type === 'public' || type === 'private') return searchState.id?.trim() || '';
+    return '';
+  }, [searchState.mode, searchState.type, searchState.id]);
+
   return (
     <div className={`v2-root ${chrome.page}`}>
       <TopNav />
@@ -576,6 +583,8 @@ const Search = () => {
               onSortChange={videoFiltering.setSort}
               getShareUrl={getShareUrl}
               searchFinished={searchState.finished}
+              friendIdsCsv={userData.friendIds}
+              listingMemberId={listingMemberId}
             />
           )}
           <p className={styles.footerNote}>

@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import type { Mood } from '../helpers/types';
+import {
+  FRIEND_IDS_STORAGE_KEY,
+  FRIENDS_LAST_SYNC_STORAGE_KEY,
+} from '../helpers/friendIds';
 import {
   fetchMoodsForUser,
   fetchProfile,
@@ -9,6 +12,8 @@ import {
   syncLocalStorageToProfile,
   updateProfile,
 } from '../helpers/supabase/userProfile';
+import { normalizeSyncTimestampForDb } from '../helpers/syncTimestamp';
+import type { Mood } from '../helpers/types';
 
 import { useAuth } from './useAuth';
 
@@ -27,6 +32,8 @@ function readLocalScalars() {
     defaultMood: localStorage.getItem('tvass-default-mood') || '',
     favourites: localStorage.getItem('tvass-favourites') || '',
     lastSyncDate: localStorage.getItem('tvass-last-sync-date') || '',
+    friendIds: localStorage.getItem(FRIEND_IDS_STORAGE_KEY) || '',
+    friendsLastSyncDate: localStorage.getItem(FRIENDS_LAST_SYNC_STORAGE_KEY) || '',
   };
 }
 
@@ -35,11 +42,15 @@ function writeLocalScalars(sc: {
   defaultMood: string;
   favourites: string;
   lastSyncDate: string;
+  friendIds: string;
+  friendsLastSyncDate: string;
 }) {
   localStorage.setItem('tvass-user-id', sc.thisvidUserId);
   localStorage.setItem('tvass-default-mood', sc.defaultMood);
   localStorage.setItem('tvass-favourites', sc.favourites);
   localStorage.setItem('tvass-last-sync-date', sc.lastSyncDate);
+  localStorage.setItem(FRIEND_IDS_STORAGE_KEY, sc.friendIds);
+  localStorage.setItem(FRIENDS_LAST_SYNC_STORAGE_KEY, sc.friendsLastSyncDate);
 }
 
 function writeLocalMoods(moods: Mood[]) {
@@ -52,6 +63,8 @@ type UserDataBundle = {
   defaultMood: string;
   favourites: string;
   lastSyncDate: string;
+  friendIds: string;
+  friendsLastSyncDate: string;
 };
 
 const emptyBundleLocal = (): UserDataBundle => ({
@@ -59,11 +72,36 @@ const emptyBundleLocal = (): UserDataBundle => ({
   ...readLocalScalars(),
 });
 
+function mergeScalars(
+  prev: UserDataBundle,
+  partial: Partial<Omit<UserDataBundle, 'moods'>>,
+): UserDataBundle {
+  const nextLastSync =
+    partial.lastSyncDate !== undefined
+      ? normalizeSyncTimestampForDb(partial.lastSyncDate) ?? ''
+      : prev.lastSyncDate;
+  const nextFriendsLastSync =
+    partial.friendsLastSyncDate !== undefined
+      ? normalizeSyncTimestampForDb(partial.friendsLastSyncDate) ?? ''
+      : prev.friendsLastSyncDate;
+  return {
+    moods: prev.moods,
+    thisvidUserId: partial.thisvidUserId ?? prev.thisvidUserId,
+    defaultMood: partial.defaultMood ?? prev.defaultMood,
+    favourites: partial.favourites ?? prev.favourites,
+    lastSyncDate: nextLastSync,
+    friendIds: partial.friendIds ?? prev.friendIds,
+    friendsLastSyncDate: nextFriendsLastSync,
+  };
+}
+
 /** v2 shell: moods + prefs from Supabase when logged in, else legacy localStorage keys. */
 export const useUserData = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [bundle, setBundle] = useState<UserDataBundle>(() => emptyBundleLocal());
+  const bundleRef = useRef(bundle);
+  bundleRef.current = bundle;
 
   /** Keeps UI from treating cloud data as not ready before the remote load kicks in (avoids a race where Settings runs while loading is still false). */
   useLayoutEffect(() => {
@@ -78,6 +116,7 @@ export const useUserData = () => {
         const next = emptyBundleLocal();
         if (!cancelled) {
           setBundle(next);
+          bundleRef.current = next;
           setLoading(false);
         }
         return;
@@ -93,13 +132,17 @@ export const useUserData = () => {
 
         if (profile) {
           mirrorProfileToLocalStorage(profile, moodRows);
-          setBundle({
+          const loaded = {
             moods: moodRows,
             thisvidUserId: profile.thisvid_user_id || '',
             defaultMood: profile.default_mood || '',
             favourites: (profile.favourites || []).join(','),
             lastSyncDate: profile.last_sync_date || '',
-          });
+            friendIds: (profile.friend_ids || []).join(','),
+            friendsLastSyncDate: profile.friends_last_sync_date || '',
+          };
+          bundleRef.current = loaded;
+          setBundle(loaded);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -114,37 +157,39 @@ export const useUserData = () => {
 
   const persistScalars = useCallback(
     async (partial: Partial<Omit<UserDataBundle, 'moods'>>) => {
-      setBundle((prev) => {
-        const next: UserDataBundle = {
-          moods: prev.moods,
-          thisvidUserId: partial.thisvidUserId ?? prev.thisvidUserId,
-          defaultMood: partial.defaultMood ?? prev.defaultMood,
-          favourites: partial.favourites ?? prev.favourites,
-          lastSyncDate: partial.lastSyncDate ?? prev.lastSyncDate,
-        };
-        writeLocalScalars({
-          thisvidUserId: next.thisvidUserId,
-          defaultMood: next.defaultMood,
-          favourites: next.favourites,
-          lastSyncDate: next.lastSyncDate,
-        });
-
-        Promise.resolve().then(async () => {
-          if (!user?.id) return;
-          const favParts = next.favourites
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean);
-          await updateProfile(user.id, {
-            thisvid_user_id: next.thisvidUserId || null,
-            default_mood: next.defaultMood || null,
-            favourites: favParts,
-            last_sync_date: next.lastSyncDate || null,
-          });
-        });
-
-        return next;
+      const next = mergeScalars(bundleRef.current, partial);
+      writeLocalScalars({
+        thisvidUserId: next.thisvidUserId,
+        defaultMood: next.defaultMood,
+        favourites: next.favourites,
+        lastSyncDate: next.lastSyncDate,
+        friendIds: next.friendIds,
+        friendsLastSyncDate: next.friendsLastSyncDate,
       });
+      bundleRef.current = next;
+      setBundle(next);
+
+      if (!user?.id) return;
+
+      const favParts = next.favourites
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const friendParts = next.friendIds
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const ok = await updateProfile(user.id, {
+        thisvid_user_id: next.thisvidUserId || null,
+        default_mood: next.defaultMood || null,
+        favourites: favParts,
+        last_sync_date: next.lastSyncDate || null,
+        friend_ids: friendParts,
+        friends_last_sync_date: next.friendsLastSyncDate || null,
+      });
+      if (!ok) {
+        throw new Error('Failed to save profile to Supabase');
+      }
     },
     [user?.id],
   );
@@ -175,6 +220,30 @@ export const useUserData = () => {
     [persistScalars],
   );
 
+  const setFriendsAndLastSync = useCallback(
+    async (friendIdsCsv: string, friendsLastSync: string) => {
+      await persistScalars({ friendIds: friendIdsCsv, friendsLastSyncDate: friendsLastSync });
+    },
+    [persistScalars],
+  );
+
+  const setProfileSync = useCallback(
+    async (data: {
+      favouritesCsv: string;
+      friendIdsCsv: string;
+      lastSync: string;
+      friendsLastSync: string;
+    }) => {
+      await persistScalars({
+        favourites: data.favouritesCsv,
+        friendIds: data.friendIdsCsv,
+        lastSyncDate: data.lastSync,
+        friendsLastSyncDate: data.friendsLastSync,
+      });
+    },
+    [persistScalars],
+  );
+
   const refreshProfileFromCloud = useCallback(async (opts?: { quiet?: boolean }) => {
     const authId = user?.id;
     if (!authId) return;
@@ -186,13 +255,17 @@ export const useUserData = () => {
       if (!profile) return;
 
       mirrorProfileToLocalStorage(profile, moodRows);
-      setBundle({
+      const loaded = {
         moods: moodRows,
         thisvidUserId: profile.thisvid_user_id || '',
         defaultMood: profile.default_mood || '',
         favourites: (profile.favourites || []).join(','),
         lastSyncDate: profile.last_sync_date || '',
-      });
+        friendIds: (profile.friend_ids || []).join(','),
+        friendsLastSyncDate: profile.friends_last_sync_date || '',
+      };
+      bundleRef.current = loaded;
+      setBundle(loaded);
     } finally {
       if (!opts?.quiet) setLoading(false);
     }
@@ -213,6 +286,10 @@ export const useUserData = () => {
       lastSyncDate: bundle.lastSyncDate,
       setLastSyncDate: (v: string) => persistScalars({ lastSyncDate: v }),
       setFavouritesAndLastSync,
+      friendIds: bundle.friendIds,
+      friendsLastSyncDate: bundle.friendsLastSyncDate,
+      setFriendsAndLastSync,
+      setProfileSync,
       refreshProfileFromCloud,
     }),
     [
@@ -223,6 +300,8 @@ export const useUserData = () => {
       persistScalars,
       setDefaultMood,
       setFavouritesAndLastSync,
+      setFriendsAndLastSync,
+      setProfileSync,
       refreshProfileFromCloud,
     ],
   );

@@ -22,30 +22,37 @@ export const getFriends = async (
   // Set the total pages.
   setTotalPages(lastPage);
 
+  const parsePage = ($page: ReturnType<typeof cheerio.load>) =>
+    $page('.tumbpu')
+      .map((_i, e) => {
+        const $e = $page(e);
+        const url = $e.attr('href') || '';
+        const uid = url.split('/').filter(Boolean).pop() || '';
+        const avatar = $e.find('.thumb img').attr('src') || '';
+        const username = $e.find('.title').text() || '';
+
+        return { uid, username, avatar, url };
+      })
+      .get()
+      .filter((f) => f.uid);
+
+  const page1Friends = parsePage($);
+
   let progress = 1;
-  // Fetch every page (except the first one) and get the friends.
-  const friends = await Promise.all(
+  updateProgress(progress);
+
+  const restPages = await Promise.all(
     [...Array(lastPage).keys()].slice(1).map(async (page) => {
-      const response = await fetch(`/members/${userId}/friends/${page}/`);
-      const body = await response.text();
-      const $ = cheerio.load(body);
+      const pageResponse = await fetch(`/members/${userId}/friends/${page}/`);
+      const pageBody = await pageResponse.text();
+      const $page = cheerio.load(pageBody);
 
       progress++;
       updateProgress(progress);
 
-      return $('.tumbpu')
-        .map((i, e) => {
-          const $e = $(e);
-          const url = $e.attr('href') || '';
-          const uid = $e.attr('href')?.split('/').filter(Boolean).pop() || '';
-          const avatar = $e.find('.thumb img').attr('src') || '';
-          const username = $e.find('.title').text() || '';
-
-          return { uid, username, avatar, url };
-        })
-        .get();
+      return parsePage($page);
     }),
   );
 
-  return friends.flat();
+  return [...page1Friends, ...restPages.flat()];
 };

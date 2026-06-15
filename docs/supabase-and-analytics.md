@@ -24,7 +24,7 @@ If the site **Site URL** is only the origin (e.g. `http://localhost:3000`), the 
 
 When a user completes email magic-link sign-in (`src/hooks/useAuth.tsx`), the app can sync prefs to Supabase:
 
-- **`profiles`** — one row per `auth.users` user (`id` FK). Holds ThisVid-related scalars mirrored from legacy local keys: `thisvid_user_id`, `default_mood`, `favourites` (text array), `last_sync_date`. Rows are created from an `on_auth_user_created` trigger.
+- **`profiles`** — one row per `auth.users` user (`id` FK). Holds ThisVid-related scalars mirrored from legacy local keys: `thisvid_user_id`, `default_mood`, `favourites` (text array), `last_sync_date`, `friend_ids` (text array of ThisVid member IDs), `friends_last_sync_date`. Rows are created from an `on_auth_user_created` trigger.
 - **`moods`** — curated mood definitions per user (`user_id` → `profiles.id`). Replaces ad-hoc `tvass-moods` when logged in via `helpers/supabase/userProfile.ts`.
 - **`useUserData`** — single hook for Search v2, Settings (`/settings`), Moods (`/moods`): loads from Supabase when authenticated (with one-time merge from local keys), writes back on change; anonymous users stay on **`localStorage` only** (legacy `/search` etc. unchanged). First-login sync **merges** local into `profiles`: empty local scalar fields keep existing remote values instead of wiping the row. **Note:** the hook state is **per component instance** (not a global store). **Settings** therefore calls **`refreshProfileFromCloud({ quiet: true })`** after auth + `useUserData` loading finish on every visit so ThisVid ID / favourites / moods always rehydrate from Supabase when signed in, even if `localStorage` was cleared and another page had a different hook instance.
 
