@@ -1,0 +1,25 @@
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--v2-border);
+  border-radius: var(--v2-radius);
+  background: var(--v2-surface-low);
+  color: var(--v2-on-surface);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--v2-font-mono, ui-monospace, monospace);
+}
+
+.input:hover {
+  border-color: rgba(255, 0, 60, 0.35);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--v2-accent);
+  background: var(--v2-surface);
+  box-shadow: 0 0 0 2px rgba(255, 0, 60, 0.15);
+}

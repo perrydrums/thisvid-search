@@ -131,6 +131,33 @@ export const filterVideos = ({
     });
 };
 
+/** Video duration from listing/detail text (`MM:SS`) as whole seconds. */
+export const videoDurationSeconds = (duration: string): number => {
+  const parts = duration.split(':').map(Number);
+  if (parts.length < 2 || parts.some((n) => Number.isNaN(n))) return 0;
+  return parts[0] * 60 + parts[1];
+};
+
+/** @deprecated Use {@link videoDurationSeconds}. */
+export const videoDurationMinutes = (duration: string): number => videoDurationSeconds(duration) / 60;
+
+export const filterVideosByDuration = (
+  videos: Video[],
+  minSeconds = 0,
+  maxSeconds: number | null = null,
+): Video[] => {
+  const hasMin = minSeconds > 0;
+  const hasMax = maxSeconds != null && maxSeconds > 0;
+  if (!hasMin && !hasMax) return videos;
+
+  return videos.filter((video) => {
+    const secs = videoDurationSeconds(video.duration);
+    if (hasMin && secs < minSeconds) return false;
+    if (hasMax && secs > maxSeconds!) return false;
+    return true;
+  });
+};
+
 export const sortVideos = (videos: Array<Video> = [], sortMode: string): Array<Video> => {
   const sortedVideos = videos;
   switch (sortMode) {

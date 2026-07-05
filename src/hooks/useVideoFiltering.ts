@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Video, LogParams } from '../helpers/types';
-import { filterVideos, sortVideos } from '../helpers/videos';
+import { filterVideos, filterVideosByDuration, sortVideos } from '../helpers/videos';
+import {
+  parseMaxDurationParamSeconds,
+  parseMinDurationParamSeconds,
+} from '../helpers/duration';
 import { getLocalFavourites } from '../helpers/favourites';
 import { updateLogResultCount } from '../helpers/supabase/log';
 
@@ -50,8 +54,9 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
   const [rawVideos, setRawVideos] = useState<Video[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
 
-  // Filtering options
-  const [minDuration, setMinDuration] = useState(params.minDuration || 0);
+  // Filtering options (seconds)
+  const [minDuration, setMinDuration] = useState(() => parseMinDurationParamSeconds(params));
+  const [maxDuration, setMaxDuration] = useState<number | null>(() => parseMaxDurationParamSeconds(params));
   const [sort, setSort] = useState(params.orderBy || 'relevance');
   const [quick, setQuick] = useState(true);
   const [omitPrivate, setOmitPrivate] = useState(false);
@@ -81,6 +86,8 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
       filteredVideos = filteredVideos.filter((video) => !video.isPrivate);
     }
 
+    filteredVideos = filterVideosByDuration(filteredVideos, minDuration, maxDuration);
+
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
@@ -91,7 +98,7 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
         console.error('Failed to update log result count:', error);
       });
     }
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, sort, searchObject]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, minDuration, maxDuration, sort, searchObject]);
 
   // Helper function to reset tags based on mood
   const applyMoodPreferences = (moodPreferences: any) => {
@@ -101,7 +108,14 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
     moodPreferences.excludeTags && setExcludeTags(moodPreferences.excludeTags);
     moodPreferences.boosterTags && setBoosterTags(moodPreferences.boosterTags);
     moodPreferences.diminishingTags && setDiminishingTags(moodPreferences.diminishingTags);
-    moodPreferences.minDuration !== undefined && setMinDuration(moodPreferences.minDuration || 0);
+    moodPreferences.minDuration !== undefined &&
+      setMinDuration(Math.max(0, Math.floor(Number(moodPreferences.minDuration) || 0) * 60));
+    setMaxDuration(null);
+  };
+
+  const setDurationRange = (min: number, max: number | null) => {
+    setMinDuration(min);
+    setMaxDuration(max);
   };
 
   const clearMoodPreferences = () => {
@@ -110,6 +124,7 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
     setBoosterTags([]);
     setDiminishingTags([]);
     setMinDuration(0);
+    setMaxDuration(null);
   };
 
   return {
@@ -129,6 +144,8 @@ export const useVideoFiltering = ({ params, searchObject, syncedDefaultMood }: U
 
     // Filtering options
     minDuration, setMinDuration,
+    maxDuration, setMaxDuration,
+    setDurationRange,
     sort, setSort,
     quick, setQuick,
     omitPrivate, setOmitPrivate,

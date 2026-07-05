@@ -329,8 +329,8 @@ const SearchRefactored = () => {
               setDiminishingTags={videoFiltering.setDiminishingTags}
               termsOperator={videoFiltering.termsOperator}
               setTermsOperator={videoFiltering.setTermsOperator}
-              minDuration={videoFiltering.minDuration}
-              setMinDuration={videoFiltering.setMinDuration}
+              minDuration={Math.floor(videoFiltering.minDuration / 60)}
+              setMinDuration={(d) => videoFiltering.setMinDuration((d ?? 0) * 60)}
               start={searchState.start}
               setStart={searchState.setStart}
               amount={searchState.amount}

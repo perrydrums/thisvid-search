@@ -161,6 +161,8 @@ const Search = () => {
     primaryTag: searchState.primaryTag,
     category: searchState.category,
     minDuration: videoFiltering.minDuration,
+    scrapeMinDuration: 0,
+    logDuration: Math.floor(videoFiltering.minDuration / 60),
     quick: videoFiltering.quick,
     preserveResults: videoFiltering.preserveResults,
     rawVideos: videoFiltering.rawVideos,
@@ -455,7 +457,10 @@ const Search = () => {
       boosterTags: videoFiltering.boosterTags.join(','),
       diminishingTags: videoFiltering.diminishingTags.join(','),
       amount: String(isV2ListingMode ? listingChunkPages : searchState.amount),
-      minDuration: String(videoFiltering.minDuration),
+      minDurationSec: String(videoFiltering.minDuration),
+      ...(videoFiltering.maxDuration != null
+        ? { maxDurationSec: String(videoFiltering.maxDuration) }
+        : {}),
       primaryTag: searchState.primaryTag,
       category: searchState.category,
       id: searchState.id,
@@ -504,7 +509,8 @@ const Search = () => {
                   userIds={userIds}
                   onUserIdsChange={setUserIds}
                   minDuration={videoFiltering.minDuration}
-                  onMinDurationChange={videoFiltering.setMinDuration}
+                  maxDuration={videoFiltering.maxDuration}
+                  onDurationRangeChange={videoFiltering.setDurationRange}
                   typeOptions={typeOptions}
                   type={searchState.type}
                   onTypeChange={searchState.setType}

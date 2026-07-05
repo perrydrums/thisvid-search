@@ -23,6 +23,9 @@ interface UseSearchLogicProps {
   primaryTag: string;
   category: string;
   minDuration: number;
+  /** `null` = unlimited (slider max). */
+  scrapeMinDuration?: number;
+  logDuration?: number;
   quick: boolean;
   preserveResults: boolean;
   rawVideos: Video[];
@@ -51,6 +54,8 @@ export const useSearchLogic = ({
   primaryTag,
   category,
   minDuration,
+  scrapeMinDuration,
+  logDuration,
   quick,
   preserveResults,
   rawVideos,
@@ -71,6 +76,8 @@ export const useSearchLogic = ({
   executeScroll,
 }: UseSearchLogicProps) => {
   const [pageLimitLoading, setPageLimitLoading] = useState(false);
+  const effectiveScrapeMinDuration = scrapeMinDuration ?? minDuration;
+  const effectiveLogDuration = logDuration ?? minDuration;
 
   const getUrl = useCallback((page: number): string => {
     const idTrim = id?.trim() ?? '';
@@ -211,7 +218,7 @@ export const useSearchLogic = ({
       tags: includeTags,
       pageAmount,
       quick,
-      duration: minDuration,
+      duration: effectiveLogDuration,
       primaryTag,
       category,
       userId: id,
@@ -270,7 +277,7 @@ export const useSearchLogic = ({
       promises.push(
         getVideos({
           url,
-          minDuration,
+          minDuration: effectiveScrapeMinDuration,
           quick,
           page: currentPage,
         // eslint-disable-next-line no-loop-func -- callback runs when each page settles; shared progress/tempPageLimit (see Search/index.tsx)

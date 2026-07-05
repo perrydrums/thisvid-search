@@ -3,7 +3,8 @@ import React from 'react';
 import { Category } from '../../../../helpers/types';
 
 import { Input } from '../../atoms/Input';
-import { RangeSlider } from '../../atoms/RangeSlider';
+import { DurationRangeSlider } from '../../atoms/DurationRangeSlider';
+import { DurationRangeBadge } from '../../molecules/DurationRangeBadge';
 import { ChipInput } from '../../molecules/ChipInput';
 import { ToggleGroup } from '../../molecules/ToggleGroup';
 
@@ -17,8 +18,11 @@ export type PrimaryParametersCardProps = {
   mode: SearchMode;
   userIds: string[];
   onUserIdsChange: (ids: string[]) => void;
+  /** Minimum duration in seconds. */
   minDuration: number;
-  onMinDurationChange: (n: number) => void;
+  /** Maximum duration in seconds; `null` = 1h+. */
+  maxDuration: number | null;
+  onDurationRangeChange: (min: number, max: number | null) => void;
   typeOptions: TypeOption[];
   type: string;
   onTypeChange: (v: string) => void;
@@ -38,7 +42,8 @@ export const PrimaryParametersCard: React.FC<PrimaryParametersCardProps> = ({
   userIds,
   onUserIdsChange,
   minDuration,
-  onMinDurationChange,
+  maxDuration,
+  onDurationRangeChange,
   typeOptions,
   type,
   onTypeChange,
@@ -51,8 +56,6 @@ export const PrimaryParametersCard: React.FC<PrimaryParametersCardProps> = ({
   onCategorySlugChange,
   resolveUserChipDisplay,
 }) => {
-  const durationLabel = minDuration >= 60 ? `${Math.floor(minDuration / 60)}h${minDuration % 60}m` : `${minDuration}m`;
-
   return (
     <div className={styles.card}>
       <h2 className={styles.cardTitle}>
@@ -178,14 +181,31 @@ export const PrimaryParametersCard: React.FC<PrimaryParametersCardProps> = ({
 
       <div className={styles.row2}>
         <div className={styles.durationBlock}>
-          <label className={styles.lbl} htmlFor="v2-min-dur">
-            Minimal Duration (min)
+          <label className={styles.lbl} htmlFor="v2-duration-range">
+            Duration
           </label>
-          <div className={styles.sliderRow}>
-            <RangeSlider id="v2-min-dur" min={0} max={180} value={minDuration} onChange={onMinDurationChange} />
-            <span className={styles.durBadge} aria-live="polite">
-              {durationLabel}
-            </span>
+          <div className={styles.durationRow}>
+            <div className={styles.durationSliderCol}>
+              <DurationRangeSlider
+                id="v2-duration-range"
+                valueMin={minDuration}
+                valueMax={maxDuration}
+                onChange={onDurationRangeChange}
+              />
+              <div className={styles.durationTicks}>
+                <span>0</span>
+                <span>30m</span>
+                <span>1h+</span>
+              </div>
+            </div>
+            <div className={styles.durationInputCol}>
+              <DurationRangeBadge
+                id="v2-duration-input"
+                minSeconds={minDuration}
+                maxSeconds={maxDuration}
+                onChange={onDurationRangeChange}
+              />
+            </div>
           </div>
         </div>
       </div>
