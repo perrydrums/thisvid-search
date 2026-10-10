@@ -4,12 +4,26 @@ const fetch = require('node-fetch');
 const { requireSiteOrigin } = require('./allowedOrigins');
 const { LISTING_BASE, assertSafeListingPath, resolvePageHrefToThisvid } = require('./validateThisvidUrl');
 
-const successHeaders = {
-  'Content-Type': 'application/json',
-  'Cache-Control': 'public, max-age=0, must-revalidate',
-  'Netlify-CDN-Cache-Control': 'public, durable, max-age=3600, stale-while-revalidate=7200',
-  'Netlify-Vary': 'query',
-};
+const WEEK_SECONDS = 7 * 24 * 60 * 60;
+
+/** Browser always revalidates; Netlify CDN holds the JSON. Category and tag listings change slowly. */
+function successHeadersForListing(pathSuffix) {
+  const pathname = String(pathSuffix || '').split('?')[0];
+  const longLived =
+    pathname === '/categories' ||
+    pathname.startsWith('/categories/') ||
+    pathname === '/tags' ||
+    pathname.startsWith('/tags/');
+  const maxAge = longLived ? WEEK_SECONDS : 3600;
+  const staleWhileRevalidate = longLived ? WEEK_SECONDS * 2 : 7200;
+
+  return {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'public, max-age=0, must-revalidate',
+    'Netlify-CDN-Cache-Control': `public, durable, max-age=${maxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
+    'Netlify-Vary': 'query',
+  };
+}
 
 const errorHeaders = {
   'Content-Type': 'application/json',
@@ -188,7 +202,7 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      headers: successHeaders,
+      headers: successHeadersForListing(pathSuffix),
       body: JSON.stringify({
         success: true,
         videos: videos,

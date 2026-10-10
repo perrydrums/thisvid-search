@@ -170,6 +170,19 @@ status = 200
   window_size = 60
   aggregate_by = ["ip", "domain"]
 
+# Category index and tag pages change slowly; cache proxied HTML for 7 days.
+[[headers]]
+for = "/categories/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+    Netlify-CDN-Cache-Control = "public, durable, max-age=604800, stale-while-revalidate=1209600"
+
+[[headers]]
+for = "/tags/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+    Netlify-CDN-Cache-Control = "public, durable, max-age=604800, stale-while-revalidate=1209600"
+
 [[headers]]
 for = "/*"
   [headers.values]
