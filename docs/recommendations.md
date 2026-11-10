@@ -4,7 +4,7 @@
 
 **`/recommendations`** (“For you” in the sidebar) shows two rails:
 
-1. **New from your friends** — uploads from the last 14 days by people on the synced friend list.
+1. **New from your friends** — up to **40** uploads from the last 90 days by people on the synced friend list (at most 20 from one friend).
 2. **You might like** — videos that resemble the analysed favourites, from several public sources.
 
 Both rails drop videos already in the favourites, drop the user’s own uploads, and drop private videos unless the uploader is a friend. They are sorted by a relevance score built from the Analyse taste profile. The same video is not shown in both rails.
@@ -53,7 +53,7 @@ Up to **120** friend profiles per refresh, **6** at a time, via `GET /memberFeed
 3. Friends who have never been scanned.
 4. Everyone else, least recently scanned first, so a long friend list rotates. A profile that had no uploads last time is skipped for **7 days**.
 
-Candidates are that friend’s public and private uploads from the last **14 days**. Private is allowed here because the uploader is a friend by construction.
+Candidates are that friend’s public and private uploads from the last **90 days**. Private is allowed here because the uploader is a friend by construction. The rail keeps the top **40** after scoring, with at most **20** from one friend.
 
 ### You might like
 
@@ -76,7 +76,7 @@ Applied to both rails:
 - Not in the synced favourites or the analysed favourites (URLs normalised to `https://thisvid.com/videos/{slug}/`).
 - Not uploaded by the user’s own ThisVid id.
 - Private only when the uploader’s id is in the friend list. Checked again after the video page is read, in case the tile’s uploader was wrong or unknown.
-- At most **4** videos per friend on the first rail and **3** per uploader on the second.
+- At most **20** videos per friend on the first rail (the rail itself stops at **40**) and **3** per uploader on the second.
 - Each rail keeps up to **1000** videos. The page renders them in batches of 24 as you scroll, the same way Search does.
 
 Hovering a card shows **Hide**. That writes `hidden_recommendations` (`video_url`, `hidden_at`) for the signed-in user — see [supabase-and-analytics.md](./supabase-and-analytics.md). A hide stops counting one month after `hidden_at`. The page does not mention that window. Signed-out hides stay in `tvass-hidden-recommendations` and are copied to Supabase on the next sign-in.

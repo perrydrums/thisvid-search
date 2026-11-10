@@ -7,7 +7,9 @@ export const TITLE_TAG_CONFIDENCE = 0.6;
 export const ENRICH_PER_RAIL = 60;
 export const ENRICH_MIN_PER_SOURCE = 8;
 export const RAIL_LIMIT = 1000;
-export const FRIENDS_PER_UPLOADER = 4;
+/** How many videos the friends rail shows. */
+export const FRIENDS_RAIL_LIMIT = 40;
+export const FRIENDS_PER_UPLOADER = 20;
 export const FORYOU_PER_UPLOADER = 3;
 
 export const FOR_YOU_SOURCE_QUOTA: RecommendationSource[] = [

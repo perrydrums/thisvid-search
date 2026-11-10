@@ -8,6 +8,7 @@ import {
   ENRICH_PER_RAIL,
   FORYOU_PER_UPLOADER,
   FRIENDS_PER_UPLOADER,
+  FRIENDS_RAIL_LIMIT,
   RAIL_LIMIT,
   buildIdf,
   buildProfileIndexes,
@@ -85,6 +86,7 @@ export function recommendationCacheKey(input: {
     input.favouriteUrls.length,
     hashString([...input.favouriteUrls].sort().join(',')),
     input.analyseDate,
+    `friends-rail:${FRIENDS_RAIL_LIMIT}`,
     input.related
       .slice(0, 20)
       .map((video) => `${video.url}:${video.hits}`)
@@ -156,7 +158,8 @@ function rankRail(
     .sort(compareByScoreThenNewest);
 
   const perUploader = rail === 'friends' ? FRIENDS_PER_UPLOADER : FORYOU_PER_UPLOADER;
-  return takeDiverse(ranked, perUploader, RAIL_LIMIT);
+  const limit = rail === 'friends' ? FRIENDS_RAIL_LIMIT : RAIL_LIMIT;
+  return takeDiverse(ranked, perUploader, limit);
 }
 
 function topForEnrichment(

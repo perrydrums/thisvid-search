@@ -6,7 +6,7 @@ import { getVideos, parseRelativeTime } from '../videos';
 export const FRIEND_SCAN_LIMIT = 120;
 export const FRIEND_SCAN_CONCURRENCY = 6;
 export const LISTING_CONCURRENCY = 6;
-export const FRIEND_UPLOAD_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
+export const FRIEND_UPLOAD_MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000;
 export const FRIEND_ACTIVE_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 export const FRIEND_EMPTY_RETRY_MS = 7 * 24 * 60 * 60 * 1000;
 export const TOP_DISTINCTIVE_TAGS = 5;

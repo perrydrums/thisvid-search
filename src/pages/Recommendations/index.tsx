@@ -62,7 +62,7 @@ const RecommendationsPage = () => {
             <SectionHeader
               icon="auto_awesome"
               title="For you"
-              subtitle="Videos picked from your favourites, without asking for a ThisVid password."
+              subtitle="Videos picked based on your favourites."
             />
             <p className={styles.hint}>
               Two lists from your favourites: videos friends posted recently, and videos that resemble
@@ -104,7 +104,7 @@ const RecommendationsPage = () => {
                       friends synced.
                     </>
                   ) : (
-                    <>Sync favourites and friends. No password — only your public profile id.</>
+                    <>Sync favourites and friends.</>
                   )}
                   <div className={styles.actions}>
                     <Button
@@ -171,7 +171,7 @@ const RecommendationsPage = () => {
               <RecommendationRail
                 icon="group"
                 title="New from your friends"
-                subtitle="Public and private uploads from the last two weeks, ranked against your favourites."
+                subtitle="Recent uploads from your friends, ranked against your favourites."
                 videos={recs.fromFriends}
                 empty={friendsEmpty}
                 onHide={recs.hideRecommendation}
