@@ -9,9 +9,8 @@ const Home = () => {
       <h1 className={styles.title}>ThisVid Advanced Search Site</h1>
       <div className={styles.buttons}>
         <button onClick={() => (window.location.href = '/')}>Search</button>
-        <button onClick={() => (window.location.href = '/legacy/recommendations')}>Recommendations</button>
+        <button onClick={() => (window.location.href = '/recommendations')}>For you</button>
         <button onClick={() => (window.location.href = '/settings')}>Preferences</button>
-        <button onClick={() => (window.location.href = '/legacy/whats-new')}>What's New</button>
       </div>
     </div>
   );

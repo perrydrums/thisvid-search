@@ -31,7 +31,6 @@ const modes: Modes = {
   category: 'Category',
   tags: 'Tags',
   extreme: 'Extreme',
-  friendsEvents: "What's New",
 };
 
 const types: Types = {

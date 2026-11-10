@@ -1,5 +1,8 @@
 import cheerio from 'cheerio';
 
+import { parseVideoTile } from './parseVideoTile';
+import { canonicalVideoUrl } from './videoUrl';
+
 export type AnalyseFavouriteVideo = {
   title: string;
   thumbnail: string;
@@ -23,6 +26,32 @@ export type AnalyseFavouriteUsers = Record<string, AnalyseFavouriteUser>;
 
 export const TVASS_USER_ID_STORAGE_KEY = 'tvass-user-id';
 export const ANALYSE_USERS_STORAGE_KEY = 'tvass-analyse-users';
+/** Related-video tiles harvested from favourite detail pages, capped and sorted by hit count. */
+export const ANALYSE_RELATED_STORAGE_KEY = 'tvass-analyse-related';
+/** ISO timestamp of the last successful Analyse run (full or single page). */
+export const ANALYSE_DATE_STORAGE_KEY = 'tvass-analyse-date';
+
+export const RELATED_STORE_CAP = 1000;
+
+export type HarvestedRelatedVideo = {
+  title: string;
+  url: string;
+  isPrivate: boolean;
+  duration: string;
+  avatar: string;
+  views: number;
+  date: string;
+  rating: number | null;
+  /** How many analysed favourites listed this video as related. */
+  hits: number;
+};
+
+export type RelatedAccumulator = Map<string, HarvestedRelatedVideo>;
+
+export type AnalyseFavouritesResult = {
+  users: AnalyseFavouriteUsers;
+  related: HarvestedRelatedVideo[];
+};
 
 /** Same-origin path for fetch (proxied to ThisVid in dev + prod). Handles absolute or relative hrefs. */
 function hrefToProxiedPath(href: string): string {
@@ -30,23 +59,62 @@ function hrefToProxiedPath(href: string): string {
   return `${pathname}${search}`;
 }
 
-async function fetchMemberAvatar(memberNumericId: string): Promise<string> {
+/** Member id → avatar URL. An entry means that profile page was already requested, even if it had no avatar. */
+export type FetchedProfiles = Map<string, string>;
+
+function memberIdFromProfileUrl(url: string): string {
+  const match = String(url || '').match(/\/members\/(\d+)/);
+  return match ? match[1] : '';
+}
+
+function profileId(memberNumericId: string): string {
+  const fromUrl = memberIdFromProfileUrl(memberNumericId);
+  if (fromUrl) return fromUrl;
   const id = parseInt(memberNumericId, 10);
-  if (!id) return '';
-  const userResponse = await fetch(`/members/${id}/`);
+  return Number.isFinite(id) && id > 0 ? String(id) : '';
+}
+
+/** Profiles already stored on `users` count as fetched, so later pages don't request them again. */
+function rememberExistingProfiles(users: AnalyseFavouriteUsers, fetched: FetchedProfiles): void {
+  Object.values(users).forEach((user) => {
+    const id = memberIdFromProfileUrl(user.url);
+    if (id && !fetched.has(id)) fetched.set(id, user.avatar || '');
+  });
+}
+
+async function fetchMemberAvatar(memberId: string): Promise<string> {
+  const userResponse = await fetch(`/members/${memberId}/`);
   const userBody = await userResponse.text();
   const $ = cheerio.load(userBody);
   return $('.avatar img').first().attr('src') || '';
 }
 
 async function getAvatarForUploader(
-  users: AnalyseFavouriteUsers,
-  username: string,
+  fetched: FetchedProfiles,
+  inflight: Map<string, Promise<string>>,
   memberNumericId: string,
 ): Promise<string> {
-  const cached = users[username]?.avatar;
-  if (cached) return cached;
-  return fetchMemberAvatar(memberNumericId);
+  const id = profileId(memberNumericId);
+  if (!id) return '';
+  if (fetched.has(id)) return fetched.get(id) || '';
+
+  const pending = inflight.get(id);
+  if (pending) return pending;
+
+  const request = (async () => {
+    try {
+      const avatar = await fetchMemberAvatar(id);
+      fetched.set(id, avatar);
+      return avatar;
+    } catch {
+      fetched.set(id, '');
+      return '';
+    } finally {
+      inflight.delete(id);
+    }
+  })();
+  inflight.set(id, request);
+  return request;
 }
 
 function mergeVideo(
@@ -73,15 +141,64 @@ function mergeVideo(
   if (userUrl) u.url = userUrl;
 }
 
+function addRelatedHit(related: RelatedAccumulator, tile: HarvestedRelatedVideo): void {
+  const existing = related.get(tile.url);
+  if (!existing) {
+    related.set(tile.url, tile);
+    return;
+  }
+  existing.hits += 1;
+  if (!existing.avatar && tile.avatar) existing.avatar = tile.avatar;
+  if (tile.rating != null) existing.rating = tile.rating;
+  if (tile.views > existing.views) existing.views = tile.views;
+}
+
+/** Related tiles on one favourite's detail page. Counted once per favourite, not per duplicate tile. */
+function harvestRelatedTiles(
+  $v: ReturnType<typeof cheerio.load>,
+  favouriteUrl: string,
+): HarvestedRelatedVideo[] {
+  const ownUrl = canonicalVideoUrl(favouriteUrl);
+  const seen = new Set<string>();
+  const tiles: HarvestedRelatedVideo[] = [];
+
+  $v('a.tumbpu').each((_, element) => {
+    const parsed = parseVideoTile($v, element);
+    if (!parsed) return;
+    const url = canonicalVideoUrl(parsed.url);
+    if (!url || url === ownUrl || seen.has(url)) return;
+    seen.add(url);
+    tiles.push({
+      title: parsed.title,
+      url,
+      isPrivate: parsed.isPrivate,
+      duration: parsed.duration,
+      avatar: parsed.avatar,
+      views: parsed.views,
+      date: parsed.date,
+      rating: parsed.rating,
+      hits: 1,
+    });
+  });
+
+  return tiles;
+}
+
 /**
  * Scrape one favourites listing page and merge video detail into `users` (mutates).
- * Same HTML logic as the Analyse page.
+ * When `related` is passed, also records Related Videos tiles from each detail page.
  */
 export async function analyseFavouritesListingPage(
   uid: string,
   page: number,
   users: AnalyseFavouriteUsers,
+  related?: RelatedAccumulator,
+  fetchedProfiles?: FetchedProfiles,
 ): Promise<void> {
+  const fetched = fetchedProfiles ?? new Map();
+  rememberExistingProfiles(users, fetched);
+  const inflightProfiles = new Map<string, Promise<string>>();
+
   const listUrl = `/members/${uid}/favourite_videos/${page}/`;
   const response = await fetch(listUrl);
   const body = await response.text();
@@ -126,7 +243,8 @@ export async function analyseFavouritesListingPage(
           userUrl,
           url: href,
         };
-        return { video, memberId: userID };
+        const relatedTiles = related ? harvestRelatedTiles($v, href) : [];
+        return { video, memberId: userID, relatedTiles };
       } catch {
         return null;
       }
@@ -135,8 +253,15 @@ export async function analyseFavouritesListingPage(
 
   for (const row of rows) {
     if (!row) continue;
-    const avatar = await getAvatarForUploader(users, row.video.username, row.memberId);
+    const avatar = await getAvatarForUploader(
+      fetched,
+      inflightProfiles,
+      row.video.userUrl || row.memberId,
+    );
     mergeVideo(users, row.video, avatar);
+    if (related) {
+      row.relatedTiles.forEach((tile) => addRelatedHit(related, tile));
+    }
   }
 }
 
@@ -155,21 +280,95 @@ export type RunAnalyseFavouritesOptions = {
   onProgress?: (completedPages: number, totalPages: number) => void;
 };
 
+export function analysedVideoUrls(users: AnalyseFavouriteUsers): Set<string> {
+  const urls = new Set<string>();
+  Object.values(users).forEach((user) => {
+    user.videos.forEach((video) => {
+      const url = canonicalVideoUrl(video.url);
+      if (url) urls.add(url);
+    });
+  });
+  return urls;
+}
+
+/** Top related videos by how often analysed favourites listed them. Favourites themselves are dropped. */
+export function harvestedRelatedList(
+  related: RelatedAccumulator,
+  users?: AnalyseFavouriteUsers,
+): HarvestedRelatedVideo[] {
+  const own = users ? analysedVideoUrls(users) : null;
+  return Array.from(related.values())
+    .filter((video) => !own || !own.has(video.url))
+    .sort((a, b) => b.hits - a.hits || b.views - a.views)
+    .slice(0, RELATED_STORE_CAP);
+}
+
+export function loadHarvestedRelated(): HarvestedRelatedVideo[] {
+  try {
+    const raw = localStorage.getItem(ANALYSE_RELATED_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is HarvestedRelatedVideo => {
+      return !!item && typeof item === 'object' && typeof (item as HarvestedRelatedVideo).url === 'string';
+    });
+  } catch {
+    return [];
+  }
+}
+
+export function relatedListToMap(list: HarvestedRelatedVideo[]): RelatedAccumulator {
+  const map: RelatedAccumulator = new Map();
+  list.forEach((item) => {
+    const url = canonicalVideoUrl(item.url);
+    if (!url) return;
+    const hits = Number(item.hits);
+    map.set(url, {
+      ...item,
+      url,
+      hits: Number.isFinite(hits) && hits > 0 ? hits : 1,
+    });
+  });
+  return map;
+}
+
+export function loadAnalyseDate(): string {
+  return localStorage.getItem(ANALYSE_DATE_STORAGE_KEY) || '';
+}
+
+/** Persists the capped related index and stamps the analysis date. Shrinks the list if storage is full. */
+export function saveHarvestedRelated(videos: HarvestedRelatedVideo[]): void {
+  const stamped = new Date().toISOString();
+  const attempts = [videos.slice(0, RELATED_STORE_CAP), videos.slice(0, 400), videos.slice(0, 100)];
+  for (const payload of attempts) {
+    try {
+      localStorage.setItem(ANALYSE_RELATED_STORAGE_KEY, JSON.stringify(payload));
+      localStorage.setItem(ANALYSE_DATE_STORAGE_KEY, stamped);
+      return;
+    } catch {
+      /* quota — try a smaller payload */
+    }
+  }
+  console.error('Failed to save harvested related videos');
+}
+
 /**
  * Full favourite-videos analysis: all pages, sequentially (safe merges).
- * Replaces the former inline logic on the Analyse page.
+ * Also harvests Related Videos from each favourite's detail page (no extra requests).
  */
 export async function runAnalyseFavourites(
   uid: string,
   options?: RunAnalyseFavouritesOptions,
-): Promise<AnalyseFavouriteUsers> {
+): Promise<AnalyseFavouritesResult> {
   const pageLimit = await getFavouriteListingPageLimit(uid);
   const users: AnalyseFavouriteUsers = {};
+  const related: RelatedAccumulator = new Map();
+  const fetchedProfiles: FetchedProfiles = new Map();
 
   for (let page = 1; page <= pageLimit; page++) {
-    await analyseFavouritesListingPage(uid, page, users);
+    await analyseFavouritesListingPage(uid, page, users, related, fetchedProfiles);
     options?.onProgress?.(page, pageLimit);
   }
 
-  return users;
+  return { users, related: harvestedRelatedList(related, users) };
 }

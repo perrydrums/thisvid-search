@@ -1,4 +1,3 @@
-import cheerio from 'cheerio';
 import React, { useCallback, useEffect, useState } from 'react';
 import LoadingBar from 'react-top-loading-bar';
 
@@ -9,10 +8,9 @@ import { TopNav } from '../../components/v2/organisms/TopNav';
 import chrome from '../../components/v2/V2Chrome.module.css';
 
 import styles from './Settings.module.css';
+import { scrapeProfileForSync } from '../../helpers/profileSync';
+import { formatSyncTimestampForDisplay } from '../../helpers/syncTimestamp';
 import type { Mood } from '../../helpers/types';
-import { fetchAllFriends } from '../../helpers/friends';
-import { createSyncTimestamp, formatSyncTimestampForDisplay } from '../../helpers/syncTimestamp';
-import { getVideos } from '../../helpers/videos';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserData } from '../../hooks/useUserData';
 
@@ -24,9 +22,6 @@ const LOG_LINES = [
   { ts: '[10:42:10]', line: 'WARNING: RATE LIMIT APPROACHING (75%)', tone: 'warn' as const },
   { ts: '[10:42:12]', line: 'SYNCING LOCAL CACHE WITH LOCAL STORAGE...', tone: 'ok' as const },
 ];
-
-/** One progress step after all favourite listing pages (friends API). */
-const FRIENDS_SYNC_STEPS = 1;
 
 const Settings = () => {
   const { loading: authLoading } = useAuth();
@@ -80,54 +75,11 @@ const Settings = () => {
     setSyncDone(0);
     setSyncTotal(0);
     try {
-      const response = await fetch(`/members/${userId}/favourite_videos/`);
-      const body = await response.text();
-      const $ = cheerio.load(body);
-
-      const lastPage =
-        parseInt(
-          $('li.pagination-last a').text() || $('.pagination-list li:nth-last-child(2) a').text(),
-          10,
-        ) || 1;
-
-      setSyncTotal(lastPage + FRIENDS_SYNC_STEPS);
-
-      const promises = [];
-      for (let i = 1; i <= lastPage; i++) {
-        promises.push(
-          getVideos({
-            url: `/members/${userId}/favourite_videos/${i}`,
-            page: i,
-            minDuration: 0,
-            quick: true,
-          }).then((batch) => {
-            setSyncDone((n) => n + 1);
-            return batch;
-          }),
-        );
-      }
-
-      const videos = (await Promise.all(promises)).flat().filter(
-        (value, index, self) => index === self.findIndex((v) => v.url === value.url),
-      );
-
-      const friendsResult = await fetchAllFriends(userId);
-      setSyncDone(lastPage + FRIENDS_SYNC_STEPS);
-
-      if (!friendsResult.success) {
-        throw new Error('Failed to fetch friends');
-      }
-
-      const ids = [...new Set(friendsResult.friends.map((f) => f.uid).filter(Boolean))];
-      const videoUrls = videos.map((v) => v.url);
-      const now = createSyncTimestamp();
-
-      await setProfileSync({
-        favouritesCsv: videoUrls.join(','),
-        friendIdsCsv: ids.join(','),
-        lastSync: now,
-        friendsLastSync: now,
+      const scraped = await scrapeProfileForSync(userId, (done, total) => {
+        setSyncTotal(total);
+        setSyncDone(done);
       });
+      await setProfileSync(scraped);
     } catch (e) {
       console.error(e);
       alert('Failed to sync profile. Check console.');

@@ -1,0 +1,89 @@
+.section {
+  margin-top: var(--v2-space-xl);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--v2-space-lg);
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--v2-space-md);
+  }
+}
+
+.empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--v2-on-surface-subtle);
+}
+
+.cardWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.hideBtn {
+  position: absolute;
+  top: calc(var(--v2-space-sm) + 8px);
+  right: calc(var(--v2-space-sm) + 8px);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  padding: 4px 8px;
+  border: none;
+  border-radius: var(--v2-radius-sm);
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  box-shadow: none;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hideBtn span {
+  font-size: 14px;
+}
+
+.cardWrap:hover .hideBtn,
+.cardWrap:focus-within .hideBtn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hideBtn:hover {
+  background: var(--v2-accent);
+  box-shadow: none;
+}
+
+@media (hover: none) {
+  .hideBtn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.sentinel {
+  min-height: 48px;
+  margin-top: var(--v2-space-lg);
+  padding: var(--v2-space-md);
+  text-align: center;
+  font-size: 13px;
+  color: var(--v2-on-surface-subtle);
+}

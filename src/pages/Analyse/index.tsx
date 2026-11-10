@@ -15,7 +15,11 @@ import {
   TVASS_USER_ID_STORAGE_KEY,
   analyseFavouritesListingPage,
   getFavouriteListingPageLimit,
+  harvestedRelatedList,
+  loadHarvestedRelated,
+  relatedListToMap,
   runAnalyseFavourites,
+  saveHarvestedRelated,
 } from '../../helpers/analyseFavourites';
 
 import styles from './Analyse.module.css';
@@ -147,7 +151,8 @@ const Analyse = () => {
           setPageLimit(total);
         },
       });
-      setUsers(result);
+      setUsers(result.users);
+      saveHarvestedRelated(result.related);
     } catch (e) {
       console.error(e);
       setErrorMessage('Analysis failed. Check your User ID and try again.');
@@ -161,8 +166,10 @@ const Analyse = () => {
     setFinished(false);
     try {
       const draft = JSON.parse(JSON.stringify(users)) as AnalyseFavouriteUsers;
-      await analyseFavouritesListingPage(uid, progressCount + 1, draft);
+      const related = relatedListToMap(loadHarvestedRelated());
+      await analyseFavouritesListingPage(uid, progressCount + 1, draft, related);
       setUsers(draft);
+      saveHarvestedRelated(harvestedRelatedList(related, draft));
       setProgressCount((c) => c + 1);
     } catch (e) {
       console.error(e);
@@ -486,7 +493,7 @@ const Analyse = () => {
           )}
 
           <p className={styles.footerNote}>
-            <a href="/legacy/recommendations">Recommendations</a> uses the same saved data (
+            <a href="/recommendations">For you</a> uses the same saved data (
             <code>tvass-analyse-users</code>).{' '}
             <a href="/legacy/search">Legacy search</a>
           </p>

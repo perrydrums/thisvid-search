@@ -28,7 +28,6 @@ const modes: Modes = {
   category: 'Category',
   tags: 'Tags',
   extreme: 'Extreme',
-  friendsEvents: "What's New",
 };
 
 const types: Types = {
@@ -125,13 +124,6 @@ const SearchLegacy = () => {
   const [activeMood, setActiveMood] = useState(
     params.run === undefined ? localStorage.getItem('tvass-default-mood') || '' : '',
   );
-  const [friendsEventsUsername, setFriendsEventsUsername] = useState(params.friendsEventsUsername || '');
-  const [friendsEventsPassword, setFriendsEventsPassword] = useState('');
-  const [friendsEventsCategory, setFriendsEventsCategory] = useState(params.friendsEventsCategory || '');
-  const [enrichedVideosData, setEnrichedVideosData] = useState<Map<string, { category?: string }>>(new Map());
-  const [enriching, setEnriching] = useState(false);
-  const [enrichmentProgress, setEnrichmentProgress] = useState(0);
-
   // update the document.title based on the state
   useEffect(() => {
     const title = 'ThisVid ASS'
@@ -159,9 +151,6 @@ const SearchLegacy = () => {
           .replace(/-/g, ' ')
           .replace(/\b\w/g, (char: string) => char.toUpperCase())
         } videos - ` + title;
-        break;
-      case 'friendsEvents':
-        document.title = `What's New - ` + title;
         break;
       default:
         document.title = title;
@@ -243,53 +232,6 @@ const SearchLegacy = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Load friendsEvents videos from localStorage when mode is friendsEvents
-  useEffect(() => {
-    if (mode === 'friendsEvents') {
-      const stored = localStorage.getItem('tvass-whats-new-videos');
-      if (stored) {
-        try {
-          const parsedVideos = JSON.parse(stored);
-          // Map friendsEvents videos to Search Video format
-          const mappedVideos: Video[] = parsedVideos.map((video: any) => ({
-            title: video.title,
-            url: video.url,
-            isPrivate: false,
-            duration: '',
-            avatar: video.thumbnail || '',
-            views: 0,
-            date: '',
-            relevance: 0,
-            page: 1,
-          }));
-          setRawVideos(mappedVideos);
-          setFinished(true);
-
-          // Store enriched data (category) in a Map
-          const enrichedMap = new Map<string, { category?: string }>();
-          parsedVideos.forEach((video: any) => {
-            if (video.category) {
-              enrichedMap.set(video.url, { category: video.category });
-            }
-          });
-          setEnrichedVideosData(enrichedMap);
-
-          // Check if any videos need enrichment (missing category)
-          const needsEnrichment = parsedVideos.filter((v: any) => !v.category);
-          if (needsEnrichment.length > 0) {
-            enrichVideos(needsEnrichment, mappedVideos);
-          }
-        } catch (err) {
-          console.error('Error parsing stored videos:', err);
-        }
-      }
-    } else {
-      // Reset finished state when switching away from friendsEvents
-      setFinished(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
 
   useEffect(() => {
     getCategories().then((categories: Category[]) => {
@@ -379,7 +321,6 @@ const SearchLegacy = () => {
         !url.trim() ||
         (mode === 'extreme' && (!type || !primaryTag)) ||
         (mode === 'newest' && !type) ||
-        mode === 'friendsEvents' ||
         (mode === 'user' && (!(id?.trim?.() ?? '') || !type)) ||
         (mode === 'friend' && (!(friendId?.trim?.() ?? '') || !type))
       ) {
@@ -456,79 +397,6 @@ const SearchLegacy = () => {
     if (!preserveResults) {
       setRawVideos([]);
       setVideos([]);
-    }
-
-    // Handle friendsEvents mode differently
-    if (mode === 'friendsEvents') {
-      if (!friendsEventsUsername || !friendsEventsPassword) {
-        setErrorMessage('Please enter both username and password');
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch('/friendsEvents', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: friendsEventsUsername,
-            password: friendsEventsPassword,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          setErrorMessage(data.message || 'Failed to fetch videos');
-          setLoading(false);
-          return;
-        }
-
-        // Map friendsEvents videos to Search Video format
-        const mappedVideos: Video[] = (data.videos || []).map((video: any, index: number) => ({
-          title: video.title,
-          url: video.url,
-          isPrivate: false,
-          duration: '',
-          avatar: video.thumbnail || '',
-          views: 0,
-          date: '',
-          relevance: 0,
-          page: 1,
-        }));
-
-        setRawVideos(mappedVideos);
-        setFinished(true);
-        executeScroll();
-        logSearch();
-
-        // Save to localStorage
-        if (data.videos && data.videos.length > 0) {
-          localStorage.setItem('tvass-whats-new-videos', JSON.stringify(data.videos));
-
-          // Store enriched data (category) in a Map
-          const enrichedMap = new Map<string, { category?: string }>();
-          data.videos.forEach((video: any) => {
-            if (video.category) {
-              enrichedMap.set(video.url, { category: video.category });
-            }
-          });
-          setEnrichedVideosData(enrichedMap);
-        }
-
-        // Start async enrichment
-        if (data.videos && data.videos.length > 0) {
-          enrichVideos(data.videos, mappedVideos);
-        }
-      } catch (err) {
-        setErrorMessage('An error occurred while fetching videos. Please try again.');
-        console.error('Error fetching videos:', err);
-      } finally {
-        setLoading(false);
-      }
-      return;
     }
 
     const promises = [];
@@ -609,64 +477,6 @@ const SearchLegacy = () => {
     setLoading(false);
   };
 
-  // Enrich videos with tags, category, and thumbnail
-  const enrichVideos = async (friendsEventsVideos: any[], mappedVideos: Video[]) => {
-    setEnriching(true);
-    setEnrichmentProgress(0);
-
-    const batchSize = 5;
-    let enrichedCount = 0;
-
-    for (let i = 0; i < friendsEventsVideos.length; i += batchSize) {
-      const batch = friendsEventsVideos.slice(i, i + batchSize);
-
-      const enrichmentPromises = batch.map(async (video) => {
-        try {
-          const response = await fetch(`/videoDetails?url=${encodeURIComponent(video.url)}`);
-          const data = await response.json();
-
-          if (data.success) {
-            return {
-              ...video,
-              category: data.category || '',
-            };
-          }
-          return video;
-        } catch (err) {
-          console.error(`Error enriching video ${video.url}:`, err);
-          return video;
-        }
-      });
-
-      const enrichedBatch = await Promise.all(enrichmentPromises);
-
-      // Update rawVideos with enriched data
-      setRawVideos((prevVideos) => {
-        const updated = prevVideos.map((v) => {
-          // Thumbnails are already set from friendsEvents, no need to update
-          return v;
-        });
-        return updated;
-      });
-
-      // Update enriched videos data map with category information
-      setEnrichedVideosData((prevMap) => {
-        const newMap = new Map(prevMap);
-        enrichedBatch.forEach((enriched) => {
-          if (enriched.category) {
-            newMap.set(enriched.url, { category: enriched.category });
-          }
-        });
-        return newMap;
-      });
-
-      enrichedCount += enrichedBatch.length;
-      setEnrichmentProgress(enrichedCount);
-    }
-
-    setEnriching(false);
-  };
-
   // Run for the next set of pages.
   const next = () => {
     run(start + amount);
@@ -735,14 +545,6 @@ const SearchLegacy = () => {
       filteredVideos = filteredVideos.filter((video) => !video.isPrivate);
     }
 
-    // Apply category filter for friendsEvents mode
-    if (mode === 'friendsEvents' && friendsEventsCategory) {
-      filteredVideos = filteredVideos.filter((video) => {
-        const enriched = enrichedVideosData.get(video.url);
-        return enriched?.category === friendsEventsCategory;
-      });
-    }
-
     // Sort the filtered videos
     const sortedVideos = sortVideos(filteredVideos, sort);
     setVideos(sortedVideos);
@@ -754,7 +556,7 @@ const SearchLegacy = () => {
         console.error('Failed to update log result count:', error);
       });
     }
-  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, sort, mode, friendsEventsCategory, enrichedVideosData, searchObject]);
+  }, [rawVideos, includeTags, excludeTags, termsOperator, boosterTags, diminishingTags, omitFavourites, omitPrivate, sort, searchObject]);
 
   return (
     <>
@@ -905,77 +707,6 @@ const SearchLegacy = () => {
                   )}
                 </>
               )}
-              {mode === 'friendsEvents' && (
-                <>
-                  <label htmlFor="friends-events-username">Thisvid Username</label>
-                  <input
-                    type="text"
-                    id="friends-events-username"
-                    value={friendsEventsUsername}
-                    onChange={(e) => setFriendsEventsUsername(e.target.value)}
-                    placeholder="Enter your username"
-                    disabled={loading}
-                    autoComplete="off"
-                    data-1p-ignore
-                    required
-                  />
-                  <label htmlFor="friends-events-password">Credential</label>
-                  <input
-                    type="password"
-                    id="friends-events-password"
-                    value={friendsEventsPassword}
-                    onChange={(e) => setFriendsEventsPassword(e.target.value)}
-                    placeholder="Enter your credential"
-                    disabled={loading}
-                    autoComplete="off"
-                    data-1p-ignore
-                    required
-                  />
-                  {enriching && (
-                    <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '8px' }}>
-                      Enriching videos... {enrichmentProgress} / {rawVideos.length}
-                    </div>
-                  )}
-                  {mode === 'friendsEvents' && rawVideos.length > 0 && (() => {
-                    const allCategories = Array.from(
-                      new Set(
-                        Array.from(enrichedVideosData.values())
-                          .map((data) => data.category)
-                          .filter((cat): cat is string => !!cat)
-                      )
-                    ).sort();
-
-                    if (allCategories.length > 0) {
-                      return (
-                        <>
-                          <label htmlFor="friends-events-category">Category</label>
-                          <div className="select-wrapper">
-                            <select
-                              id="friends-events-category"
-                              value={friendsEventsCategory}
-                              onChange={(e) => setFriendsEventsCategory(e.target.value)}
-                            >
-                              <option value="">All Categories</option>
-                              {allCategories.map((category) => {
-                                const count = rawVideos.filter((v) => {
-                                  const enriched = enrichedVideosData.get(v.url);
-                                  return enriched?.category === category;
-                                }).length;
-                                return (
-                                  <option key={category} value={category}>
-                                    {category} ({count})
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          </div>
-                        </>
-                      );
-                    }
-                    return null;
-                  })()}
-                </>
-              )}
               {mode === 'category' && (
                 <>
                   <label htmlFor="category">Category</label>
@@ -1026,26 +757,22 @@ const SearchLegacy = () => {
                   />
                 </>
               )}
-              {mode !== 'friendsEvents' && (
-                <>
-                  <label htmlFor="type">Type</label>
-                  <div className="select-wrapper">
-                    <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
-                      <option disabled value="">
-                        {' '}
-                        - Select -
+              <label htmlFor="type">Type</label>
+              <div className="select-wrapper">
+                <select value={type} id="type" required onChange={(e) => setType(e.target.value)}>
+                  <option disabled value="">
+                    {' '}
+                    - Select -
+                  </option>
+                  {types[mode]?.map(({ value, label }) => {
+                    return (
+                      <option key={value} value={value}>
+                        {label}
                       </option>
-                      {types[mode]?.map(({ value, label }) => {
-                        return (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                </>
-              )}
+                    );
+                  })}
+                </select>
+              </div>
               {mode === 'extreme' && (
                 <>
                   <label htmlFor="primary-tag">Search</label>

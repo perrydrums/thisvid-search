@@ -1,0 +1,124 @@
+.wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--v2-main-content-padding-top) var(--v2-space-lg) var(--v2-space-xl);
+}
+
+.card {
+  border-radius: var(--v2-radius-lg);
+  background: var(--v2-surface);
+  box-shadow: var(--v2-shadow-1);
+  border: 1px solid var(--v2-border);
+  padding: var(--v2-space-lg);
+}
+
+.steps {
+  margin: var(--v2-space-md) 0 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--v2-space-md);
+  color: var(--v2-on-surface);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.stepDone {
+  color: var(--v2-on-surface-muted);
+}
+
+.field {
+  max-width: 22rem;
+  margin-top: var(--v2-space-sm);
+}
+
+.hint {
+  margin: var(--v2-space-md) 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--v2-on-surface-muted);
+}
+
+.hint a {
+  color: var(--v2-accent);
+  font-weight: 700;
+}
+
+.stale {
+  margin: var(--v2-space-md) 0 0;
+  padding: 12px 14px;
+  border-radius: var(--v2-radius);
+  background: rgba(186, 0, 41, 0.08);
+  color: var(--v2-on-surface);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.error {
+  margin: var(--v2-space-md) 0 0;
+  padding: 12px 14px;
+  border-radius: var(--v2-radius);
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--v2-space-md);
+  align-items: center;
+  margin-top: var(--v2-space-lg);
+}
+
+.progressBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  padding: 12px 20px;
+  font-family: var(--v2-font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border: none;
+  border-radius: var(--v2-radius);
+  cursor: pointer;
+  overflow: hidden;
+  background: #24262b;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.progressBtn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.progressBtn:disabled {
+  cursor: wait;
+}
+
+.progressFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--v2-accent);
+  transition: width 0.2s ease;
+  pointer-events: none;
+}
+
+.progressLabel {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.updated {
+  margin: var(--v2-space-sm) 0 0;
+  font-size: 12px;
+  color: var(--v2-on-surface-subtle);
+}

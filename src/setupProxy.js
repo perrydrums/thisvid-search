@@ -118,7 +118,7 @@ module.exports = function (app) {
   );
 
   app.use(
-    '/friendsEvents',
+    '/memberFeed',
     createProxyMiddleware({
       target: 'https://tvass.netlify.app/.netlify/functions',
       changeOrigin: true,

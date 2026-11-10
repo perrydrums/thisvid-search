@@ -1,4 +1,10 @@
-export type AppSidebarActivePage = 'search' | 'analyse' | 'moods' | 'history' | 'settings';
+export type AppSidebarActivePage =
+  | 'search'
+  | 'recommendations'
+  | 'analyse'
+  | 'moods'
+  | 'history'
+  | 'settings';
 
 export const APP_NAV_ITEMS: {
   page: AppSidebarActivePage;
@@ -7,6 +13,7 @@ export const APP_NAV_ITEMS: {
   label: string;
 }[] = [
   { page: 'search', to: '/search', icon: 'search', label: 'Search' },
+  { page: 'recommendations', to: '/recommendations', icon: 'auto_awesome', label: 'For you' },
   { page: 'analyse', to: '/analyse', icon: 'analytics', label: 'Analyse' },
   { page: 'moods', to: '/moods', icon: 'mood', label: 'Moods' },
   { page: 'history', to: '/history', icon: 'history', label: 'History' },

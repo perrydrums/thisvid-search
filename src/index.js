@@ -8,13 +8,16 @@ import { getNameWithSeed } from './helpers/users';
 import './index.css';
 import Search from './pages/Search';
 import Analyse from './pages/Analyse';
+import RecommendationsPage from './pages/Recommendations';
 import { ShortLinkResolver } from './pages/ShortLinkResolver';
 import History from './pages/History';
 import Moods from './pages/Moods';
 import Settings from './pages/Settings';
 import SearchLegacy from './pages/legacy/SearchLegacy';
-import Recommendations from './pages/legacy/Recommendations';
-import WhatsNew from './pages/legacy/WhatsNew';
+
+// Drop caches from the removed What's New feed and the old recommendations page.
+localStorage.removeItem('tvass-recommendations');
+localStorage.removeItem('tvass-whats-new-videos');
 
 // Generate random visitor ID if not already set in local storage.
 if (!localStorage.getItem('visitorId')) {
@@ -70,6 +73,10 @@ const router = createBrowserRouter([
         element: <Analyse />,
       },
       {
+        path: '/recommendations',
+        element: <RecommendationsPage />,
+      },
+      {
         path: '/s/:code',
         element: <ShortLinkResolver />,
       },
@@ -83,11 +90,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/legacy/recommendations',
-        element: <Recommendations />,
+        element: <Navigate to="/recommendations" replace />,
       },
       {
         path: '/legacy/whats-new',
-        element: <WhatsNew />,
+        element: <Navigate to="/recommendations" replace />,
       },
     ],
   },

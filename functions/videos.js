@@ -2,18 +2,27 @@ const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 
 const { requireSiteOrigin } = require('./allowedOrigins');
+const { durationSeconds, parseVideoTile } = require('./parseVideoTile');
 const { LISTING_BASE, assertSafeListingPath, resolvePageHrefToThisvid } = require('./validateThisvidUrl');
 
 const WEEK_SECONDS = 7 * 24 * 60 * 60;
 
-/** Browser always revalidates; Netlify CDN holds the JSON. Category and tag listings change slowly. */
+/**
+ * Latest listings move within hours. Only slow-changing indexes stay cached for a week:
+ * the category index, category "most popular", and tag popular/best sorts.
+ */
+function isLongLivedListing(pathname) {
+  const path = String(pathname || '').replace(/\/+$/, '') || '/';
+  if (path === '/categories') return true;
+  if (/^\/categories\/[^/]+\/most-popular(\/\d+)?$/.test(path)) return true;
+  if (/^\/tags\/[^/]+\/(popular|best)-(males|females)(\/\d+)?$/.test(path)) return true;
+  return false;
+}
+
+/** Browser always revalidates; Netlify CDN holds the JSON. */
 function successHeadersForListing(pathSuffix) {
   const pathname = String(pathSuffix || '').split('?')[0];
-  const longLived =
-    pathname === '/categories' ||
-    pathname.startsWith('/categories/') ||
-    pathname === '/tags' ||
-    pathname.startsWith('/tags/');
+  const longLived = isLongLivedListing(pathname);
   const maxAge = longLived ? WEEK_SECONDS : 3600;
   const staleWhileRevalidate = longLived ? WEEK_SECONDS * 2 : 7200;
 
@@ -132,51 +141,17 @@ exports.handler = async function (event, context) {
 
     const videos = [];
     const urls = [];
+    const minSeconds = minDuration * 60;
     $('.tumbpu').each((i, element) => {
-      const isPrivate =
-        $('span.thumb.private', element).length > 0 ||
-        $('span', element).first().hasClass('private');
+      const parsed = parseVideoTile($, element);
+      if (!parsed) return;
+      if (durationSeconds(parsed.duration) < minSeconds) return;
 
-      const avatar = isPrivate
-        ? $('span', element).first().attr('style').match(/url\((.*?)\)/)[1].replace('//', 'https://')
-        : $('span .lazy-load', element).first().attr('data-original').replace('//', 'https://');
-
-      const viewsHtml = $('.view', element).first().text();
-      const views = viewsHtml.match(/\d+/)[0];
-      const date = $('.date', element).first().text();
-
-      const duration = $('span span.duration', element).text();
-      const [minutes, seconds] = duration.split(':').map(Number);
-      const time = minutes * 60 + seconds;
-
-      const title = $(element).attr('title') || '';
-
-      if (time >= minDuration * 60) {
-        if (quick) {
-          videos.push({
-            title,
-            url: $(element).attr('href') || '',
-            isPrivate,
-            duration,
-            avatar,
-            views: parseInt(views),
-            date,
-            relevance: 0,
-            page,
-          });
-        } else {
-          urls.push({
-            title,
-            url: $(element).attr('href') || '',
-            isPrivate,
-            duration,
-            avatar,
-            views: parseInt(views),
-            date,
-            relevance: 0,
-            page,
-          });
-        }
+      const video = { ...parsed, page };
+      if (quick) {
+        videos.push(video);
+      } else {
+        urls.push(video);
       }
     });
 
@@ -186,18 +161,7 @@ exports.handler = async function (event, context) {
           const absVideoUrl = resolvePageHrefToThisvid(video.url);
           const vidResponse = await fetch(absVideoUrl);
           await vidResponse.text();
-
-          videos.push({
-            relevance: video.relevance,
-            title: video.title,
-            url: video.url,
-            isPrivate: video.isPrivate,
-            duration: video.duration,
-            avatar: video.avatar,
-            views: video.views,
-            date: video.date,
-            page: video.page,
-          });
+          videos.push(video);
         } catch (error) {
           console.error('videos: skipped bad video url', error?.message || error);
         }
