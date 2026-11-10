@@ -110,7 +110,7 @@ exports.handler = async function (event, context) {
   try {
     const response = await fetch(LISTING_BASE + pathSuffix, {
       headers: {
-        'Referer': LISTING_BASE,
+        'Referer': LISTING_BASE + pathSuffix,
       },
     });
 
